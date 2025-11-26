@@ -10,14 +10,14 @@
 - Initialize tooling: Tailwind, ESLint, basic aliases, env management. - Done.
 - Configure Firebase SDK (client) and Admin SDK (server-only in API routes). - Done
 - Configure Supabase Storage via server route for signed uploads. - Done
-- Add Google Maps script loading + API key from env.
-- Create core folders: `app/(public)`, `app/(auth)`, `app/(me)`, `app/(admin)`, `lib/`, `components/`, `types/`, `app/api/*`.
+- Add Google Maps script loading + API key from env. - Done 
+- Create core folders: `app/(public)`, `app/(auth)`, `app/(me)`, `app/(admin)`, `lib/`, `components/`, `types/`, `app/api/*`. - Done
 
 **Phase 1 — Auth (Day 2–4)**
-- Email/password registration, login, logout with email verification (Firebase Auth).
-- Password reset flow (email link).
-- Protect routes via middleware and server-side session checks.
-- User profile document created on first login; include role: `user|admin`.
+- Email/password registration, login, logout with email verification (Firebase Auth). - Done
+- Password reset flow (email link). - Done
+- Protect routes via middleware and server-side session checks. - Done
+- User profile document created on first login; include role: `user|admin`. - Done
 
 **Phase 2 — Data Model (Day 3–5)**
 - Firestore collections (MVP):

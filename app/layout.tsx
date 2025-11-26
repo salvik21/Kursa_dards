@@ -16,8 +16,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <GoogleMapsLoader />
-        <Map />
         {children}
       </body>
     </html>
