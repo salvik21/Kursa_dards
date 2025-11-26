@@ -1,9 +1,14 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebase/admin";
+import { getSessionUser } from "@/lib/auth/server";
 
 export async function GET() {
+  const user = await getSessionUser();
+  if (!user || user.role !== "admin") {
+    return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
+  }
+
   try {
-    // пробуем получить до 1 пользователя (может быть 0 — это нормально)
     const list = await adminAuth.listUsers(1);
     return NextResponse.json({
       ok: true,
