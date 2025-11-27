@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { verifyIdToken } from "@/lib/firebase/admin"; 
+﻿import { NextRequest, NextResponse } from "next/server";
+import { adminAuth } from "@/lib/firebase/admin";
 
 const protectedMatchers = [/^\/me\//, /^\/posts\/.+\/edit$/, /^\/admin\//];
 
@@ -19,15 +19,13 @@ export async function middleware(req: NextRequest) {
   }
 
   try {
-    await verifyIdToken(token);
+    await adminAuth.verifySessionCookie(token, true);
     return NextResponse.next();
   } catch {
     return NextResponse.redirect(new URL("/auth/sign-in", req.url));
   }
 }
 
-
 export const config = {
   matcher: ["/me/:path*", "/posts/:path*/edit", "/admin/:path*"],
 };
-

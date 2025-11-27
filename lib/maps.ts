@@ -11,7 +11,13 @@ export async function loadGoogleMaps() {
     libraries: ["places"],
   });
 
-  await importLibrary("maps");
-  await importLibrary("places");
-  return google.maps;
+  const [{ Map }, placesLib] = await Promise.all([
+    importLibrary("maps"),
+    importLibrary("places"),
+  ]);
+
+  return {
+    Map,
+    places: placesLib,
+  };
 }

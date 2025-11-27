@@ -7,25 +7,25 @@ export default function Map() {
   const mapRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
+    let canceled = false;
 
-    async function init() {
+    async function initMap() {
       try {
-        const gm = await loadGoogleMaps();
-        if (cancelled || !mapRef.current) return;
-        new gm.Map(mapRef.current, {
+        const { Map } = await loadGoogleMaps();
+        if (canceled || !mapRef.current) return;
+        new Map(mapRef.current, {
           center: { lat: 55.751244, lng: 37.618423 },
           zoom: 12,
         });
       } catch (error) {
-        console.error("Failed to load Google Maps", error);
+        console.error("Failed to init map", error);
       }
     }
 
-    init();
+    initMap();
 
     return () => {
-      cancelled = true;
+      canceled = true;
     };
   }, []);
 
@@ -35,7 +35,7 @@ export default function Map() {
       style={{
         width: "100%",
         height: "400px",
-        background: "yellow", // Simple fallback background until the map renders
+        background: "yellow",
       }}
     />
   );
