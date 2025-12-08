@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { supabaseServer} from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,10 +13,18 @@ export async function POST(req: NextRequest) {
     }
 
     const bucket = process.env.SUPABASE_BUCKET_NAME!;
+    if (!supabaseServer) {
+      console.error("Supabase not configured");
+      return NextResponse.json(
+        { error: "Supabase is not configured on the server" },
+        { status: 500 }
+      );
+    }
+
     // сделаем путь вида: items/время-имяФайла
     const filePath = `${folder || "items"}/${Date.now()}-${fileName}`;
 
-    const { data, error } = await supabaseAdmin.storage
+    const { data, error } = await supabaseServer.storage
       .from(bucket)
       .createSignedUploadUrl(filePath);
 
