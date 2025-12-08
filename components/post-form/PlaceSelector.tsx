@@ -21,7 +21,7 @@ export function PlaceSelector({ value, options, onChange }: PlaceSelectorProps) 
           </option>
         ))}
       </select>
-      <p className="text-xs text-gray-600">Select a preset place or choose "No place".</p>
+      <p className="text-xs text-gray-600">Select a preset place or choose {"\""}No place{"\""}</p>
     </div>
   );
 }

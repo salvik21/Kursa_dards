@@ -1,9 +1,9 @@
-import nodemailer from "nodemailer";
+import nodemailer, { Transporter } from "nodemailer";
 
 const SMTP_URL = process.env.EMAIL_SMTP_URL;
 const DEFAULT_FROM = process.env.EMAIL_FROM || "no-reply@lost-and-found";
 
-let transporter: nodemailer.Transporter | null = null;
+let transporter: Transporter | null = null;
 
 function ensureTransporter() {
   if (!SMTP_URL) {

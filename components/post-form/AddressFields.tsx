@@ -59,7 +59,7 @@ export function AddressFields({
           />
         </div>
       </div>
-      <p className="text-xs text-gray-600">Will be saved as text without coordinates. For precise alerts, choose "Pick on map".</p>
+      <p className="text-xs text-gray-600">Will be saved as text without coordinates. For precise alerts, choose {"\""}Pick on map{"\""}.</p>
     </div>
   );
 }

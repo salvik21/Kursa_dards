@@ -168,6 +168,8 @@ export default function NotificationSettings() {
         autocomplete = new window.google.maps.places.Autocomplete(addressInputRef.current, {
           fields: ["geometry", "formatted_address", "name"],
         });
+        if (!autocomplete) return;
+
         listener = autocomplete.addListener("place_changed", () => {
           const place = autocomplete?.getPlace();
           const loc = place?.geometry?.location;

@@ -10,6 +10,7 @@ type ComplaintItem = {
   postStatus?: string | null;
   reporterName?: string | null;
   reporterEmail?: string | null;
+  userId?: string | null;
   reason: string;
   status: string;
   createdAt?: string | null;

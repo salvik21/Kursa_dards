@@ -12,7 +12,7 @@ type LocationStepProps = {
   lng: string;
   onLocationModeChange: (mode: LocationMode) => void;
   onPlaceChange: (value: string) => void;
-  onAddressChange: (field: keyof typeof address, value: string) => void;
+  onAddressChange: (field: "street" | "house" | "city" | "postal", value: string) => void;
   onLatLngChange: (lat: string, lng: string) => void;
   onPlaceNameChange: (value: string) => void;
 };
