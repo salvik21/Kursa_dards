@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase/firestore";
 
 export type PostType = "lost" | "found";
-export type PostStatus = "open" | "resolved" | "closed";
+export type PostStatus = "pending" | "open" | "resolved" | "closed" | "hidden";
 
 export interface GeoPoint {
   lat: number;
@@ -33,6 +33,10 @@ export interface Post {
 
   description: string;
   descriptionHidden?: boolean;
+  blockedReason?: string;
+  blockedBy?: string;
+  blockedComplaintId?: string;
+  blockedAt?: Timestamp;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

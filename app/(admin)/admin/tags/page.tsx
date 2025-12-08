@@ -1,0 +1,142 @@
+"use client";
+
+import { useEffect, useState, FormEvent } from "react";
+import Link from "next/link";
+
+type Tag = {
+  id: string;
+  name: string;
+};
+
+export default function TagsPage() {
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadTags = async () => {
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/tags", { cache: "no-store" });
+      if (!res.ok) throw new Error("Failed to load tags");
+      const data = await res.json();
+      setTags(data.tags ?? []);
+    } catch (err: any) {
+      setError(err?.message || "Failed to load tags");
+    }
+  };
+
+  const removeTag = async (id: string) => {
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/tags", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || "Failed to delete tag");
+      }
+      setMessage("Tag deleted");
+      loadTags();
+    } catch (err: any) {
+      setError(err?.message || "Failed to delete tag");
+    }
+  };
+
+  useEffect(() => {
+    loadTags();
+  }, []);
+
+  const onSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setMessage(null);
+    setError(null);
+    if (!name.trim()) {
+      setError("Tag name is required");
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/tags", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim() }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || "Failed to create tag");
+      }
+      setName("");
+      setMessage("Tag created");
+      loadTags();
+    } catch (err: any) {
+      setError(err?.message || "Failed to create tag");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main className="mx-auto max-w-3xl p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Manage tags</h1>
+          <p className="text-sm text-gray-700">Admins can add tags used across posts.</p>
+        </div>
+        <Link href="/admin" className="text-blue-600 hover:underline text-sm">
+          Back to admin
+        </Link>
+      </div>
+
+      <form onSubmit={onSubmit} className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-gray-800">Tag name</label>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="e.g., Wallet, Electronics, Documents"
+          />
+        </div>
+        {message && <p className="text-sm text-green-700">{message}</p>}
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        <button
+          type="submit"
+          disabled={loading}
+          className="inline-flex items-center rounded bg-blue-600 px-4 py-2 text-white font-semibold shadow hover:bg-blue-700 disabled:opacity-60"
+        >
+          {loading ? "Saving..." : "Add tag"}
+        </button>
+      </form>
+
+      <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-3">
+        <h2 className="text-lg font-semibold text-gray-900">Existing tags</h2>
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        {tags.length === 0 ? (
+          <p className="text-sm text-gray-600">No tags yet.</p>
+        ) : (
+          <ul className="grid gap-2 md:grid-cols-2">
+            {tags.map((tag) => (
+              <li
+                key={tag.id}
+                className="flex items-center justify-between rounded border border-gray-200 px-3 py-2 text-sm text-gray-800"
+              >
+                <span>{tag.name}</span>
+                <button
+                  type="button"
+                  onClick={() => removeTag(tag.id)}
+                  className="rounded bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-100"
+                >
+                  Delete
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </main>
+  );
+}

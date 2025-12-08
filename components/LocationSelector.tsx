@@ -51,7 +51,7 @@ export function LocationSelector({ presets = [], onChange }: Props) {
     if (mode !== "map") return;
     if (!mapRef.current || typeof window === "undefined" || !window.google) return;
 
-    const center = geo ?? { lat: 55.751244, lng: 37.618423 };
+    const center = geo ?? { lat: 56.9496, lng: 24.1052 }; // Riga default
     const map = new window.google.maps.Map(mapRef.current, {
       center,
       zoom: 10,

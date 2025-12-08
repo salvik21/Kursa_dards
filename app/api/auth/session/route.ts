@@ -1,7 +1,9 @@
 ﻿import { NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 
-const SESSION_EXPIRES_IN = 7 * 24 * 60 * 60 * 1000; // 7 days
+export const runtime = "nodejs";
+
+const SESSION_EXPIRES_IN = 1 * 60 * 60 * 1000; // server-side token lifetime (1 hour)
 
 export async function POST(request: Request) {
   try {
@@ -35,6 +37,7 @@ export async function POST(request: Request) {
 
     const response = NextResponse.json({ ok: true });
 
+    // Session cookie lives 1 hour (or until logout).
     response.cookies.set({
       name: "session",
       value: sessionCookie,
