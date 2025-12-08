@@ -1,29 +1,8 @@
-﻿import { NextRequest, NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase/admin";
+import { NextRequest, NextResponse } from "next/server";
 
-const protectedMatchers = [/^\/me\//, /^\/posts\/.+\/edit$/, /^\/admin\//];
-
-export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-
-  const requiresAuth = protectedMatchers.some((pattern) =>
-    pattern.test(pathname)
-  );
-  if (!requiresAuth) {
-    return NextResponse.next();
-  }
-
-  const token = req.cookies.get("session")?.value;
-  if (!token) {
-    return NextResponse.redirect(new URL("/auth/sign-in", req.url));
-  }
-
-  try {
-    await adminAuth.verifySessionCookie(token, true);
-    return NextResponse.next();
-  } catch {
-    return NextResponse.redirect(new URL("/auth/sign-in", req.url));
-  }
+// Edge middleware cannot use firebase-admin (node-only). Route-level guards handle auth.
+export function middleware(_req: NextRequest) {
+  return NextResponse.next();
 }
 
 export const config = {

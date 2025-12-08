@@ -14,7 +14,7 @@ export default function Map() {
         const { Map } = await loadGoogleMaps();
         if (canceled || !mapRef.current) return;
         new Map(mapRef.current, {
-          center: { lat: 55.751244, lng: 37.618423 },
+          center: { lat: 56.9496, lng: 24.1052 }, // Riga default
           zoom: 12,
         });
       } catch (error) {

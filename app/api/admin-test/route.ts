@@ -2,6 +2,7 @@
 import { adminAuth } from "@/lib/firebase/admin";
 import { getSessionUser } from "@/lib/auth/server";
 
+
 export async function GET() {
   const user = await getSessionUser();
   if (!user || user.role !== "admin") {
@@ -22,3 +23,5 @@ export async function GET() {
     );
   }
 }
+
+export const runtime = "nodejs";

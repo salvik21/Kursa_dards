@@ -1,109 +1,144 @@
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import type { GeoPoint } from "@/types/post";
+import { adminDb } from "@/lib/firebase/admin";
+import ContactOwner from "./ContactOwner";
+import SubmitComplaint from "./SubmitComplaint";
+import LocationMap from "./LocationMap";
+import PhotoGallery from "./PhotoGallery";
+import { getSessionUser } from "@/lib/auth/server";
 
-type PostDetail = {
-  id: string;
-  title: string;
-  status: "open" | "resolved" | "closed";
-  type: "lost" | "found";
-  category: string;
-  tags: string[];
-  description: string;
-  descriptionHidden?: boolean;
-  placeName?: string;
-  geo?: GeoPoint;
-  photos: { id: string; url: string; alt?: string }[];
-  createdAt: string;
-  updatedAt: string;
-  userName?: string;
-  userPhone?: string;
-  userEmail?: string;
+type PageProps = {
+  params: { id: string };
 };
 
-const mockPost: PostDetail = {
-  id: "demo-123",
-  title: "Black backpack near central park",
-  status: "open",
-  type: "lost",
-  category: "bags",
-  tags: ["backpack", "black", "laptop"],
-  description:
-    "Lost a black backpack with a laptop inside near the main entrance of the central park. Reward for return.",
-  placeName: "Central Park main gate",
-  geo: { lat: 55.751244, lng: 37.618423 },
-  photos: [
-    { id: "p1", url: "https://images.unsplash.com/photo-1511499767150-a48a237f0083", alt: "Backpack" },
-    { id: "p2", url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab", alt: "Zippers" },
-  ],
-  createdAt: "2025-11-20T10:15:00Z",
-  updatedAt: "2025-11-22T14:45:00Z",
-  userName: "Alex Doe",
-  userEmail: "alex@example.com",
-  userPhone: "+371 20000000",
-};
+export const runtime = "nodejs";
 
-export const metadata: Metadata = {
-  title: "Post detail",
-};
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const snap = await adminDb.collection("posts").doc(params.id).get();
+  const data = snap.data() as any;
+  const title = data?.title ?? "Post";
+  return { title };
+}
 
-export default function PostDetailPage({ params }: { params: { id: string } }) {
-  const post = mockPost;
+export default async function PostDetailPage({ params }: PageProps) {
+  const viewer = await getSessionUser();
+  const snap = await adminDb.collection("posts").doc(params.id).get();
+  if (!snap.exists) {
+    notFound();
+  }
+  const data = snap.data() as any;
+  let ownerEmail = data?.ownerEmail || data?.userEmail || null;
+  let ownerName: string | null = null;
+  let ownerPhone: string | null = null;
+  if (!ownerEmail && data?.userId) {
+    try {
+      const userSnap = await adminDb.collection("users").doc(data.userId).get();
+      const userData = userSnap.data() as any;
+      if (userData?.email) {
+        ownerEmail = userData.email;
+      }
+      ownerName = userData?.displayName ?? userData?.name ?? null;
+      ownerPhone = userData?.phone ?? null;
+    } catch (e) {
+      // ignore lookup failure
+    }
+  }
+  const post = {
+    id: snap.id,
+    title: data.title ?? "",
+    type: data.type ?? "",
+    status: data.status ?? "open",
+    category: data.category ?? "",
+    tags: data.tags ?? [],
+    placeName: data.placeName ?? null,
+    geo: data.geo ?? null,
+    description: data.description ?? "",
+    photos: data.photos ?? [],
+    createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
+    updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : null,
+    ownerEmail,
+    ownerName,
+    ownerPhone,
+    blockedReason: data.blockedReason ?? null,
+  };
+  const canEdit = viewer && (viewer.role === "admin" || viewer.uid === data.userId);
 
-  const statusColors: Record<PostDetail["status"], string> = {
+  const statusColors: Record<string, string> = {
+    pending: "bg-amber-100 text-amber-800 border-amber-200",
     open: "bg-green-100 text-green-800 border-green-200",
     resolved: "bg-blue-100 text-blue-800 border-blue-200",
+    hidden: "bg-amber-100 text-amber-800 border-amber-200",
     closed: "bg-gray-100 text-gray-700 border-gray-200",
   };
 
   return (
     <main className="mx-auto flex max-w-4xl flex-col gap-6 p-6">
+      <div>
+        <a
+          href="/"
+          className="text-sm text-blue-600 hover:underline"
+        >
+          ← Back to home
+        </a>
+      </div>
+
       <header className="space-y-3 border-b border-gray-200 pb-4">
         <div className="flex items-center gap-3">
-          <span className={`rounded-full border px-3 py-1 text-sm font-semibold ${statusColors[post.status]}`}>
-            {post.status.toUpperCase()}
+          <span className={`rounded-full border px-3 py-1 text-sm font-semibold ${statusColors[post.status] ?? ""}`}>
+            {post.status?.toUpperCase()}
           </span>
           <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-800">
             {post.type === "lost" ? "Lost" : "Found"}
           </span>
         </div>
         <h1 className="text-3xl font-bold text-gray-900">{post.title}</h1>
-        <div className="flex flex-wrap gap-3 text-sm text-gray-700">
-          <span className="rounded border border-gray-200 bg-gray-50 px-3 py-1 font-medium">
-            Category: {post.category}
-          </span>
-          <span className="rounded border border-gray-200 bg-gray-50 px-3 py-1 font-medium">
-            Tags: {post.tags.join(", ")}
-          </span>
-          <span className="rounded border border-gray-200 bg-gray-50 px-3 py-1">
-            Created: {new Date(post.createdAt).toLocaleString()}
-          </span>
-          <span className="rounded border border-gray-200 bg-gray-50 px-3 py-1">
-            Updated: {new Date(post.updatedAt).toLocaleString()}
-          </span>
-        </div>
+        {post.createdAt && (
+          <div className="flex flex-wrap gap-3 text-sm text-gray-700">
+            <span className="rounded border border-gray-200 bg-gray-50 px-3 py-1">
+              Created: {new Date(post.createdAt).toLocaleString()}
+            </span>
+          </div>
+        )}
+        {canEdit && (
+          <div>
+            <a
+              href={`/posts/${post.id}/edit`}
+              className="inline-flex items-center rounded border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700 hover:bg-blue-100"
+            >
+              Edit post
+            </a>
+          </div>
+        )}
       </header>
+
+      {post.status === "hidden" && post.blockedReason && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+          This post is hidden by an administrator. Reason: {post.blockedReason}
+        </div>
+      )}
 
       <section className="space-y-2">
         <h2 className="text-xl font-semibold text-gray-900">Description</h2>
-        <p className="leading-relaxed text-gray-800">{post.description}</p>
-        {post.descriptionHidden && (
-          <p className="text-sm text-amber-700">Some details are hidden and only visible to the author.</p>
-        )}
+        <p className="leading-relaxed text-gray-800 whitespace-pre-wrap">{post.description}</p>
       </section>
+
+      {(post.ownerName || post.ownerEmail || post.ownerPhone) && (
+        <section className="space-y-2">
+          <h2 className="text-xl font-semibold text-gray-900">Owner info</h2>
+          <div className="rounded border border-gray-200 bg-gray-50 p-3 text-sm text-gray-800 space-y-1">
+            {post.ownerName && <div><span className="font-semibold">Name:</span> {post.ownerName}</div>}
+            {post.ownerEmail && <div><span className="font-semibold">Email:</span> {post.ownerEmail}</div>}
+            {post.ownerPhone && <div><span className="font-semibold">Phone:</span> {post.ownerPhone}</div>}
+          </div>
+        </section>
+      )}
 
       <section className="space-y-3">
         <h2 className="text-xl font-semibold text-gray-900">Photos</h2>
         {post.photos.length === 0 ? (
           <p className="text-gray-700">No photos attached.</p>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {post.photos.map((photo) => (
-              <figure key={photo.id} className="overflow-hidden rounded-lg border border-gray-200">
-                <img src={photo.url} alt={photo.alt ?? "Post photo"} className="h-56 w-full object-cover" />
-                {photo.alt && <figcaption className="p-2 text-sm text-gray-700">{photo.alt}</figcaption>}
-              </figure>
-            ))}
-          </div>
+          <PhotoGallery photos={post.photos} />
         )}
       </section>
 
@@ -114,27 +149,32 @@ export default function PostDetailPage({ params }: { params: { id: string } }) {
             <div className="font-medium">Place: {post.placeName}</div>
             {post.geo ? (
               <div className="text-sm text-gray-700">
-                Coordinates: {post.geo.lat.toFixed(5)}, {post.geo.lng.toFixed(5)}
+                Coordinates: {post.geo.lat?.toFixed?.(5) ?? post.geo.lat}, {post.geo.lng?.toFixed?.(5) ?? post.geo.lng}
               </div>
             ) : (
               <div className="text-sm text-gray-700">Coordinates not provided.</div>
+            )}
+            {post.geo && (
+              <LocationMap
+                lat={Number(post.geo.lat)}
+                lng={Number(post.geo.lng)}
+                label={post.placeName || post.title}
+              />
             )}
           </div>
         ) : (
           <p className="text-gray-700">No location provided.</p>
         )}
-        <div className="rounded border border-dashed border-gray-300 p-4 text-sm text-gray-600">
-          Map placeholder. Integrate Google Maps here and place a marker at the coordinates when available.
-        </div>
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-xl font-semibold text-gray-900">Contact</h2>
-        <div className="rounded border border-gray-200 bg-gray-50 p-3 text-gray-800">
-          <div className="font-medium">{post.userName ?? "Anonymous user"}</div>
-          {post.userEmail && <div>Email: {post.userEmail}</div>}
-          {post.userPhone && <div>Phone: {post.userPhone}</div>}
-        </div>
+        <h2 className="text-xl font-semibold text-gray-900">Contact owner</h2>
+        <ContactOwner postId={post.id} ownerEmail={post.ownerEmail} />
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-xl font-semibold text-gray-900">Пожаловаться</h2>
+        <SubmitComplaint postId={post.id} />
       </section>
     </main>
   );

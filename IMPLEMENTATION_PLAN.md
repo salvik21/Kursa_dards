@@ -10,8 +10,8 @@
 - Initialize tooling: Tailwind, ESLint, basic aliases, env management. - Done.
 - Configure Firebase SDK (client) and Admin SDK (server-only in API routes). - Done
 - Configure Supabase Storage via server route for signed uploads. - Done
-- Add Google Maps script loading + API key from env. - Done 
-- Create core folders: `app/(public)`, `app/(auth)`, `app/(me)`, `app/(admin)`, `lib/`, `components/`, `types/`, `app/api/*`. - Done
+- Add Google Maps script loading + API key from env.
+- Create core folders: `app/(public)`, `app/(auth)`, `app/(me)`, `app/(admin)`, `lib/`, `components/`, `types/`, `app/api/*`.
 
 **Phase 1 — Auth (Day 2–4)**
 - Email/password registration, login, logout with email verification (Firebase Auth). - Done
@@ -20,13 +20,13 @@
 - User profile document created on first login; include role: `user|admin`. - Done
 
 **Phase 2 — Data Model (Day 3–5)**
-- Firestore collections (MVP):
+- Firestore collections (MVP): - Done
   - `users`: { role, name, email, phone?, blocked? }
-  - `posts`: { userId, title, type: "lost|found", status, category, tags[], placeName, geo: { lat, lng }, createdAt, updatedAt }
-  - `photos`: { postId, url, alt }
-  - Optional later: `complaints`, `subscriptions`.
-- Indexes: by `type`, `category`, `createdAt desc`, `geo` bounding box fields.
-- Types: shared `types/*.ts` for Firestore shapes.
+  - `posts`: { userId, title, type: "lost|found", status, category, tags[], placeName, geo: { lat, lng }, createdAt, updatedAt } - Done
+  - `photos`: { postId, url, alt } - Done
+  - Optional later: `complaints`, `subscriptions`. - Done
+- Indexes: by `type`, `category`, `createdAt desc`, `geo` bounding box fields. - Done
+- Types: shared `types/*.ts` for Firestore shapes. - Done
 
 **Phase 3 — Post CRUD (Day 5–8)**
 - Create/edit/delete own posts: `app/posts/new`, `app/posts/[id]/edit`, `app/me/posts`.

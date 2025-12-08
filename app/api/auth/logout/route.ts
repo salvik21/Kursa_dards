@@ -2,6 +2,8 @@
 import { NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebase/admin";
 
+export const runtime = "nodejs";
+
 export async function POST() {
   try {
     const token = cookies().get("session")?.value;

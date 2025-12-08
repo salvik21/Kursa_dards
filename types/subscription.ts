@@ -12,4 +12,6 @@ export interface Subscription {
   radiusKm: number;
   location: SubscriptionLocation;
   categories?: string[];
+  enabled?: boolean;
+  userEmail?: string;
 }
