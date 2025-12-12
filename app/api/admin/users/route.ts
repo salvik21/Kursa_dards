@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { getSessionUser } from "@/lib/auth/server";
+import { deleteUserAccount } from "@/lib/deleteUser";
 
 export const runtime = "nodejs";
 
@@ -68,5 +69,40 @@ export async function PATCH(req: Request) {
   } catch (error: any) {
     console.error("Update user error:", error);
     return NextResponse.json({ ok: false, error: error?.message || "Failed to update user" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  const user = await getSessionUser();
+  if (!user || user.role !== "admin") {
+    return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
+  }
+  try {
+    const { id } = await req.json();
+    if (!id || typeof id !== "string") {
+      return NextResponse.json({ ok: false, error: "Invalid payload" }, { status: 400 });
+    }
+
+    const targetSnap = await adminDb.collection("users").doc(id).get();
+    if (!targetSnap.exists) {
+      return NextResponse.json({ ok: false, error: "User not found" }, { status: 404 });
+    }
+    const targetRole = (targetSnap.data() as any)?.role ?? "user";
+
+    if (targetRole === "admin") {
+      const adminsSnap = await adminDb.collection("users").where("role", "==", "admin").get();
+      if (adminsSnap.size <= 1) {
+        return NextResponse.json({ ok: false, error: "Cannot delete the last admin" }, { status: 400 });
+      }
+    }
+
+    await deleteUserAccount(id, { protectLastAdmin: true });
+    return NextResponse.json({ ok: true });
+  } catch (error: any) {
+    console.error("Delete user error:", error);
+    return NextResponse.json(
+      { ok: false, error: error?.message || "Failed to delete user" },
+      { status: 500 }
+    );
   }
 }

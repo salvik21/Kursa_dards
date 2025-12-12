@@ -1,18 +1,23 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { PostForm } from "@/components/PostForm";
 
 export default function NewPostPage() {
+  const router = useRouter();
   const initialValues = {
     title: "",
     type: "lost" as const,
     category: "",
     tags: [],
-    placeName: "No place",
+    placeName: "Nav vietas",
     description: "",
     photos: [],
     geo: null,
+    showEmail: true,
+    showPhone: false,
+    privateNote: "",
   };
 
   const createPost = async (payload: any) => {
@@ -23,19 +28,20 @@ export default function NewPostPage() {
     });
     const json = await res.json();
     if (!res.ok) {
-      throw new Error(json?.error || "Failed to create post");
+      throw new Error(json?.error || "Neizdevās izveidot ierakstu");
     }
+    router.push("/me");
   };
 
   return (
     <main className="mx-auto max-w-3xl p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Create a post</h1>
-          <p className="text-sm text-gray-600">Fill in the fields below and submit.</p>
+          <h1 className="text-3xl font-bold text-gray-900">Izveidot ierakstu</h1>
+          <p className="text-sm text-gray-600">Aizpildiet laukus un iesniedziet.</p>
         </div>
         <Link href="/me" className="text-blue-600 hover:underline text-sm">
-          Back to account
+          Atpakaļ uz kontu
         </Link>
       </div>
 

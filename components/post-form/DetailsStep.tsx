@@ -6,17 +6,28 @@ type DetailsStepProps = {
   availableCategories: Option[];
   availableTags: string[];
   fieldErrors: { title?: boolean; category?: boolean; description?: boolean };
+  contactEmail?: string;
+  contactPhone?: string;
   onUpdate: <K extends keyof PostFormValues>(key: K, value: PostFormValues[K]) => void;
   onToggleTag: (tag: string) => void;
 };
 
-export function DetailsStep({ values, availableCategories, availableTags, fieldErrors, onUpdate, onToggleTag }: DetailsStepProps) {
+export function DetailsStep({
+  values,
+  availableCategories,
+  availableTags,
+  fieldErrors,
+  contactEmail,
+  contactPhone,
+  onUpdate,
+  onToggleTag,
+}: DetailsStepProps) {
   const categories = useMemo(() => availableCategories, [availableCategories]);
 
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <label className="text-sm font-semibold text-gray-800">Title *</label>
+        <label className="text-sm font-semibold text-gray-800">Virsraksts *</label>
         <input
           value={values.title}
           onChange={(e) => onUpdate("title", e.target.value)}
@@ -25,14 +36,14 @@ export function DetailsStep({ values, availableCategories, availableTags, fieldE
               ? "border-red-500 focus:border-red-500 focus:ring-red-500"
               : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           }`}
-          placeholder="Lost black backpack near park"
+          placeholder="Pazudusi melna mugursoma pie parka"
         />
-        {fieldErrors.title && <p className="text-xs text-red-600">Title is required.</p>}
+        {fieldErrors.title && <p className="text-xs text-red-600">Nepieciešams virsraksts.</p>}
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-800">Type *</label>
+          <label className="text-sm font-semibold text-gray-800">Veids *</label>
           <select
             value={values.type}
             onChange={(e) => onUpdate("type", e.target.value as PostType)}
@@ -44,7 +55,7 @@ export function DetailsStep({ values, availableCategories, availableTags, fieldE
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-800">Category *</label>
+          <label className="text-sm font-semibold text-gray-800">Kategorija *</label>
           <select
             value={values.category}
             onChange={(e) => onUpdate("category", e.target.value)}
@@ -54,18 +65,18 @@ export function DetailsStep({ values, availableCategories, availableTags, fieldE
                 : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
             }`}
           >
-            <option value="">Choose category</option>
+            <option value="">Izvēlieties kategoriju</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.name}>
+              <option key={c.id} value={c.id}>
                 {c.name}
               </option>
             ))}
           </select>
-          {fieldErrors.category && <p className="text-xs text-red-600">Category is required.</p>}
+          {fieldErrors.category && <p className="text-xs text-red-600">Kategorija ir obligāta.</p>}
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-800">Tags (double-click to add/remove)</label>
+          <label className="text-sm font-semibold text-gray-800">Birkas (dubultklikšķis, lai pievienotu/noņemtu)</label>
           <div className="flex flex-wrap gap-2 rounded border border-gray-300 p-3">
             {availableTags.map((t) => {
               const active = values.tags.includes(t);
@@ -79,7 +90,7 @@ export function DetailsStep({ values, availableCategories, availableTags, fieldE
                       ? "bg-blue-600 text-white border border-blue-600"
                       : "bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200"
                   }`}
-                  title="Double-click to toggle"
+                  title="Dubultklikšķis, lai pārslēgtu"
                 >
                   {t}
                 </button>
@@ -101,12 +112,12 @@ export function DetailsStep({ values, availableCategories, availableTags, fieldE
               ))}
             </div>
           )}
-          <p className="text-xs text-gray-600">Double-click a tag to add/remove it.</p>
+          <p className="text-xs text-gray-600">Veiciet dubultklikšķi uz birkas, lai to pievienotu/noņemtu.</p>
         </div>
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-semibold text-gray-800">Description *</label>
+        <label className="text-sm font-semibold text-gray-800">Apraksts *</label>
         <textarea
           value={values.description}
           onChange={(e) => onUpdate("description", e.target.value)}
@@ -116,9 +127,51 @@ export function DetailsStep({ values, availableCategories, availableTags, fieldE
               ? "border-red-500 focus:border-red-500 focus:ring-red-500"
               : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           }`}
-          placeholder="Describe what was lost/found, where, when, and identifying details."
+          placeholder="Aprakstiet, kas tika pazaudēts/atrasts, kur, kad un pazīmes."
         />
-        {fieldErrors.description && <p className="text-xs text-red-600">Description is required.</p>}
+        {fieldErrors.description && <p className="text-xs text-red-600">Apraksts ir obligāts.</p>}
+      </div>
+
+      {values.type === "found" && (
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-gray-800">Privāta piezīme (redzama tikai jums un administratoriem)</label>
+          <textarea
+            value={values.privateNote ?? ""}
+            onChange={(e) => onUpdate("privateNote", e.target.value)}
+            rows={3}
+            className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="Papildu piezīme sev vai administratoriem. Publiski netiek rādīta."
+          />
+          <p className="text-xs text-gray-600">Šī piezīme nav redzama citiem lietotājiem.</p>
+        </div>
+      )}
+
+      <div className="space-y-2 rounded border border-gray-200 bg-gray-50 p-3">
+        <div className="text-sm font-semibold text-gray-800">Kontaktinformācijas redzamība</div>
+        <p className="text-xs text-gray-600">Izvēlieties, ko rādīt sludinājumā publiski.</p>
+        <div className="space-y-2 pt-1">
+          <label className="inline-flex items-center gap-2 text-sm text-gray-800">
+            <input
+              type="checkbox"
+              checked={values.showEmail !== false}
+              onChange={(e) => onUpdate("showEmail", e.target.checked)}
+            />
+            Rādīt manu e-pastu{contactEmail ? ` (${contactEmail})` : ""}
+          </label>
+          {contactPhone && (
+            <label className="inline-flex items-center gap-2 text-sm text-gray-800">
+              <input
+                type="checkbox"
+                checked={!!values.showPhone}
+                onChange={(e) => onUpdate("showPhone", e.target.checked)}
+              />
+              Rādīt manu telefonu ({contactPhone})
+            </label>
+          )}
+          {!contactPhone && (
+            <p className="text-xs text-gray-500">Jūsu profilā nav tālruņa numura, tādēļ tas netiks rādīts.</p>
+          )}
+        </div>
       </div>
     </div>
   );

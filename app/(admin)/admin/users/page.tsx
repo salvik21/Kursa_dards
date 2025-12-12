@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { AdminBackButton } from "@/components/AdminBackButton";
 
 type UserItem = {
   id: string;
@@ -21,6 +22,7 @@ export default function UsersPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [roleUpdatingId, setRoleUpdatingId] = useState<string | null>(null);
   const [roleError, setRoleError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -29,12 +31,12 @@ export default function UsersPage() {
       const res = await fetch("/api/admin/users", { cache: "no-store" });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || "Failed to load users");
+        throw new Error(data?.error || "Neizdevās ielādēt lietotājus");
       }
       const data = await res.json();
       setUsers(data.users ?? []);
     } catch (err: any) {
-      setError(err?.message || "Failed to load users");
+      setError(err?.message || "Neizdevās ielādēt lietotājus");
     } finally {
       setLoading(false);
     }
@@ -55,11 +57,11 @@ export default function UsersPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || "Failed to update user");
+        throw new Error(data?.error || "Neizdevās atjaunināt lietotāju");
       }
       load();
     } catch (err: any) {
-      setError(err?.message || "Failed to update user");
+      setError(err?.message || "Neizdevās atjaunināt lietotāju");
     } finally {
       setUpdatingId(null);
     }
@@ -77,14 +79,37 @@ export default function UsersPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || "Failed to update role");
+        throw new Error(data?.error || "Neizdevās atjaunināt lomu");
       }
       load();
     } catch (err: any) {
-      setError(err?.message || "Failed to update role");
+      setError(err?.message || "Neizdevās atjaunināt lomu");
       setRoleError(err?.message || null);
     } finally {
       setRoleUpdatingId(null);
+    }
+  };
+
+  const deleteUser = async (id: string) => {
+    const confirmed = window.confirm("Dzēst šo lietotāju un visus viņa sludinājumus?");
+    if (!confirmed) return;
+    setDeletingId(id);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data?.error || "Neizdevās dzēst lietotāju");
+      }
+      load();
+    } catch (err: any) {
+      setError(err?.message || "Neizdevās dzēst lietotāju");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -92,28 +117,19 @@ export default function UsersPage() {
     <main className="mx-auto max-w-4xl p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Users</h1>
-          <p className="text-sm text-gray-700">View user list and personal details (admin only).</p>
+          <h1 className="text-3xl font-bold text-gray-900">Lietotāji</h1>
+          <p className="text-sm text-gray-700">Aplūkojiet lietotāju sarakstu un datus (tikai adminiem).</p>
         </div>
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={load}
-            className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
-          >
-            Refresh
-          </button>
-          <Link href="/admin" className="text-blue-600 hover:underline text-sm">
-            Back to admin
-          </Link>
+          <AdminBackButton />
         </div>
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
-      {loading && <p className="text-sm text-gray-600">Loading...</p>}
+      {loading && <p className="text-sm text-gray-600">Ielādē...</p>}
 
       {users.length === 0 && !loading ? (
-        <p className="text-sm text-gray-600">No users found.</p>
+        <p className="text-sm text-gray-600">Lietotāji nav atrasti.</p>
       ) : (
         <div className="space-y-3">
           {users.map((u) => (
@@ -124,13 +140,13 @@ export default function UsersPage() {
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <div className="text-sm font-semibold text-gray-900">
-                    {u.name || "No name"}{" "}
-                    <span className="text-xs text-gray-500">({u.role ?? "user"})</span>
+                    {u.name || "Bez vārda"}{" "}
+                    <span className="text-xs text-gray-500">({u.role === "admin" ? "administrators" : "lietotājs"})</span>
                   </div>
                   <div className="text-sm text-gray-700">{u.email}</div>
-                  {u.phone && <div className="text-sm text-gray-700">Phone: {u.phone}</div>}
+                  {u.phone && <div className="text-sm text-gray-700">Tālrunis: {u.phone}</div>}
                   {u.createdAt && (
-                    <div className="text-xs text-gray-500">Created: {new Date(u.createdAt).toLocaleString()}</div>
+                    <div className="text-xs text-gray-500">Izveidots: {new Date(u.createdAt).toLocaleString()}</div>
                   )}
                 </div>
                 <div className="flex flex-col items-end gap-1 text-xs">
@@ -139,10 +155,10 @@ export default function UsersPage() {
                       u.blocked ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"
                     }`}
                   >
-                    {u.blocked ? "Blocked" : "Active"}
+                    {u.blocked ? "Bloķēts" : "Aktīvs"}
                   </span>
                   <span className="rounded-full bg-gray-100 px-2 py-1 text-gray-700">
-                    {u.canLogin === false ? "Login disabled" : "Login allowed"}
+                    {u.canLogin === false ? "Pieteikšanās liegta" : "Pieteikšanās atļauta"}
                   </span>
                   <button
                     type="button"
@@ -155,10 +171,10 @@ export default function UsersPage() {
                     } disabled:opacity-60`}
                   >
                     {updatingId === u.id
-                      ? "Updating..."
+                      ? "Atjaunina..."
                       : u.blocked
-                        ? "Unblock"
-                        : "Block"}
+                        ? "Atbloķēt"
+                        : "Bloķēt"}
                   </button>
                   <button
                     type="button"
@@ -167,10 +183,18 @@ export default function UsersPage() {
                     className="rounded px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-50 disabled:opacity-60"
                   >
                     {roleUpdatingId === u.id
-                      ? "Updating..."
+                      ? "Atjaunina..."
                       : u.role === "admin"
-                        ? "Demote to user"
-                        : "Promote to admin"}
+                        ? "Noņemt administratoru"
+                        : "Piešķirt administratoru"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteUser(u.id)}
+                    disabled={deletingId === u.id}
+                    className="rounded px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
+                  >
+                    {deletingId === u.id ? "Dzēš..." : "Dzēst lietotāju"}
                   </button>
                   {roleError && roleUpdatingId === u.id && (
                     <p className="text-[11px] text-red-600">{roleError}</p>

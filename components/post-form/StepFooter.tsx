@@ -6,9 +6,10 @@ type StepFooterProps = {
   onSubmit: () => void;
   onCancelHref: string;
   mode: "create" | "edit";
+  disableSubmit?: boolean;
 };
 
-export function StepFooter({ step, saving, onPrev, onNext, onSubmit, onCancelHref, mode }: StepFooterProps) {
+export function StepFooter({ step, saving, onPrev, onNext, onSubmit, onCancelHref, mode, disableSubmit }: StepFooterProps) {
   return (
     <div className="flex items-center justify-between">
       <div className="flex gap-2">
@@ -18,7 +19,7 @@ export function StepFooter({ step, saving, onPrev, onNext, onSubmit, onCancelHre
           disabled={step === 0}
           className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition disabled:opacity-50"
         >
-          Previous
+          Atpakaļ
         </button>
         {step < 2 && (
           <button
@@ -26,7 +27,7 @@ export function StepFooter({ step, saving, onPrev, onNext, onSubmit, onCancelHre
             onClick={onNext}
             className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 transition"
           >
-            Next
+            Tālāk
           </button>
         )}
       </div>
@@ -36,15 +37,15 @@ export function StepFooter({ step, saving, onPrev, onNext, onSubmit, onCancelHre
             href={onCancelHref}
             className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
           >
-            Cancel
+            Atcelt
           </a>
           <button
             type="button"
             onClick={onSubmit}
-            disabled={saving}
+            disabled={saving || disableSubmit}
             className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 transition disabled:opacity-60"
           >
-            {saving ? "Saving..." : mode === "create" ? "Create post" : "Save changes"}
+            {saving ? "Saglabā..." : mode === "create" ? "Izveidot ierakstu" : "Saglabāt izmaiņas"}
           </button>
         </div>
       )}

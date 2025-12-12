@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { getSessionUser } from "@/lib/auth/server";
+import { deletePostWithRelations } from "@/lib/deletePost";
+import { upsertPostPlace } from "@/lib/postsPlace";
+import { syncPostPhotos } from "@/lib/postPhotos";
 
 export const runtime = "nodejs";
 
@@ -50,22 +53,54 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
       return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
     }
 
+    // Try to load geo from postsPlace
+    let geoFromPlace: any = null;
+    let descriptionPlaceFromPlace: string | null = null;
+    try {
+      const placeSnap = await adminDb.collection("postsPlace").doc(params.id).get();
+      const placeData = placeSnap.data() as any;
+      geoFromPlace = placeData?.geo ?? null;
+      descriptionPlaceFromPlace = placeData?.descriptionPlace ?? null;
+    } catch {
+      geoFromPlace = null;
+      descriptionPlaceFromPlace = null;
+    }
+
+    // Resolve category name from categories collection
+    let categoryName = "";
+    if (data?.categoryId) {
+      try {
+        const catSnap = await adminDb.collection("categories").doc(data.categoryId).get();
+        categoryName = (catSnap.data() as any)?.name ?? "";
+      } catch {
+        categoryName = "";
+      }
+    }
+
     return NextResponse.json({
       ok: true,
       post: {
         id: snap.id,
         title: data.title ?? "",
         type: data.type ?? "",
-        category: data.category ?? "",
-      placeName: data.placeName ?? null,
-      description: data.description ?? "",
-      photos: data.photos ?? [],
-      geo: data.geo ?? null,
-    },
-  });
-} catch (error: any) {
-  console.error("Get post error:", error);
-  return NextResponse.json(
+        
+        categoryId: data.categoryId,
+  
+      
+   
+      
+        photos: data.photos ?? [],
+      
+     
+        showEmail: data.showEmail !== false,
+        showPhone: !!data.showPhone,
+        privateNote: data.privateNote ?? "",
+        postsPlaceId: data.postsPlaceId ?? params.id,
+      },
+    });
+  } catch (error: any) {
+    console.error("Get post error:", error);
+    return NextResponse.json(
       { ok: false, error: error?.message || "Failed to load post" },
       { status: 500 }
     );
@@ -94,14 +129,18 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     const payload = await req.json();
     const title = normalizeString(payload.title);
     const type = normalizeString(payload.type).toLowerCase();
-    const category = normalizeString(payload.category);
+    const categoryId = normalizeString(payload.categoryId || payload.category);
     const placeName = normalizeString(payload.placeName) || null;
     const description = normalizeString(payload.description);
+    const descriptionPlace = normalizeString(payload.descriptionPlace);
     const photos = Array.isArray(payload.photos) ? payload.photos.filter(Boolean) : [];
     const tags = Array.isArray(payload.tags) ? payload.tags.filter(Boolean) : [];
     const geo = normalizeGeo(payload.geo);
+    const showEmail = typeof payload.showEmail === "boolean" ? payload.showEmail : true;
+    const showPhone = typeof payload.showPhone === "boolean" ? payload.showPhone : false;
+    const privateNote = typeof payload.privateNote === "string" ? payload.privateNote.trim() : "";
 
-    if (!title || !category || !description) {
+    if (!title || !categoryId || !description) {
       return NextResponse.json(
         { ok: false, error: "Title, category and description are required" },
         { status: 400 }
@@ -114,22 +153,71 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     await adminDb.collection("posts").doc(params.id).update({
       title,
       type,
-      category,
-      placeName,
-      description,
+      categoryId,
+      placeNamePosts: null,
+      descriptionPosts: description,
       photos,
       tags,
-      geo: geo ?? null,
+      postsPlaceId: params.id,
+      showEmail,
+      showPhone,
+      privateNote,
+      status: "pending",
+      blockedReason: null,
+      blockedBy: null,
+      blockedAt: null,
       updatedAt: new Date(),
     });
 
     await syncPostTags(params.id, tags);
+
+    // Keep postsPlace in sync for mapping/location uses
+    await upsertPostPlace({
+      postId: params.id,
+      geo,
+      description: descriptionPlace || null,
+      placeName: null,
+    });
+
+    await syncPostPhotos({
+      postId: params.id,
+      photos,
+    });
 
     return NextResponse.json({ ok: true });
   } catch (error: any) {
     console.error("Update post error:", error);
     return NextResponse.json(
       { ok: false, error: error?.message || "Failed to update post" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+  try {
+    const user = await getSessionUser();
+    if (!user) {
+      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const snap = await adminDb.collection("posts").doc(params.id).get();
+    if (!snap.exists) {
+      return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
+    }
+    const data = snap.data() as any;
+    const isOwner = data?.userId === user.uid;
+    const isAdmin = user.role === "admin";
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
+    }
+
+    await deletePostWithRelations(params.id);
+    return NextResponse.json({ ok: true });
+  } catch (error: any) {
+    console.error("Delete post error:", error);
+    return NextResponse.json(
+      { ok: false, error: error?.message || "Failed to delete post" },
       { status: 500 }
     );
   }

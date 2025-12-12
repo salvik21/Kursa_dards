@@ -2,6 +2,7 @@
 
 import { useEffect, useState, FormEvent, useRef } from "react";
 import Link from "next/link";
+import { AdminBackButton } from "@/components/AdminBackButton";
 import { loadGoogleMaps } from "@/lib/maps";
 
 type Place = { id: string; name: string; lat?: number; lng?: number };
@@ -39,7 +40,7 @@ export default function PlacesPage() {
     setMessage(null);
     setError(null);
     if (!name.trim() || !lat.trim() || !lng.trim()) {
-      setError("Place name and coordinates are required");
+      setError("Nepieciešams vietas nosaukums un koordinātas");
       return;
     }
     setLoading(true);
@@ -55,15 +56,15 @@ export default function PlacesPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || "Failed to create place");
+        throw new Error(data?.error || "Neizdevās izveidot vietu");
       }
       setName("");
-      setLat("");
-      setLng("");
-      setMessage("Place created");
+      setLat(defaultLat);
+      setLng(defaultLng);
+      setMessage("Vieta izveidota");
       loadPlaces();
     } catch (err: any) {
-      setError(err?.message || "Failed to create place");
+      setError(err?.message || "Neizdevās izveidot vietu");
     } finally {
       setLoading(false);
     }
@@ -79,12 +80,12 @@ export default function PlacesPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || "Failed to delete place");
+        throw new Error(data?.error || "Neizdevās dzēst vietu");
       }
-      setMessage("Place deleted");
+      setMessage("Vieta dzēsta");
       loadPlaces();
     } catch (err: any) {
-      setError(err?.message || "Failed to delete place");
+      setError(err?.message || "Neizdevās dzēst vietu");
     }
   };
 
@@ -92,27 +93,25 @@ export default function PlacesPage() {
     <main className="mx-auto max-w-3xl p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Manage places</h1>
-          <p className="text-sm text-gray-700">Admins can add or remove preset place names used in posts.</p>
+          <h1 className="text-3xl font-bold text-gray-900">Vietu pārvaldība</h1>
+          <p className="text-sm text-gray-700">Administratori var pievienot vai noņemt iepriekš sagatavotus vietu nosaukumus.</p>
         </div>
-        <Link href="/admin" className="text-blue-600 hover:underline text-sm">
-          Back to admin
-        </Link>
+        <AdminBackButton />
       </div>
 
       <form onSubmit={onSubmit} className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-800">Place name</label>
+          <label className="text-sm font-semibold text-gray-800">Vietas nosaukums</label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="e.g., Central Park, Main Station"
+            placeholder="piem., Centrālais parks, Galvenā stacija"
           />
         </div>
         <div className="grid gap-3 md:grid-cols-2">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-800">Latitude</label>
+            <label className="text-sm font-semibold text-gray-800">Platums</label>
             <input
               value={lat}
               onChange={(e) => setLat(e.target.value)}
@@ -121,7 +120,7 @@ export default function PlacesPage() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-800">Longitude</label>
+            <label className="text-sm font-semibold text-gray-800">Garums</label>
             <input
               value={lng}
               onChange={(e) => setLng(e.target.value)}
@@ -145,15 +144,15 @@ export default function PlacesPage() {
           disabled={loading}
           className="inline-flex items-center rounded bg-blue-600 px-4 py-2 text-white font-semibold shadow hover:bg-blue-700 disabled:opacity-60"
         >
-          {loading ? "Saving..." : "Add place"}
+          {loading ? "Saglabā..." : "Pievienot vietu"}
         </button>
       </form>
 
       <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-3">
-        <h2 className="text-lg font-semibold text-gray-900">Existing places</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Esošās vietas</h2>
         {error && <p className="text-sm text-red-600">{error}</p>}
         {places.length === 0 ? (
-          <p className="text-sm text-gray-600">No places yet.</p>
+          <p className="text-sm text-gray-600">Vietas vēl nav pievienotas.</p>
         ) : (
           <ul className="space-y-2">
             {places.map((place) => (
@@ -175,7 +174,7 @@ export default function PlacesPage() {
                   onClick={() => removePlace(place.id)}
                   className="rounded bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-100"
                 >
-                  Delete
+                  Dzēst
                 </button>
               </li>
             ))}
@@ -199,6 +198,11 @@ function MapPicker({
   const markerRef = useRef<google.maps.Marker | null>(null);
   const mapInstance = useRef<google.maps.Map | null>(null);
   const [mounted, setMounted] = useState(false);
+  const onChangeRef = useRef(onChange);
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   useEffect(() => {
     setMounted(true);
@@ -208,10 +212,14 @@ function MapPicker({
   useEffect(() => {
     let cancelled = false;
     async function initMap() {
+      if (mapInstance.current) return;
       try {
         const gm = await loadGoogleMaps();
         if (cancelled || !mapRef.current) return;
-        const initial = lat && lng ? { lat: Number(lat), lng: Number(lng) } : { lat: 56.9496, lng: 24.1052 }; // Riga
+        const parsedLat = Number(lat);
+        const parsedLng = Number(lng);
+        const hasCoords = Number.isFinite(parsedLat) && Number.isFinite(parsedLng);
+        const initial = hasCoords ? { lat: parsedLat, lng: parsedLng } : { lat: 56.9496, lng: 24.1052 }; // Riga
         const map = new gm.Map(mapRef.current, {
           center: initial,
           zoom: 11,
@@ -226,7 +234,7 @@ function MapPicker({
         markerRef.current = marker;
 
         const update = (pos: google.maps.LatLng) => {
-          onChange(pos.lat().toString(), pos.lng().toString());
+          onChangeRef.current?.(pos.lat().toString(), pos.lng().toString());
         };
 
         marker.addListener("dragend", () => {
@@ -249,15 +257,16 @@ function MapPicker({
     return () => {
       cancelled = true;
     };
-  }, [mounted, lat, lng, onChange]);
+  }, [mounted]);
 
   useEffect(() => {
     if (!mapInstance.current || !markerRef.current) return;
-    if (lat && lng) {
-      const position = { lat: Number(lat), lng: Number(lng) };
-      markerRef.current.setPosition(position);
-      mapInstance.current.setCenter(position);
-    }
+    const parsedLat = Number(lat);
+    const parsedLng = Number(lng);
+    if (!Number.isFinite(parsedLat) || !Number.isFinite(parsedLng)) return;
+    const position = { lat: parsedLat, lng: parsedLng };
+    markerRef.current.setPosition(position);
+    mapInstance.current.setCenter(position);
   }, [lat, lng]);
 
   if (!mounted) {
@@ -271,9 +280,9 @@ function MapPicker({
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-semibold text-gray-800">Location on map</label>
+      <label className="text-sm font-semibold text-gray-800">Atrašanās vieta kartē</label>
       <div ref={mapRef} className="h-64 w-full rounded border border-gray-300" role="presentation" />
-      <p className="text-xs text-gray-600">Click on the map or drag the marker to set coordinates.</p>
+      <p className="text-xs text-gray-600">Noklikšķiniet kartē vai pavelciet marķieri, lai norādītu koordinātas.</p>
     </div>
   );
 }

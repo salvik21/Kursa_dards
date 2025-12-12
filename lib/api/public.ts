@@ -27,7 +27,15 @@ export async function fetchPlaces(): Promise<Option[]> {
     const res = await fetch("/api/public/places", { cache: "no-store" });
     if (!res.ok) throw new Error("failed");
     const data = await res.json();
-    return [{ id: "no-place", name: "No place" }, ...(data?.places ?? [])];
+    return [
+      { id: "no-place", name: "Nav vietas" },
+      ...((data?.places ?? []).map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        lat: typeof p.lat === "number" ? p.lat : undefined,
+        lng: typeof p.lng === "number" ? p.lng : undefined,
+      })) as Option[]),
+    ];
   } catch {
     return [];
   }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { adminDb } from "@/lib/firebase/admin";
 import { getSessionUser } from "@/lib/auth/server";
+import { AdminBackButton } from "@/components/AdminBackButton";
 
 export const runtime = "nodejs";
 
@@ -71,12 +72,7 @@ export default async function AdminStatsPage() {
           >
             Download CSV
           </a>
-          <Link
-            href="/admin"
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
-          >
-            Back to admin
-          </Link>
+          <AdminBackButton className="rounded-lg" />
         </div>
       </header>
 

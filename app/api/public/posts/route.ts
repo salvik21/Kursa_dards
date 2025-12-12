@@ -13,6 +13,10 @@ export async function GET(req: Request) {
     const place = searchParams.get("place")?.trim().toLowerCase() || "";
     const limit = q || type || category || place ? 50 : 20;
 
+    const categoriesSnap = await adminDb.collection("categories").get();
+    const categoriesMap = new Map<string, string>();
+    categoriesSnap.docs.forEach((d) => categoriesMap.set(d.id, (d.data() as any)?.name ?? ""));
+
     const snap = await adminDb
       .collection("posts")
       .orderBy("createdAt", "desc")
@@ -22,14 +26,17 @@ export async function GET(req: Request) {
     const posts = snap.docs
       .map((d) => {
         const data = d.data() as any;
+        const categoryName = categoriesMap.get(data.categoryId) ?? data.categoryName ?? data.category ?? "";
         return {
           id: d.id,
           title: data.title ?? "",
           type: data.type ?? "",
           status: data.status ?? "open",
-          category: data.category ?? "",
+          category: categoryName,
+          categoryName,
+          categoryId: data.categoryId ?? "",
           placeName: data.placeName ?? null,
-          description: data.description ?? "",
+          description: data.descriptionPosts ?? data.description ?? "",
           photos: data.photos ?? [],
           createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
         };
@@ -39,7 +46,12 @@ export async function GET(req: Request) {
       // Apply filters
       .filter((p) => {
         if (type && p.type.toLowerCase() !== type) return false;
-        if (category && p.category.toLowerCase() !== category) return false;
+        if (
+          category &&
+          p.category.toLowerCase() !== category &&
+          p.categoryId.toLowerCase() !== category
+        )
+          return false;
         if (place && (p.placeName ?? "").toLowerCase() !== place) return false;
         if (!terms.length) return true;
         const haystack = `${p.title} ${p.description ?? ""} ${p.category ?? ""} ${p.placeName ?? ""}`

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { requireSessionUser } from "@/lib/auth/server";
+import { deleteUserAccount } from "@/lib/deleteUser";
 
 export const runtime = "nodejs";
 
@@ -69,6 +70,26 @@ export async function PATCH(req: Request) {
     return NextResponse.json(
       { ok: false, error: error?.message || "Failed to update profile" },
       { status: error?.message === "Unauthenticated" ? 401 : 500 }
+    );
+  }
+}
+
+export async function DELETE() {
+  try {
+    const user = await requireSessionUser();
+    await deleteUserAccount(user.uid, { protectLastAdmin: true });
+    return NextResponse.json({ ok: true });
+  } catch (error: any) {
+    console.error("DELETE /api/me error:", error);
+    const status =
+      error?.message === "Unauthenticated"
+        ? 401
+        : error?.message === "Cannot delete the last admin"
+          ? 400
+          : 500;
+    return NextResponse.json(
+      { ok: false, error: error?.message || "Failed to delete account" },
+      { status }
     );
   }
 }

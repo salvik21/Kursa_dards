@@ -53,7 +53,7 @@ export function HeaderUserBar({ initialUser }: Props) {
   }, []);
 
   if (loading && !user) {
-    return <span className="text-sm text-gray-600">Loading...</span>;
+    return <span className="text-sm text-gray-600">Ielādē...</span>;
   }
 
   if (!user) {
@@ -63,13 +63,13 @@ export function HeaderUserBar({ initialUser }: Props) {
           href="/auth/sign-in"
           className="rounded border border-blue-600 px-3 py-1 font-semibold text-blue-600 hover:bg-blue-50 transition"
         >
-          Login
+          Pieteikties
         </Link>
         <Link
           href="/auth/sign-up"
           className="rounded bg-blue-600 px-3 py-1 font-semibold text-white hover:bg-blue-700 transition"
         >
-          Register
+          Reģistrēties
         </Link>
       </div>
     );
@@ -85,14 +85,14 @@ export function HeaderUserBar({ initialUser }: Props) {
         href="/me"
         className="rounded border border-gray-300 px-3 py-1 font-semibold text-gray-800 hover:bg-gray-50 transition"
       >
-        Account
+        Konts
       </Link>
       {user.role === "admin" && (
         <Link
           href="/admin"
           className="rounded border border-blue-200 bg-blue-50 px-3 py-1 font-semibold text-blue-700 hover:bg-blue-100 transition"
         >
-          Admin
+          Admins
         </Link>
       )}
       <LogoutButton onLoggedOut={load} />

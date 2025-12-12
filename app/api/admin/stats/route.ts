@@ -29,16 +29,21 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const wantCsv = (searchParams.get("format") || "").toLowerCase() === "csv";
 
+    const categoriesSnap = await adminDb.collection("categories").get();
+    const categoriesMap = new Map<string, string>();
+    categoriesSnap.docs.forEach((d) => categoriesMap.set(d.id, (d.data() as any)?.name ?? ""));
+
     const snap = await adminDb.collection("posts").orderBy("createdAt", "desc").get();
 
     const posts: PostSummary[] = snap.docs.map((d) => {
       const data = d.data() as any;
+      const categoryName = categoriesMap.get(data.categoryId) ?? data.categoryName ?? data.category ?? "";
       return {
         id: d.id,
         title: data.title ?? "",
         type: data.type ?? "",
         status: data.status ?? "open",
-        category: data.category ?? "",
+        category: categoryName,
         placeName: data.placeName ?? null,
         createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
       };

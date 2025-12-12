@@ -3,22 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { PostForm } from "@/components/PostForm";
+import type { PostFormValues } from "@/components/post-form/types";
 
 type PostType = "lost" | "found";
 
-type PostPayload = {
-  title: string;
-  type: PostType;
-  category: string;
-  placeName: string;
-  description: string;
-  photos: string[];
-  tags: string[];
-  geo?: { lat: number; lng: number } | null;
-};
-
 export default function EditPostPage({ params }: { params: { id: string } }) {
-  const [initialValues, setInitialValues] = useState<PostPayload | null>(null);
+  const [initialValues, setInitialValues] = useState<PostFormValues | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,20 +20,23 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
         const res = await fetch(`/api/posts/${params.id}`, { cache: "no-store" });
         const json = await res.json();
         if (!res.ok) {
-          throw new Error(json?.error || "Failed to load post");
+          throw new Error(json?.error || "Neizdevās ielādēt ierakstu");
         }
         setInitialValues({
           title: json.post.title ?? "",
           type: (json.post.type as PostType) ?? "lost",
-          category: json.post.category ?? "",
-          placeName: json.post.placeName ?? "No place",
+          category: json.post.categoryId ?? json.post.category ?? "",
+          placeName: json.post.placeName ? (json.post.placeName === "No place" ? "Nav vietas" : json.post.placeName) : "Nav vietas",
           description: json.post.description ?? "",
           photos: json.post.photos ?? [],
           tags: json.post.tags ?? [],
           geo: json.post.geo ?? null,
+          showEmail: json.post.showEmail !== false,
+          showPhone: !!json.post.showPhone,
+          privateNote: json.post.privateNote ?? "",
         });
       } catch (err: any) {
-        setError(err?.message || "Failed to load post");
+        setError(err?.message || "Neizdevās ielādēt ierakstu");
       } finally {
         setLoading(false);
       }
@@ -51,7 +44,7 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
     load();
   }, [params.id]);
 
-  const updatePost = async (payload: any) => {
+  const updatePost = async (payload: PostFormValues) => {
     const res = await fetch(`/api/posts/${params.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -59,14 +52,14 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
     });
     const json = await res.json();
     if (!res.ok) {
-      throw new Error(json?.error || "Failed to update post");
+      throw new Error(json?.error || "Neizdevās atjaunināt ierakstu");
     }
   };
 
   if (loading) {
     return (
       <main className="mx-auto max-w-3xl p-6">
-        <p className="text-sm text-gray-700">Loading...</p>
+        <p className="text-sm text-gray-700">Ielādē...</p>
       </main>
     );
   }
@@ -74,9 +67,9 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
   if (error || !initialValues) {
     return (
       <main className="mx-auto max-w-3xl p-6 space-y-4">
-        <p className="text-sm text-red-600">{error || "Failed to load post"}</p>
+        <p className="text-sm text-red-600">{error || "Neizdevās ielādēt ierakstu"}</p>
         <Link href="/" className="text-blue-600 hover:underline text-sm">
-          Back to home
+          Atpakaļ uz sākumlapu
         </Link>
       </main>
     );
@@ -86,15 +79,15 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
     <main className="mx-auto max-w-3xl p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Edit post</h1>
-          <p className="text-sm text-gray-600">Update your post details and save.</p>
+          <h1 className="text-3xl font-bold text-gray-900">Rediģēt ierakstu</h1>
+          <p className="text-sm text-gray-600">Atjaunojiet ieraksta informāciju un saglabājiet.</p>
         </div>
         <div className="flex gap-2">
           <Link href={`/posts/${params.id}`} className="text-blue-600 hover:underline text-sm">
-            View post
+            Skatīt ierakstu
           </Link>
           <Link href="/" className="text-blue-600 hover:underline text-sm">
-            Back to home
+            Atpakaļ uz sākumlapu
           </Link>
         </div>
       </div>

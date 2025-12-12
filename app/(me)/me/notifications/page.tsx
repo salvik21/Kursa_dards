@@ -14,14 +14,16 @@ export default async function NotificationsPage() {
     <main className="p-6">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Оповещения по радиусу</h1>
-          <p className="text-sm text-gray-700">Выберите пин и радиус, чтобы получать письма о новых объявлениях рядом.</p>
+          <h1 className="text-2xl font-semibold text-gray-900">Paziņojumi pēc rādiusa</h1>
+          <p className="text-sm text-gray-700">
+            Izvēlies punktu kartē un rādiusu, lai saņemtu e-pastus par jauniem sludinājumiem tuvumā.
+          </p>
         </div>
         <a
           href="/me"
           className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
         >
-          ← Назад в профиль
+          Atpakaļ uz profilu
         </a>
       </div>
 

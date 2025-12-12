@@ -14,7 +14,7 @@ export default function SubmitComplaint({ postId }: { postId: string }) {
     e.preventDefault();
     setStatus(null);
     if (!reason.trim()) {
-      setStatus("Опишите проблему перед отправкой.");
+      setStatus("Iemesls ir obligāts.");
       return;
     }
     setLoading(true);
@@ -25,13 +25,13 @@ export default function SubmitComplaint({ postId }: { postId: string }) {
         body: JSON.stringify({ reason, reporterName: name, reporterEmail: email }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Не удалось отправить жалобу");
-      setStatus("Жалоба отправлена. Мы рассмотрим её как можно скорее.");
+      if (!res.ok) throw new Error(json?.error || "Neizdevās nosūtīt sūdzību");
+      setStatus("Sūdzība nosūtīta. Paldies!");
       setReason("");
       setName("");
       setEmail("");
     } catch (err: any) {
-      const msg = err?.message || "Не удалось отправить жалобу";
+      const msg = err?.message || "Neizdevās nosūtīt sūdzību";
       setStatus(msg);
     } finally {
       setLoading(false);
@@ -45,7 +45,7 @@ export default function SubmitComplaint({ postId }: { postId: string }) {
         onClick={() => setOpen((v) => !v)}
         className="rounded bg-red-600 px-4 py-2 text-white font-semibold hover:bg-red-700 transition"
       >
-        {open ? "Скрыть форму жалобы" : "Пожаловаться на объявление"}
+        {open ? "Paslēpt formu" : "Paziņot par sludinājumu"}
       </button>
 
       {open && (
@@ -55,16 +55,16 @@ export default function SubmitComplaint({ postId }: { postId: string }) {
         >
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-1">
-              <label className="text-sm font-semibold text-gray-800">Ваше имя (необязательно)</label>
+              <label className="text-sm font-semibold text-gray-800">Vārds, uzvārds (pēc izvēles)</label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="Иван Иванов"
+                placeholder="Jūsu vārds"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-semibold text-gray-800">Email (необязательно)</label>
+              <label className="text-sm font-semibold text-gray-800">E-pasts (pēc izvēles)</label>
               <input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -74,13 +74,13 @@ export default function SubmitComplaint({ postId }: { postId: string }) {
             </div>
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-800">Текст жалобы *</label>
+            <label className="text-sm font-semibold text-gray-800">Iemesls *</label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={4}
               className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="Опишите, что не так с объявлением..."
+              placeholder="Aprakstiet, kāpēc ziņojat par sludinājumu..."
             />
           </div>
           {status && <p className="text-sm text-amber-700">{status}</p>}
@@ -89,7 +89,7 @@ export default function SubmitComplaint({ postId }: { postId: string }) {
             disabled={loading}
             className="rounded bg-blue-600 px-4 py-2 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
           >
-            {loading ? "Отправка..." : "Отправить жалобу"}
+            {loading ? "Sūta..." : "Sūtīt sūdzību"}
           </button>
         </form>
       )}

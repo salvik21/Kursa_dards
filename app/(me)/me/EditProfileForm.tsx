@@ -13,6 +13,7 @@ export default function EditProfileForm() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -54,6 +55,24 @@ export default function EditProfileForm() {
       setStatus(err?.message || "Failed to update profile");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const onDeleteAccount = async () => {
+    const confirmed = window.confirm("Delete your account and all your posts? This cannot be undone.");
+    if (!confirmed) return;
+    setDeleting(true);
+    setStatus(null);
+    try {
+      const res = await fetch("/api/me", { method: "DELETE" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Failed to delete account");
+      setStatus("Account deleted");
+      window.location.href = "/auth/sign-in";
+    } catch (err: any) {
+      setStatus(err?.message || "Failed to delete account");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -103,13 +122,23 @@ export default function EditProfileForm() {
           <p className="text-xs text-gray-500">This email is used for contact; it does not change your login.</p>
         </div>
         {status && <p className="text-sm text-amber-700">{status}</p>}
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded bg-blue-600 px-4 py-2 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
-        >
-          {saving ? "Saving..." : "Save changes"}
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded bg-blue-600 px-4 py-2 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
+          >
+            {saving ? "Saving..." : "Save changes"}
+          </button>
+          <button
+            type="button"
+            disabled={deleting}
+            onClick={onDeleteAccount}
+            className="rounded bg-red-600 px-4 py-2 text-white font-semibold hover:bg-red-700 transition disabled:opacity-60"
+          >
+            {deleting ? "Deleting..." : "Delete account"}
+          </button>
+        </div>
       </form>
     </section>
   );

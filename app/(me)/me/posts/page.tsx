@@ -2,6 +2,7 @@
 
 import useSWR from "swr";
 import Link from "next/link";
+import { useState } from "react";
 
 type Post = {
   id: string;
@@ -25,38 +26,61 @@ const statusColors: Record<string, string> = {
 };
 
 export default function MyPostsPage() {
-  const { data, error, isLoading } = useSWR("/api/me/posts", fetcher);
+  const { data, error, isLoading, mutate } = useSWR("/api/me/posts", fetcher);
   const posts: Post[] = data?.posts ?? [];
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const deletePost = async (id: string) => {
+    const confirmed = window.confirm("Dzēst šo sludinājumu un tā datus?");
+    if (!confirmed) return;
+    setDeletingId(id);
+    setDeleteError(null);
+    try {
+      const res = await fetch(`/api/posts/${id}`, { method: "DELETE" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Neizdevās dzēst sludinājumu");
+      mutate();
+    } catch (err: any) {
+      setDeleteError(err?.message || "Neizdevās dzēst sludinājumu");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <main className="mx-auto max-w-4xl p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">My posts</h1>
-          <p className="text-sm text-gray-700">View and edit posts you have created.</p>
+          <h1 className="text-2xl font-bold text-gray-900">Mani sludinājumi</h1>
+          <p className="text-sm text-gray-700">Skatiet un rediģējiet savus sludinājumus.</p>
         </div>
         <div className="flex gap-2">
           <Link
             href="/posts/new"
             className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 transition"
           >
-            Create new
+            Izveidot jaunu
           </Link>
           <Link
             href="/me"
             className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
           >
-            Back
+            Atpakaļ
           </Link>
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-600">Failed to load posts</p>}
-      {isLoading && <p className="text-sm text-gray-600">Loading...</p>}
+      {error && <p className="text-sm text-red-600">Neizdevās ielādēt sludinājumus</p>}
+      {deleteError && <p className="text-sm text-red-600">{deleteError}</p>}
+      {isLoading && <p className="text-sm text-gray-600">Ielādē...</p>}
 
       {!isLoading && posts.length === 0 ? (
         <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700 shadow-sm">
-          No posts yet. <Link href="/posts/new" className="text-blue-600 hover:underline">Create your first post.</Link>
+          Pagaidām nav sludinājumu.{" "}
+          <Link href="/posts/new" className="text-blue-600 hover:underline">
+            Izveidojiet savu pirmo sludinājumu.
+          </Link>
         </div>
       ) : (
         <div className="space-y-3">
@@ -84,7 +108,7 @@ export default function MyPostsPage() {
                 </div>
                 {p.status === "hidden" && p.blockedReason && (
                   <div className="text-xs text-red-700">
-                    Hidden by admin: {p.blockedReason}
+                    Paslēpts administratora dēļ: {p.blockedReason}
                   </div>
                 )}
               </div>
@@ -93,14 +117,22 @@ export default function MyPostsPage() {
                   href={`/posts/${p.id}`}
                   className="rounded border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
                 >
-                  View
+                  Skatīt
                 </Link>
                 <Link
                   href={`/posts/${p.id}/edit`}
                   className="rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
                 >
-                  Edit
+                  Rediģēt
                 </Link>
+                <button
+                  type="button"
+                  onClick={() => deletePost(p.id)}
+                  disabled={deletingId === p.id}
+                  className="rounded bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700 transition disabled:opacity-60"
+                >
+                  {deletingId === p.id ? "Notiek dzēšana..." : "Dzēst"}
+                </button>
               </div>
             </div>
           ))}

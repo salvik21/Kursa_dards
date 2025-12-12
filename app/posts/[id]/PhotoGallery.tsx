@@ -34,7 +34,7 @@ export default function PhotoGallery({ photos }: Props) {
             <img
               src={url}
               alt="Post photo"
-              className="h-24 w-32 object-cover"
+              className="h-36 w-48 object-cover"
               loading="lazy"
             />
           </button>
@@ -68,3 +68,4 @@ export default function PhotoGallery({ photos }: Props) {
     </div>
   );
 }
+

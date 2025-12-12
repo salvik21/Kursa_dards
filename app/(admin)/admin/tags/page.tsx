@@ -2,6 +2,7 @@
 
 import { useEffect, useState, FormEvent } from "react";
 import Link from "next/link";
+import { AdminBackButton } from "@/components/AdminBackButton";
 
 type Tag = {
   id: string;
@@ -19,11 +20,11 @@ export default function TagsPage() {
     setError(null);
     try {
       const res = await fetch("/api/admin/tags", { cache: "no-store" });
-      if (!res.ok) throw new Error("Failed to load tags");
+      if (!res.ok) throw new Error("Neizdevās ielādēt birkas");
       const data = await res.json();
       setTags(data.tags ?? []);
     } catch (err: any) {
-      setError(err?.message || "Failed to load tags");
+      setError(err?.message || "Neizdevās ielādēt birkas");
     }
   };
 
@@ -37,12 +38,12 @@ export default function TagsPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || "Failed to delete tag");
+        throw new Error(data?.error || "Neizdevās dzēst birku");
       }
-      setMessage("Tag deleted");
+      setMessage("Birka dzēsta");
       loadTags();
     } catch (err: any) {
-      setError(err?.message || "Failed to delete tag");
+      setError(err?.message || "Neizdevās dzēst birku");
     }
   };
 
@@ -67,13 +68,13 @@ export default function TagsPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || "Failed to create tag");
+        throw new Error(data?.error || "Neizdevās izveidot birku");
       }
       setName("");
-      setMessage("Tag created");
+      setMessage("Birka izveidota");
       loadTags();
     } catch (err: any) {
-      setError(err?.message || "Failed to create tag");
+      setError(err?.message || "Neizdevās izveidot birku");
     } finally {
       setLoading(false);
     }
@@ -83,22 +84,20 @@ export default function TagsPage() {
     <main className="mx-auto max-w-3xl p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Manage tags</h1>
-          <p className="text-sm text-gray-700">Admins can add tags used across posts.</p>
+          <h1 className="text-3xl font-bold text-gray-900">Pārvaldīt birkas</h1>
+          <p className="text-sm text-gray-700">Admini var pievienot birkas, ko lietot sludinājumos.</p>
         </div>
-        <Link href="/admin" className="text-blue-600 hover:underline text-sm">
-          Back to admin
-        </Link>
+        <AdminBackButton />
       </div>
 
       <form onSubmit={onSubmit} className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-800">Tag name</label>
+          <label className="text-sm font-semibold text-gray-800">Birkas nosaukums</label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="e.g., Wallet, Electronics, Documents"
+            placeholder="piem., Maks, Elektronika, Dokumenti"
           />
         </div>
         {message && <p className="text-sm text-green-700">{message}</p>}
@@ -108,15 +107,15 @@ export default function TagsPage() {
           disabled={loading}
           className="inline-flex items-center rounded bg-blue-600 px-4 py-2 text-white font-semibold shadow hover:bg-blue-700 disabled:opacity-60"
         >
-          {loading ? "Saving..." : "Add tag"}
+          {loading ? "Saglabā..." : "Pievienot birku"}
         </button>
       </form>
 
       <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-3">
-        <h2 className="text-lg font-semibold text-gray-900">Existing tags</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Esošās birkas</h2>
         {error && <p className="text-sm text-red-600">{error}</p>}
         {tags.length === 0 ? (
-          <p className="text-sm text-gray-600">No tags yet.</p>
+          <p className="text-sm text-gray-600">Birkas vēl nav pievienotas.</p>
         ) : (
           <ul className="grid gap-2 md:grid-cols-2">
             {tags.map((tag) => (
@@ -130,7 +129,7 @@ export default function TagsPage() {
                   onClick={() => removeTag(tag.id)}
                   className="rounded bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-100"
                 >
-                  Delete
+                  Dzēst
                 </button>
               </li>
             ))}

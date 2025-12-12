@@ -5,18 +5,21 @@ export type PostFormValues = {
   title: string;
   type: PostType;
   category: string;
-  tags: string[];
   placeName: string;
   description: string;
+  tags: string[];
   photos: string[];
   geo?: { lat: number; lng: number } | null;
+  showEmail?: boolean;
+  showPhone?: boolean;
+  privateNote?: string;
 };
 
-export type Option = { id: string; name: string };
+export type Option = { id: string; name: string; lat?: number; lng?: number };
 
 export type PostFormProps = {
   mode: "create" | "edit";
   initialValues: PostFormValues;
-  onSubmit: (payload: PostFormValues & { geo?: { lat: number; lng: number } | null }) => Promise<void>;
+  onSubmit: (payload: PostFormValues) => Promise<void>;
   onCancelHref: string;
 };

@@ -9,7 +9,7 @@ type PlaceSelectorProps = {
 export function PlaceSelector({ value, options, onChange }: PlaceSelectorProps) {
   return (
     <div className="space-y-2">
-      <label className="text-sm font-semibold text-gray-800">Place</label>
+      <label className="text-sm font-semibold text-gray-800">Vieta</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -21,7 +21,7 @@ export function PlaceSelector({ value, options, onChange }: PlaceSelectorProps) 
           </option>
         ))}
       </select>
-      <p className="text-xs text-gray-600">Select a preset place or choose {"\""}No place{"\""}</p>
+      <p className="text-xs text-gray-600">Izvēlieties iepriekš iestatītu vietu vai opciju {"\""}Nav vietas{"\""}</p>
     </div>
   );
 }

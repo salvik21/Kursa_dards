@@ -13,16 +13,21 @@ export async function GET() {
       .limit(100)
       .get();
 
+    const categoriesSnap = await adminDb.collection("categories").get();
+    const categoriesMap = new Map<string, string>();
+    categoriesSnap.docs.forEach((d) => categoriesMap.set(d.id, (d.data() as any)?.name ?? ""));
+
     const posts = snap.docs.map((d) => {
       const data = d.data() as any;
+      const categoryName = categoriesMap.get(data.categoryId) ?? data.categoryName ?? data.category ?? "";
       return {
         id: d.id,
         title: data.title ?? "",
         type: data.type ?? "",
         status: data.status ?? "open",
-        category: data.category ?? "",
+        category: categoryName,
         placeName: data.placeName ?? null,
-        description: data.description ?? "",
+        description: data.descriptionPosts ?? data.description ?? "",
         photos: data.photos ?? [],
         blockedReason: data.blockedReason ?? null,
         blockedAt: data.blockedAt?.toDate ? data.blockedAt.toDate().toISOString() : null,

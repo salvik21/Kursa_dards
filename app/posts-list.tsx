@@ -50,20 +50,32 @@ export default function PostsList() {
   const { data: placesData } = useSWR("/api/public/places", fetcher);
 
   const categories: Option[] = categoriesData?.categories ?? [];
-  const places: Option[] = placesData?.places ?? [];
-
   const posts: PostItem[] = data?.posts ?? [];
   const initialLoading = isLoading && !data;
   const searching = isValidating && !isLoading;
   const hasQuery = Boolean(debouncedSearch || typeFilter || category || place);
   const emptyState = !initialLoading && !searching && posts.length === 0;
 
+  // Vietu saraksts no DB (ja ir places kolekcija) vai no pašiem sludinājumiem kā rezerves variants.
+  const placeOptions: Option[] = useMemo(() => {
+    const apiPlaces: Option[] = placesData?.places ?? [];
+    if (apiPlaces.length) return apiPlaces;
+    const set = new Set<string>();
+    posts.forEach((p) => {
+      const name = (p.placeName ?? "").trim();
+      if (name) set.add(name);
+    });
+    return Array.from(set)
+      .sort((a, b) => a.localeCompare(b, "lv"))
+      .map((name) => ({ id: name, name }));
+  }, [placesData, posts]);
+
   return (
     <div className="space-y-4">
       <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-4">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-3">
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-gray-800">Search &amp; filter</p>
+            <p className="text-sm font-semibold text-gray-800">Meklēšana un filtrēšana</p>
             <p className="text-xs text-gray-500">
               Meklē pēc nosaukuma vai apraksta un izvēlies kategoriju, statusu un vietu.
             </p>
@@ -73,7 +85,7 @@ export default function PostsList() {
               id="post-search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search lost or found posts"
+              placeholder="Meklē pazudušos vai atrastos sludinājumus"
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             {search ? (
@@ -82,7 +94,7 @@ export default function PostsList() {
                 onClick={() => setSearch("")}
                 className="rounded-md border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
               >
-                Clear
+                Notīrīt
               </button>
             ) : null}
           </div>
@@ -91,7 +103,7 @@ export default function PostsList() {
         <div className="grid gap-3 md:grid-cols-3">
           <div className="space-y-1">
             <label htmlFor="type-filter" className="text-xs font-semibold text-gray-700 uppercase">
-              Status
+              Statuss
             </label>
             <select
               id="type-filter"
@@ -99,7 +111,7 @@ export default function PostsList() {
               onChange={(e) => setTypeFilter(e.target.value)}
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
-              <option value="">All</option>
+              <option value="">Visi</option>
               <option value="lost">Pazudis</option>
               <option value="found">Atrasts</option>
             </select>
@@ -110,7 +122,7 @@ export default function PostsList() {
               htmlFor="category-filter"
               className="text-xs font-semibold text-gray-700 uppercase"
             >
-              Category
+              Kategorija
             </label>
             <select
               id="category-filter"
@@ -118,7 +130,7 @@ export default function PostsList() {
               onChange={(e) => setCategory(e.target.value)}
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
-              <option value="">All</option>
+              <option value="">Visas</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.name.toLowerCase()}>
                   {c.name}
@@ -129,7 +141,7 @@ export default function PostsList() {
 
           <div className="space-y-1">
             <label htmlFor="place-filter" className="text-xs font-semibold text-gray-700 uppercase">
-              Place
+              Vieta
             </label>
             <select
               id="place-filter"
@@ -137,8 +149,8 @@ export default function PostsList() {
               onChange={(e) => setPlace(e.target.value)}
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
-              <option value="">All</option>
-              {places.map((p) => (
+              <option value="">Visas</option>
+              {placeOptions.map((p) => (
                 <option key={p.id} value={p.name.toLowerCase()}>
                   {p.name}
                 </option>
@@ -148,16 +160,16 @@ export default function PostsList() {
         </div>
 
         {searching && (
-          <p className="text-xs text-gray-500">{hasQuery ? "Searching..." : "Loading..."}</p>
+          <p className="text-xs text-gray-500">{hasQuery ? "Meklē..." : "Ielādē..."}</p>
         )}
       </div>
 
-      {error && <p className="text-sm text-red-600">Failed to load posts</p>}
-      {initialLoading && <p className="text-sm text-gray-600">Loading...</p>}
+      {error && <p className="text-sm text-red-600">Neizdevās ielādēt sludinājumus</p>}
+      {initialLoading && <p className="text-sm text-gray-600">Ielādē...</p>}
 
       {emptyState ? (
         <p className="text-sm text-gray-600">
-          {hasQuery ? "No posts match your filters." : "No posts yet."}
+          {hasQuery ? "Nav sludinājumu, kas atbilst filtriem." : "Pagaidām nav sludinājumu."}
         </p>
       ) : (
         <div className="space-y-3">

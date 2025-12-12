@@ -30,7 +30,6 @@ export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFo
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [photoUploading, setPhotoUploading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ title?: boolean; category?: boolean; description?: boolean }>({});
 
   const countryCodeMap: Record<string, string> = {
@@ -51,7 +50,7 @@ export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFo
       });
       const json = await res.json();
       if (!res.ok || !json.ok) {
-        throw new Error(json?.error || "Ģeokodēšana neizdevās");
+        throw new Error(json?.error || "Geocoding failed");
       }
       return json as { lat: number; lng: number; formattedAddress?: string };
     },
@@ -118,7 +117,7 @@ export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFo
       if (options.length) {
         setAvailablePlaces(options);
         if (!values.placeName) {
-          setValues((prev) => ({ ...prev, placeName: options[0]?.name ?? "Nav vietas" }));
+          setValues((prev) => ({ ...prev, placeName: options[0]?.name ?? "No place" }));
         }
       }
     });
@@ -132,7 +131,7 @@ export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFo
 
   const normalizePlaceName = (name: string) => {
     const clean = name?.trim() ?? "";
-    if (!clean || clean === "No place" || clean === "Nav vietas") return "";
+    if (!clean || clean === "No place") return "";
     return clean;
   };
 
@@ -168,7 +167,7 @@ export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFo
     };
     setFieldErrors(errs);
     if (errs.title || errs.category || errs.description) {
-      setMessage("Lūdzu, aizpildiet obligātos laukus: virsraksts, kategorija, apraksts.");
+      setMessage("Please fill required fields: title, category, description.");
       return false;
     }
     return true;
@@ -186,11 +185,6 @@ export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFo
   };
 
   const handleSubmit = async () => {
-    if (photoUploading) {
-      setError("Pagaidiet, līdz foto augšupielādējas.");
-      setStep(2);
-      return;
-    }
     if (!validateDetails()) {
       setStep(0);
       return;
@@ -216,36 +210,40 @@ export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFo
       } else if (locationMode === "address") {
         if (!addressString) {
           setStep(1);
-          throw new Error('Ievadiet adresi vai izmantojiet "Izvēlēties kartē", lai iestatītu koordinātas.');
+          throw new Error('Enter address or use "Pick on map" to set coordinates.');
         }
         const geocoded = await geocodeViaApi(addressString, countryCodeMap[addressCountry] || undefined);
         if (!geocoded) {
           setStep(1);
-          throw new Error('Neizdevās pārvērst adresi koordinātēs. Pārbaudiet adresi vai izvēlieties "Izvēlēties kartē".');
+          throw new Error('Could not convert address to coordinates. Check the address or choose "Pick on map".');
         }
         geoPayload = { lat: geocoded.lat, lng: geocoded.lng };
-        placeNamePayload = "adrese";
+        placeNamePayload = "адрес";
+        descriptionPayload = addressString;
       } else if (locationMode === "map") {
         if (!lat || !lng || Number.isNaN(Number(lat)) || Number.isNaN(Number(lng))) {
           setStep(1);
-          throw new Error("Ievadiet koordinātas vai izvēlieties punktu kartē.");
+          throw new Error('Enter coordinates or pick a point on the map.');
         }
         geoPayload = { lat: Number(lat), lng: Number(lng) };
-        placeNamePayload = "koordinātas";
+        placeNamePayload = "координаты";
+        descriptionPayload = values.description;
       }
 
       const selectedCategory = availableCategories.find((c) => c.id === values.category);
 
       await onSubmit({
         ...values,
-        category: selectedCategory?.id || values.category,
+        categoryId: selectedCategory?.id || values.category,
+        categoryName: selectedCategory?.name || values.category,
+        category: selectedCategory?.name || values.category,
         placeName: placeNamePayload,
         description: descriptionPayload,
         geo: geoPayload,
       });
-      setMessage(mode === "create" ? "Ieraksts izveidots." : "Ieraksts atjaunināts.");
+      setMessage(mode === "create" ? "Post created." : "Post updated.");
     } catch (err: any) {
-      setError(err?.message || "Neizdevās saglabāt ierakstu");
+      setError(err?.message || "Failed to save post");
     } finally {
       setSaving(false);
     }
@@ -291,7 +289,7 @@ export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFo
         />
       )}
 
-      {step === 2 && <PhotosStep values={values} onUpdate={updateValue} onUploadingChange={setPhotoUploading} />}
+      {step === 2 && <PhotosStep values={values} onUpdate={updateValue} />}
 
       {error && <p className="text-sm text-red-600">{error}</p>}
       {message && <p className="text-sm text-green-700">{message}</p>}
@@ -304,8 +302,8 @@ export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFo
         onSubmit={handleSubmit}
         onCancelHref={onCancelHref}
         mode={mode}
-        disableSubmit={photoUploading}
       />
     </div>
   );
 }
+

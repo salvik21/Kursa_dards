@@ -11,25 +11,55 @@ export async function GET() {
   if (!user || user.role !== "admin") {
     return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
   }
+  const categoriesSnap = await adminDb.collection("categories").get();
+  const categoriesMap = new Map<string, string>();
+  categoriesSnap.docs.forEach((d) => categoriesMap.set(d.id, (d.data() as any)?.name ?? ""));
+
   const snap = await adminDb.collection("posts").orderBy("createdAt", "desc").limit(50).get();
   const posts = snap.docs.map((d) => {
     const data = d.data() as any;
+    const categoryName = categoriesMap.get(data.categoryId) ?? data.categoryName ?? data.category ?? "";
     return {
       id: d.id,
       title: data.title ?? "",
       type: data.type ?? "",
       status: data.status ?? "open",
-      category: data.category ?? "",
+      category: categoryName,
       placeName: data.placeName ?? null,
-      description: data.description ?? "",
+      description: data.descriptionPosts ?? "",
       photos: data.photos ?? [],
       createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
       blockedReason: data.blockedReason ?? null,
       blockedBy: data.blockedBy ?? null,
       blockedAt: data.blockedAt?.toDate ? data.blockedAt.toDate().toISOString() : null,
+      privateNote: data.privateNote ?? null,
     };
   });
-  return NextResponse.json({ ok: true, posts });
+
+  // Map blockedBy UID -> email
+  const blockedIds = Array.from(
+    new Set(posts.map((p) => p.blockedBy).filter((v): v is string => !!v))
+  );
+  const blockedEmailMap = new Map<string, string>();
+  if (blockedIds.length) {
+    const lookups = blockedIds.map(async (uid) => {
+      try {
+        const doc = await adminDb.collection("users").doc(uid).get();
+        const data = doc.data() as any;
+        if (data?.email) blockedEmailMap.set(uid, data.email);
+      } catch {
+        // ignore lookup errors
+      }
+    });
+    await Promise.all(lookups);
+  }
+
+  const postsWithEmail = posts.map((p) => ({
+    ...p,
+    blockedByEmail: p.blockedBy ? blockedEmailMap.get(p.blockedBy) ?? null : null,
+  }));
+
+  return NextResponse.json({ ok: true, posts: postsWithEmail });
 }
 
 const ALLOWED_RADII = [0.5, 1, 2, 3, 4];
@@ -46,6 +76,13 @@ function normalizeGeo(raw: GeoInput | null | undefined) {
 async function notifySubscriptions(postId: string, post: any) {
   const geo = normalizeGeo(post.geo);
   if (!geo) return;
+
+  const categoryName =
+    (post.categoryId &&
+      (await adminDb.collection("categories").doc(post.categoryId).get()).data()?.name) ||
+    post.categoryName ||
+    post.category ||
+    "";
 
   const postUrl = buildPostUrl(postId);
   let subsSnap;
@@ -69,7 +106,7 @@ async function notifySubscriptions(postId: string, post: any) {
     const text = `A new announcement is now published within ${radiusKm} km of your saved location.
 
 Title: ${post.title ?? "Post"}
-Category: ${post.category ?? ""}
+Category: ${categoryName}
 Distance: ${dist.toFixed(2)} km
 Link: ${postUrl}
 `;
@@ -117,8 +154,8 @@ export async function PATCH(req: Request) {
 
     if (status === "hidden") {
       // try to notify owner about blocking
-      let to: string | null = postData?.ownerEmail || postData?.userEmail || null;
-      if (!to && postData?.userId) {
+      let to: string | null = null;
+      if (postData?.userId) {
         try {
           const userSnap = await adminDb.collection("users").doc(postData.userId).get();
           const userData = userSnap.data() as any;
@@ -128,6 +165,10 @@ export async function PATCH(req: Request) {
         } catch (err) {
           // ignore lookup failure
         }
+      }
+
+      if (!to && postData?.userEmail) {
+        to = postData.userEmail;
       }
 
       if (to) {

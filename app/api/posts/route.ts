@@ -3,11 +3,23 @@ import { adminDb } from "@/lib/firebase/admin";
 import { getSessionUser } from "@/lib/auth/server";
 import { distanceKm } from "@/lib/geo";
 import { buildPostUrl, sendEmail } from "@/lib/email";
+import { upsertPostPlace } from "@/lib/postsPlace";
+import { syncPostPhotos } from "@/lib/postPhotos";
 
 export const runtime = "nodejs";
 const ALLOWED_RADII = [0.5, 1, 2, 3, 4];
 
 type GeoInput = { lat?: number; lng?: number };
+
+async function getCategoryNameById(categoryId?: string | null) {
+  if (!categoryId) return "";
+  try {
+    const snap = await adminDb.collection("categories").doc(categoryId).get();
+    return (snap.data() as any)?.name ?? "";
+  } catch {
+    return "";
+  }
+}
 
 function normalizeGeo(raw: GeoInput | null | undefined) {
   if (!raw || typeof raw !== "object") return null;
@@ -15,6 +27,11 @@ function normalizeGeo(raw: GeoInput | null | undefined) {
   const lng = Number((raw as any).lng);
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
   return { lat, lng };
+}
+
+function normalizeVisibilityFlag(value: any, defaultValue: boolean) {
+  if (typeof value === "boolean") return value;
+  return defaultValue;
 }
 
 async function syncPostTags(postId: string, tags: string[]) {
@@ -44,6 +61,7 @@ async function sendNotificationsForPost(postId: string, post: any) {
     return;
   }
 
+  const categoryName = await getCategoryNameById(post.categoryId);
   const postUrl = buildPostUrl(postId);
 
   let subsSnap;
@@ -69,7 +87,7 @@ async function sendNotificationsForPost(postId: string, post: any) {
     const text = `A new announcement was published within ${radiusKm} km of your saved location.
 
 Title: ${post.title ?? "Post"}
-Category: ${post.category ?? ""}
+Category: ${categoryName}
 Distance: ${dist.toFixed(2)} km
 Link: ${postUrl}
 `;
@@ -93,33 +111,56 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const now = new Date();
+    const categoryId = body.categoryId || body.category || null;
 
     const geo = normalizeGeo(body.geo);
+    const showEmail = normalizeVisibilityFlag(body.showEmail, true);
+    const showPhone = normalizeVisibilityFlag(body.showPhone, false);
+    const privateNote = typeof body.privateNote === "string" ? body.privateNote.trim() : "";
+    const descriptionPlace = typeof body.descriptionPlace === "string" ? body.descriptionPlace.trim() : null;
     const doc = {
       title: body.title,
       type: body.type,
       status: "pending",
-      category: body.category,
+      categoryId,
       tags: Array.isArray(body.tags) ? body.tags : [],
-      placeName: body.placeName ?? null,
-      geo,
-      description: body.description,
+      placeName: null,
+      postsPlaceId: null as string | null,
+      descriptionPosts: body.description,
       descriptionHidden: false,
       foundNote: body.foundNote ?? null,
       photos: Array.isArray(body.photos) ? body.photos : [],
       userId: user.uid,
-      ownerEmail: user.email ?? null,
+      showEmail,
+      showPhone,
+      privateNote,
       createdAt: now,
       updatedAt: now,
     };
 
-    const ref = await adminDb.collection("posts").add(doc);
+    const ref = await adminDb.collection("posts").add({ ...doc, postsPlaceId: null });
 
     // sync tags -> postTags collection
     await syncPostTags(ref.id, doc.tags);
 
+    // Keep postsPlace in sync for mapping/location uses
+    await upsertPostPlace({
+      postId: ref.id,
+      geo,
+      description: descriptionPlace,
+      placeName: null,
+    });
+
+    // store postsPlaceId now that doc exists
+    await ref.update({ postsPlaceId: ref.id });
+
+    await syncPostPhotos({
+      postId: ref.id,
+      photos: doc.photos,
+    });
+
     // Notify subscribers about nearby posts (best-effort, non-blocking on failure)
-    await sendNotificationsForPost(ref.id, doc);
+    await sendNotificationsForPost(ref.id, { ...doc, geo });
 
     return NextResponse.json({ ok: true, id: ref.id });
   } catch (error: any) {

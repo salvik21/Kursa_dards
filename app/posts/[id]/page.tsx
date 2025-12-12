@@ -6,6 +6,7 @@ import SubmitComplaint from "./SubmitComplaint";
 import LocationMap from "./LocationMap";
 import PhotoGallery from "./PhotoGallery";
 import { getSessionUser } from "@/lib/auth/server";
+import { AdminActions } from "./AdminActions";
 
 type PageProps = {
   params: { id: string };
@@ -16,33 +17,48 @@ export const runtime = "nodejs";
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const snap = await adminDb.collection("posts").doc(params.id).get();
   const data = snap.data() as any;
-  const title = data?.title ?? "Post";
+  const title = data?.title ?? "Sludinājums";
   return { title };
 }
 
 export default async function PostDetailPage({ params }: PageProps) {
   const viewer = await getSessionUser();
+  const isAdmin = viewer?.role?.toLowerCase?.() === "admin";
   const snap = await adminDb.collection("posts").doc(params.id).get();
   if (!snap.exists) {
     notFound();
   }
+
   const data = snap.data() as any;
-  let ownerEmail = data?.ownerEmail || data?.userEmail || null;
+
+  // Load geo from postsPlace collection (single doc keyed by postId)
+  let geoFromPlace: { lat: number; lng: number } | null = null;
+  try {
+    const placeSnap = await adminDb.collection("postsPlace").doc(params.id).get();
+    const placeData = placeSnap.data() as any;
+    if (placeData?.geo && Number.isFinite(placeData.geo.lat) && Number.isFinite(placeData.geo.lng)) {
+      geoFromPlace = { lat: placeData.geo.lat, lng: placeData.geo.lng };
+    }
+  } catch {
+    geoFromPlace = null;
+  }
+
+  let ownerEmail = data?.userEmail || null;
   let ownerName: string | null = null;
   let ownerPhone: string | null = null;
+  const canSeePrivate = isAdmin || (viewer && viewer.uid === data.userId);
   if (!ownerEmail && data?.userId) {
     try {
       const userSnap = await adminDb.collection("users").doc(data.userId).get();
       const userData = userSnap.data() as any;
-      if (userData?.email) {
-        ownerEmail = userData.email;
-      }
+      if (userData?.email) ownerEmail = userData.email;
       ownerName = userData?.displayName ?? userData?.name ?? null;
       ownerPhone = userData?.phone ?? null;
     } catch (e) {
-      // ignore lookup failure
+     
     }
   }
+
   const post = {
     id: snap.id,
     title: data.title ?? "",
@@ -51,17 +67,42 @@ export default async function PostDetailPage({ params }: PageProps) {
     category: data.category ?? "",
     tags: data.tags ?? [],
     placeName: data.placeName ?? null,
-    geo: data.geo ?? null,
-    description: data.description ?? "",
+    geo: geoFromPlace,
+    description: data.descriptionPosts ?? data.description ?? "",
     photos: data.photos ?? [],
     createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
     updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : null,
     ownerEmail,
     ownerName,
     ownerPhone,
+    showEmail: data.showEmail !== false,
+    showPhone: !!data.showPhone,
+    privateNote: data.privateNote ?? "",
     blockedReason: data.blockedReason ?? null,
   };
-  const canEdit = viewer && (viewer.role === "admin" || viewer.uid === data.userId);
+  const canEdit = viewer && viewer.uid === data.userId;
+
+  let postComplaints: { id: string; reason?: string | null; createdAt?: string | null }[] = [];
+  try {
+    const baseQuery = adminDb.collection("complaints").where("postId", "==", params.id);
+    let complaintsSnap;
+    try {
+      complaintsSnap = await baseQuery.orderBy("createdAt", "desc").limit(5).get();
+    } catch {
+      // Fallback without orderBy if composite index is missing
+      complaintsSnap = await baseQuery.limit(5).get();
+    }
+    postComplaints = complaintsSnap.docs.map((d) => {
+      const c = d.data() as any;
+      return {
+        id: d.id,
+        reason: c?.reason ?? null,
+        createdAt: c?.createdAt?.toDate ? c.createdAt.toDate().toISOString() : null,
+      };
+    });
+  } catch {
+    postComplaints = [];
+  }
 
   const statusColors: Record<string, string> = {
     pending: "bg-amber-100 text-amber-800 border-amber-200",
@@ -76,106 +117,105 @@ export default async function PostDetailPage({ params }: PageProps) {
       <div>
         <a
           href="/"
-          className="text-sm text-blue-600 hover:underline"
+          className="inline-flex items-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
         >
-          ← Back to home
+          Atpakaļ uz sākumu
         </a>
       </div>
 
-      <header className="space-y-3 border-b border-gray-200 pb-4">
-        <div className="flex items-center gap-3">
-          <span className={`rounded-full border px-3 py-1 text-sm font-semibold ${statusColors[post.status] ?? ""}`}>
-            {post.status?.toUpperCase()}
-          </span>
-          <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-800">
-            {post.type === "lost" ? "Lost" : "Found"}
-          </span>
-        </div>
-        <h1 className="text-3xl font-bold text-gray-900">{post.title}</h1>
-        {post.createdAt && (
-          <div className="flex flex-wrap gap-3 text-sm text-gray-700">
-            <span className="rounded border border-gray-200 bg-gray-50 px-3 py-1">
-              Created: {new Date(post.createdAt).toLocaleString()}
+      <header className="border-b border-gray-200 pb-4">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <span className={`rounded-full border px-3 py-1 text-sm font-semibold ${statusColors[post.status] ?? ""}`}>
+              {post.status?.toUpperCase()}
+            </span>
+            <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-800">
+              {post.type === "lost" ? "Pazudis" : "Atrasts"}
             </span>
           </div>
-        )}
-        {canEdit && (
-          <div>
-            <a
-              href={`/posts/${post.id}/edit`}
-              className="inline-flex items-center rounded border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700 hover:bg-blue-100"
-            >
-              Edit post
-            </a>
+
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="text-3xl font-bold text-gray-900">{post.title}</h1>
+            <div className="flex flex-col items-end gap-2">
+              {post.createdAt && (
+                <span className="rounded border border-gray-200 bg-gray-50 px-3 py-1 text-sm text-gray-700">
+                  Izveidots: {new Date(post.createdAt).toLocaleString()}
+                </span>
+              )}
+              {canEdit && (
+                <a
+                  href={`/posts/${post.id}/edit`}
+                  className="inline-flex items-center rounded border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700 hover:bg-blue-100"
+                >
+                  Rediģēt sludinājumu
+                </a>
+              )}
+            </div>
           </div>
-        )}
+
+          {post.photos.length > 0 && (
+            <div className="pt-2">
+              <PhotoGallery photos={post.photos} />
+            </div>
+          )}
+        </div>
       </header>
 
       {post.status === "hidden" && post.blockedReason && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-          This post is hidden by an administrator. Reason: {post.blockedReason}
+          Sludinājumu paslēpa administrators. Iemesls: {post.blockedReason}
         </div>
       )}
 
       <section className="space-y-2">
-        <h2 className="text-xl font-semibold text-gray-900">Description</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Apraksts</h2>
         <p className="leading-relaxed text-gray-800 whitespace-pre-wrap">{post.description}</p>
       </section>
 
-      {(post.ownerName || post.ownerEmail || post.ownerPhone) && (
+      {post.privateNote && canSeePrivate && (
         <section className="space-y-2">
-          <h2 className="text-xl font-semibold text-gray-900">Owner info</h2>
-          <div className="rounded border border-gray-200 bg-gray-50 p-3 text-sm text-gray-800 space-y-1">
-            {post.ownerName && <div><span className="font-semibold">Name:</span> {post.ownerName}</div>}
-            {post.ownerEmail && <div><span className="font-semibold">Email:</span> {post.ownerEmail}</div>}
-            {post.ownerPhone && <div><span className="font-semibold">Phone:</span> {post.ownerPhone}</div>}
+          <h2 className="text-xl font-semibold text-gray-900">Privāta piezīme</h2>
+          <div className="rounded border border-gray-200 bg-yellow-50 p-3 text-sm text-gray-800">
+            {post.privateNote}
           </div>
         </section>
       )}
 
-      <section className="space-y-3">
-        <h2 className="text-xl font-semibold text-gray-900">Photos</h2>
-        {post.photos.length === 0 ? (
-          <p className="text-gray-700">No photos attached.</p>
-        ) : (
-          <PhotoGallery photos={post.photos} />
-        )}
-      </section>
-
       <section className="space-y-2">
-        <h2 className="text-xl font-semibold text-gray-900">Location</h2>
-        {post.placeName ? (
+        <h2 className="text-xl font-semibold text-gray-900">Atrašanās vieta</h2>
+        {post.geo ? (
           <div className="rounded border border-gray-200 bg-gray-50 p-3 text-gray-800">
-            <div className="font-medium">Place: {post.placeName}</div>
-            {post.geo ? (
-              <div className="text-sm text-gray-700">
-                Coordinates: {post.geo.lat?.toFixed?.(5) ?? post.geo.lat}, {post.geo.lng?.toFixed?.(5) ?? post.geo.lng}
-              </div>
-            ) : (
-              <div className="text-sm text-gray-700">Coordinates not provided.</div>
-            )}
-            {post.geo && (
-              <LocationMap
-                lat={Number(post.geo.lat)}
-                lng={Number(post.geo.lng)}
-                label={post.placeName || post.title}
-              />
-            )}
+            <LocationMap lat={Number(post.geo.lat)} lng={Number(post.geo.lng)} label={post.placeName || post.title} />
           </div>
         ) : (
-          <p className="text-gray-700">No location provided.</p>
+          <p className="text-gray-700">Nav norādīta atrašanās vieta.</p>
         )}
       </section>
 
-      <section className="space-y-2">
-        <h2 className="text-xl font-semibold text-gray-900">Contact owner</h2>
-        <ContactOwner postId={post.id} ownerEmail={post.ownerEmail} />
-      </section>
+      
+        (post.ownerName || (post.ownerEmail && post.showEmail) || (post.ownerPhone && post.showPhone)) && (
+        <section className="space-y-2">
+          <h2 className="text-xl font-semibold text-gray-900">Īpašnieka informācija</h2>
+          <div className="rounded border border-gray-200 bg-gray-50 p-3 text-sm text-gray-800 space-y-1">
+            {post.ownerName && (
+              <div>
+                <span className="font-semibold">Vārds:</span> {post.ownerName}
+              </div>
+            )}
+            {post.ownerEmail && post.showEmail && (
+              <div>
+                <span className="font-semibold">E-pasts:</span> {post.ownerEmail}
+              </div>
+            )}
+            {post.ownerPhone && post.showPhone && (
+              <div>
+                <span className="font-semibold">Tālrunis:</span> {post.ownerPhone}
+              </div>
+            )}
+          </div>
+        </section>
+        )
 
-      <section className="space-y-2">
-        <h2 className="text-xl font-semibold text-gray-900">Пожаловаться</h2>
-        <SubmitComplaint postId={post.id} />
-      </section>
     </main>
   );
 }

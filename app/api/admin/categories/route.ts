@@ -25,11 +25,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Name is required" }, { status: 400 });
     }
     const clean = name.trim();
-    const ref = await adminDb.collection("categories").add({
+    const docRef = adminDb.collection("categories").doc();
+    await docRef.set({
+      id: docRef.id,
       name: clean,
       createdAt: new Date(),
     });
-    return NextResponse.json({ ok: true, id: ref.id });
+    return NextResponse.json({ ok: true, id: docRef.id });
   } catch (error: any) {
     console.error("Create category error:", error);
     return NextResponse.json({ ok: false, error: error?.message || "Failed to create category" }, { status: 500 });

@@ -21,6 +21,10 @@ export async function GET() {
       const data = d.data() as any;
       let postTitle = data.postTitle ?? null;
       let postStatus = data.postStatus ?? null;
+      let postPhoto: string | null = null;
+      let postSnippet: string | null = null;
+      let blockedByEmail: string | null = null;
+      let closedByEmail: string | null = null;
 
       // fetch live post data if not stored
       if ((!postTitle || !postStatus) && data.postId) {
@@ -30,9 +34,34 @@ export async function GET() {
             const postData = postSnap.data() as any;
             postTitle = postTitle || postData?.title || null;
             postStatus = postStatus || postData?.status || null;
+            if (Array.isArray(postData?.photos) && postData.photos.length) {
+              postPhoto = postData.photos[0];
+            }
+            const raw = (postData?.description || postData?.descriptionPosts || "")?.toString?.() ?? "";
+            postSnippet = raw.length > 400 ? `${raw.slice(0, 400)}…` : raw;
           }
         } catch {
           // ignore secondary lookup errors
+        }
+      }
+
+      if (data.blockedByAdminId) {
+        try {
+          const userSnap = await adminDb.collection("users").doc(data.blockedByAdminId).get();
+          const userData = userSnap.data() as any;
+          if (userData?.email) blockedByEmail = userData.email;
+        } catch {
+          // ignore lookup
+        }
+      }
+
+      if (data.closedByAdminId) {
+        try {
+          const userSnap = await adminDb.collection("users").doc(data.closedByAdminId).get();
+          const userData = userSnap.data() as any;
+          if (userData?.email) closedByEmail = userData.email;
+        } catch {
+          // ignore lookup
         }
       }
 
@@ -48,9 +77,15 @@ export async function GET() {
         updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : null,
         postTitle,
         postStatus,
+        postSnippet,
+        postPhoto,
         blockReason: data.blockReason ?? null,
+        blockedByEmail,
         blockedByAdminId: data.blockedByAdminId ?? null,
         blockedAt: data.blockedAt?.toDate ? data.blockedAt.toDate().toISOString() : null,
+        closedByAdminId: data.closedByAdminId ?? null,
+        closedByEmail,
+        closedAt: data.closedAt?.toDate ? data.closedAt.toDate().toISOString() : null,
       };
     })
   );
@@ -87,6 +122,10 @@ export async function PATCH(req: Request) {
     };
     if (status) {
       update.status = status;
+      if (status === "closed") {
+        update.closedByAdminId = user.uid;
+        update.closedAt = now;
+      }
     }
     await complaintRef.update(update);
 
@@ -104,6 +143,8 @@ export async function PATCH(req: Request) {
           blockedByAdminId: user.uid,
           blockedAt: now,
           status: "closed",
+          closedByAdminId: user.uid,
+          closedAt: now,
         }),
         adminDb.collection("posts").doc(complaint.postId).update({
           status: "hidden",

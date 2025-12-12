@@ -1,36 +1,72 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { AdminBackButton } from "@/components/AdminBackButton";
 
 type ComplaintItem = {
   id: string;
-  postId: string;
-  postTitle?: string | null;
-  postStatus?: string | null;
+  postId?: string | null;
   reporterName?: string | null;
   reporterEmail?: string | null;
-  userId?: string | null;
-  reason: string;
-  status: string;
+  reason?: string | null;
+  status: "accepted" | "in_review" | "closed";
   createdAt?: string | null;
+  postTitle?: string | null;
+  postStatus?: string | null;
+  postSnippet?: string | null;
+  postPhoto?: string | null;
   blockReason?: string | null;
+  blockedByEmail?: string | null;
   blockedByAdminId?: string | null;
-  blockedAt?: string | null;
+  closedByEmail?: string | null;
+  closedByAdminId?: string | null;
 };
 
-const statusLabels: Record<string, string> = {
-  accepted: "Accepted",
-  in_review: "In review",
-  closed: "Closed",
+const postStatusLabels: Record<string, { label: string; className: string }> = {
+  open: { label: "Atverts", className: "bg-green-100 text-green-700" },
+  pending: { label: "Gaida apstiprinajumu", className: "bg-amber-100 text-amber-700" },
+  resolved: { label: "Atrisinats", className: "bg-blue-100 text-blue-700" },
+  hidden: { label: "Blokets", className: "bg-red-100 text-red-700" },
+  closed: { label: "Slegts", className: "bg-gray-100 text-gray-700" },
 };
+
+const complaintStatusLabels: Record<ComplaintItem["status"], { label: string; className: string }> = {
+  accepted: { label: "Pieņemta", className: "bg-emerald-100 text-emerald-700" },
+  in_review: { label: "Pārskatīšanā", className: "bg-amber-100 text-amber-700" },
+  closed: { label: "Slēgta", className: "bg-gray-100 text-gray-700" },
+};
+
+function ComplaintsHeader({ onRefresh }: { onRefresh: () => void }) {
+  return (
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Lietotaju sudzibas</h1>
+        <p className="text-sm text-gray-700">
+          Pārskatiet sūdzības, mainiet statusu un pārvaldiet sludinājumu stāvokli, ja nepieciešams.
+        </p>
+      </div>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={onRefresh}
+          className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
+        >
+          Atsvaidzinat
+        </button>
+        <AdminBackButton label="Atpakal uz adminu" />
+      </div>
+    </div>
+  );
+}
 
 export default function AdminComplaintsPage() {
   const [complaints, setComplaints] = useState<ComplaintItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [blockReasons, setBlockReasons] = useState<Record<string, string>>({});
+
+  const complaintsWithPost = complaints.filter((c) => !!c.postId);
 
   const load = async () => {
     setLoading(true);
@@ -38,20 +74,17 @@ export default function AdminComplaintsPage() {
     try {
       const res = await fetch("/api/admin/complaints", { cache: "no-store" });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Не удалось загрузить жалобы");
+      if (!res.ok) throw new Error(json?.error || "Neizdevas ieladet sudzibas");
       setComplaints(json.complaints ?? []);
     } catch (err: any) {
-      setError(err?.message || "Не удалось загрузить жалобы");
+      setError(err?.message || "Neizdevas ieladet sudzibas");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    load();
-  }, []);
-
-  const setStatus = async (id: string, status: string) => {
+  const updateStatus = async (id: string, status: ComplaintItem["status"], opts?: { reload?: boolean }) => {
+    const reload = opts?.reload !== false;
     setUpdatingId(id);
     setError(null);
     try {
@@ -61,174 +94,158 @@ export default function AdminComplaintsPage() {
         body: JSON.stringify({ id, status }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Не удалось обновить статус");
-      await load();
+      if (!res.ok) throw new Error(json?.error || "Neizdevās atjaunināt statusu");
+      if (reload) {
+        await load();
+      } else {
+        setComplaints((prev) =>
+          prev.map((c) => (c.id === id ? { ...c, status, updatedAt: new Date().toISOString() } : c))
+        );
+      }
     } catch (err: any) {
-      setError(err?.message || "Не удалось обновить статус");
+      setError(err?.message || "Neizdevās atjaunināt statusu");
     } finally {
       setUpdatingId(null);
     }
   };
 
-  const blockPost = async (complaint: ComplaintItem) => {
-    const reason = blockReasons[complaint.id]?.trim();
-    if (!reason) {
-      setError("Укажите причину блокировки");
-      return;
-    }
-    setUpdatingId(complaint.id);
-    setError(null);
-    try {
-      const res = await fetch("/api/admin/complaints", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: complaint.id, status: "closed", blockReason: reason }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Не удалось заблокировать объявление");
-      setBlockReasons((prev) => ({ ...prev, [complaint.id]: "" }));
-      await load();
-    } catch (err: any) {
-      setError(err?.message || "Не удалось заблокировать объявление");
-    } finally {
-      setUpdatingId(null);
-    }
+  useEffect(() => {
+    load();
+  }, []);
+
+  useEffect(() => {
+    const toReview = complaintsWithPost.filter((c) => c.status === "accepted");
+    if (toReview.length === 0) return;
+    toReview.forEach((c) => updateStatus(c.id, "in_review", { reload: false }));
+  }, [complaintsWithPost]);
+
+  const renderPostStatus = (status?: string | null) => {
+    if (!status) return null;
+    const info = postStatusLabels[status] ?? { label: status, className: "bg-gray-100 text-gray-700" };
+    return (
+      <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${info.className}`}>
+        {info.label}
+      </span>
+    );
+  };
+
+  const safeSnippet = (snippet?: string | null) => {
+    if (!snippet) return "";
+    return snippet.replace(/‚÷\?‚?/g, "...");
   };
 
   return (
-    <main className="mx-auto max-w-5xl p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Жалобы пользователей</h1>
-          <p className="text-sm text-gray-700">Review complaints, update status, and block posts if needed.</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={load}
-            className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
-          >
-            Refresh
-          </button>
-          <Link href="/admin" className="text-blue-600 hover:underline text-sm">
-            Back to admin
-          </Link>
-        </div>
-      </div>
+    <main className="mx-auto max-w-6xl p-6 space-y-6">
+      <ComplaintsHeader onRefresh={load} />
 
       {error && <p className="text-sm text-red-600">{error}</p>}
-      {loading && <p className="text-sm text-gray-600">Loading...</p>}
+      {loading && <p className="text-sm text-gray-600">Ielade...</p>}
+      {!loading && complaintsWithPost.length === 0 && (
+        <p className="text-sm text-gray-600">Sudzibu vel nav.</p>
+      )}
 
-      {complaints.length === 0 && !loading ? (
-        <p className="text-sm text-gray-600">No complaints yet.</p>
-      ) : (
-        <div className="space-y-3">
-          {complaints.map((c) => (
-            <article
-              key={c.id}
-              className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-3"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1">
-                  <div className="text-sm text-gray-700">
-                    Complaint ID: <span className="font-semibold text-gray-900">{c.id}</span>
-                  </div>
-                  <div className="text-sm text-gray-700">
-                    Reporter:{" "}
-                    <span className="font-semibold text-gray-900">
-                      {c.reporterName || c.reporterEmail || (c.userId === "0" ? "Guest" : c.userId)}
+      <div className="space-y-4">
+        {complaintsWithPost.map((c) => (
+          <article
+            key={c.id}
+            className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm"
+            role={c.postId ? "button" : undefined}
+            tabIndex={c.postId ? 0 : -1}
+            onClick={() => c.postId && window.location.assign(`/admin/posts/${c.postId}?from=complaints`)}
+            onKeyDown={(e) => {
+              if ((e.key === "Enter" || e.key === " ") && c.postId) {
+                e.preventDefault();
+                window.location.assign(`/admin/posts/${c.postId}?from=complaints`);
+              }
+            }}
+          >
+            <div className="flex flex-col gap-4 md:flex-row md:items-start">
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-2">
+                  {c.postId ? (
+                    <Link href={`/admin/posts/${c.postId}?from=complaints`} className="text-lg font-semibold text-blue-700 hover:underline">
+                      {c.postTitle || "Nav noradits"}
+                    </Link>
+                  ) : (
+                    <span className="text-lg font-semibold text-gray-900">{c.postTitle || "Nav noradits"}</span>
+                  )}
+                  {renderPostStatus(c.postStatus)}
+                </div>
+
+                <div className="text-xs text-gray-600 flex flex-wrap items-center gap-2">
+                  {c.createdAt && <span>{new Date(c.createdAt).toLocaleString()}</span>}
+                  {(c.reporterName || c.reporterEmail) && (
+                    <span>
+                      Ziņotājs: {c.reporterName || c.reporterEmail}
+                      {c.reporterEmail && c.reporterName ? ` (${c.reporterEmail})` : ""}
                     </span>
-                    {c.reporterEmail && (
-                      <span className="ml-2 text-xs text-gray-600">({c.reporterEmail})</span>
-                    )}
-                  </div>
-                  <div className="text-sm font-semibold text-gray-900">
-                    Post:{" "}
-                    {c.postId ? (
-                      <Link href={`/posts/${c.postId}`} className="text-blue-600 hover:underline">
-                        {c.postTitle || c.postId}
-                      </Link>
-                    ) : (
-                      "Не указано"
-                    )}{" "}
-                    {c.postStatus && (
-                      <span className="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
-                        Post status: {c.postStatus}
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    {c.createdAt && `Created: ${new Date(c.createdAt).toLocaleString()}`}
-                    {c.blockedAt &&
-                      ` · Blocked at: ${new Date(c.blockedAt).toLocaleString()} by ${c.blockedByAdminId || "admin"}`}
-                  </div>
-                  <p className="whitespace-pre-wrap text-gray-900">{c.reason}</p>
-                  {c.blockReason && (
-                    <p className="text-sm text-gray-800">
-                      Block reason: <span className="font-semibold text-gray-900">{c.blockReason}</span>
-                    </p>
                   )}
                 </div>
 
-                <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">
-                  {statusLabels[c.status] || c.status}
-                </span>
+                {c.postSnippet && (
+                  <p className="text-sm text-gray-800 whitespace-pre-wrap">{safeSnippet(c.postSnippet)}</p>
+                )}
+
+                {c.reason && (
+                  <span className="inline-flex items-center gap-2 rounded border border-amber-200 bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-800">
+                    Sūdzības iemesls:
+                    <span className="font-normal text-amber-900">{c.reason}</span>
+                  </span>
+                )}
+
+                {c.postPhoto && (
+                  <img
+                    src={c.postPhoto}
+                    alt="Sludinajuma foto"
+                    className="h-24 w-32 rounded border border-gray-200 object-cover"
+                  />
+                )}
               </div>
 
-              <div className="flex flex-wrap gap-2 text-sm">
-                <button
-                  type="button"
-                  disabled={updatingId === c.id}
-                  onClick={() => setStatus(c.id, "accepted")}
-                  className="rounded border border-gray-300 px-3 py-1 font-semibold text-gray-800 hover:bg-gray-50 transition disabled:opacity-60"
-                >
-                  Accepted
-                </button>
-                <button
-                  type="button"
-                  disabled={updatingId === c.id}
-                  onClick={() => setStatus(c.id, "in_review")}
-                  className="rounded border border-blue-200 bg-blue-50 px-3 py-1 font-semibold text-blue-700 hover:bg-blue-100 transition disabled:opacity-60"
-                >
-                  In review
-                </button>
-                <button
-                  type="button"
-                  disabled={updatingId === c.id}
-                  onClick={() => setStatus(c.id, "closed")}
-                  className="rounded border border-green-200 bg-green-50 px-3 py-1 font-semibold text-green-700 hover:bg-green-100 transition disabled:opacity-60"
-                >
-                  Closed
-                </button>
+              <div className="md:w-60 space-y-1 text-right text-sm">
+                {renderPostStatus(c.postStatus)}
+                <div className="flex justify-end">
+                  <span
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${complaintStatusLabels[c.status]?.className ?? "bg-gray-100 text-gray-700"}`}
+                  >
+                    {complaintStatusLabels[c.status]?.label ?? c.status}
+                  </span>
+                </div>
+                {c.blockReason && (
+                  <p className="text-red-700">
+                    Blokēts: {c.blockReason}
+                    {c.blockedByEmail ? ` (bloķēja ${c.blockedByEmail})` : ""}
+                  </p>
+                )}
+                <p className="text-xs text-gray-600">
+                  Pārbaudīja: {c.closedByEmail || c.blockedByEmail || "nav norādīts"}
+                </p>
               </div>
+            </div>
 
-              <div className="space-y-2 rounded border border-red-200 bg-red-50 p-3">
-                <div className="text-sm font-semibold text-red-800">Block the post</div>
-                <textarea
-                  value={blockReasons[c.id] ?? ""}
-                  onChange={(e) =>
-                    setBlockReasons((prev) => ({
-                      ...prev,
-                      [c.id]: e.target.value,
-                    }))
-                  }
-                  rows={3}
-                  className="w-full rounded border border-gray-300 px-3 py-2 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 text-sm"
-                  placeholder="Block reason (required)"
-                />
+            <div className="mt-3 flex flex-wrap justify-end gap-2">
+              {(["in_review", "closed"] as ComplaintItem["status"][]).map((s) => (
                 <button
+                  key={s}
                   type="button"
-                  disabled={updatingId === c.id}
-                  onClick={() => blockPost(c)}
-                  className="rounded bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition disabled:opacity-60"
+                  disabled={updatingId === c.id || c.status === s}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    updateStatus(c.id, s);
+                  }}
+                  className={`rounded px-3 py-1 text-sm font-semibold border transition ${
+                    c.status === s
+                      ? "bg-gray-900 text-white border-gray-900"
+                      : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50"
+                  } ${updatingId === c.id ? "opacity-70 cursor-not-allowed" : ""}`}
                 >
-                  {updatingId === c.id ? "Applying..." : "Block post"}
+                  {complaintStatusLabels[s]?.label ?? s}
                 </button>
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
     </main>
   );
 }
