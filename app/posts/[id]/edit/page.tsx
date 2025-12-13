@@ -29,6 +29,8 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
           placeName: json.post.placeName ? (json.post.placeName === "No place" ? "Nav vietas" : json.post.placeName) : "Nav vietas",
           description: json.post.description ?? "",
           photos: json.post.photos ?? [],
+          hiddenPhotos: json.post.hiddenPhotos ?? [],
+          hidePhotos: json.post.photosHidden === true,
           tags: json.post.tags ?? [],
           geo: json.post.geo ?? null,
           showEmail: json.post.showEmail !== false,
@@ -48,7 +50,11 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
     const res = await fetch(`/api/posts/${params.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        ...payload,
+        photosHidden: payload.hidePhotos === true,
+        hiddenPhotos: payload.hiddenPhotos ?? [],
+      }),
     });
     const json = await res.json();
     if (!res.ok) {

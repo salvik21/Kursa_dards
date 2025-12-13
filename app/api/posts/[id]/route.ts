@@ -83,15 +83,10 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
         id: snap.id,
         title: data.title ?? "",
         type: data.type ?? "",
-        
         categoryId: data.categoryId,
-  
-      
-   
-      
         photos: data.photos ?? [],
-      
-     
+        photosHidden: data.photosHidden === true,
+        hiddenPhotos: Array.isArray(data.hiddenPhotos) ? data.hiddenPhotos.filter(Boolean) : [],
         showEmail: data.showEmail !== false,
         showPhone: !!data.showPhone,
         privateNote: data.privateNote ?? "",
@@ -131,13 +126,15 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     const type = normalizeString(payload.type).toLowerCase();
     const categoryId = normalizeString(payload.categoryId || payload.category);
     const placeName = normalizeString(payload.placeName) || null;
-    const description = normalizeString(payload.description);
-    const descriptionPlace = normalizeString(payload.descriptionPlace);
-    const photos = Array.isArray(payload.photos) ? payload.photos.filter(Boolean) : [];
-    const tags = Array.isArray(payload.tags) ? payload.tags.filter(Boolean) : [];
-    const geo = normalizeGeo(payload.geo);
-    const showEmail = typeof payload.showEmail === "boolean" ? payload.showEmail : true;
-    const showPhone = typeof payload.showPhone === "boolean" ? payload.showPhone : false;
+  const description = normalizeString(payload.description);
+  const descriptionPlace = normalizeString(payload.descriptionPlace);
+  const photos = Array.isArray(payload.photos) ? payload.photos.filter(Boolean) : [];
+  const tags = Array.isArray(payload.tags) ? payload.tags.filter(Boolean) : [];
+  const geo = normalizeGeo(payload.geo);
+  const showEmail = typeof payload.showEmail === "boolean" ? payload.showEmail : true;
+  const showPhone = typeof payload.showPhone === "boolean" ? payload.showPhone : false;
+  const photosHidden = payload.photosHidden === true || payload.hidePhotos === true;
+  const hiddenPhotos = Array.isArray(payload.hiddenPhotos) ? payload.hiddenPhotos.filter(Boolean) : [];
     const privateNote = typeof payload.privateNote === "string" ? payload.privateNote.trim() : "";
 
     if (!title || !categoryId || !description) {
@@ -156,11 +153,13 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       categoryId,
       placeNamePosts: null,
       placeName,
-      descriptionPosts: description,
-      photos,
-      tags,
-      postsPlaceId: params.id,
-      showEmail,
+    descriptionPosts: description,
+    photos,
+    tags,
+    photosHidden,
+    hiddenPhotos,
+    postsPlaceId: params.id,
+    showEmail,
       showPhone,
       privateNote,
       status: "pending",

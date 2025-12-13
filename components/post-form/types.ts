@@ -9,6 +9,8 @@ export type PostFormValues = {
   description: string;
   tags: string[];
   photos: string[];
+  hiddenPhotos?: string[];
+  hidePhotos?: boolean;
   geo?: { lat: number; lng: number } | null;
   showEmail?: boolean;
   showPhone?: boolean;

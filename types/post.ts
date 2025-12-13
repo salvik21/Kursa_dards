@@ -32,6 +32,7 @@ export interface Post {
   // location?: Geo;
 
   description: string;
+  photosHidden?: boolean;
   descriptionHidden?: boolean;
   blockedReason?: string;
   blockedBy?: string;

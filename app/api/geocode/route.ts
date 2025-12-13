@@ -1,21 +1,21 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
 type GeocodeResult = { lat: number; lng: number; formattedAddress?: string };
-type GeocodeError = { error: string };
+type GeocodeError = { error: string; status?: number };
 type GeocodeResponse = GeocodeResult | GeocodeError;
 
-async function geocode(address: string, countryCode?: string): Promise<GeocodeResult | null> {
+async function geocode(address: string, countryCode?: string): Promise<GeocodeResponse | null> {
   const apiKey =
     process.env.GOOGLE_GEOCODING_API_KEY ||
     process.env.GOOGLE_MAPS_SERVER_KEY ||
     process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   if (!apiKey) {
-    throw new Error("GOOGLE_GEOCODING_API_KEY is not set");
+    return { error: "GOOGLE_GEOCODING_API_KEY is not set", status: 500 };
   }
-  // Explicitly narrow to string for TS
+
   const apiKeySafe: string = apiKey as string;
 
   async function request(withCountry: boolean): Promise<GeocodeResponse | null> {
@@ -28,40 +28,54 @@ async function geocode(address: string, countryCode?: string): Promise<GeocodeRe
     }
 
     const url = `https://maps.googleapis.com/maps/api/geocode/json?${params.toString()}`;
-    const res = await fetch(url);
-    if (!res.ok) {
-      throw new Error("Failed to fetch geocode");
+    try {
+      const res = await fetch(url);
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        const message =
+          (data && (data.error_message || data.status)) || res.statusText || "Failed to reach geocoding service";
+        return { error: `Geocode HTTP ${res.status}: ${message}`, status: res.status };
+      }
+
+      console.log("Geocode response", {
+        status: data?.status,
+        error: data?.error_message,
+        results: Array.isArray(data?.results) ? data.results.length : 0,
+      });
+
+      if (!data || data.status !== "OK" || !data.results?.length) {
+        return { error: data?.error_message || data?.status || "NOT_FOUND" };
+      }
+      const first = data.results[0];
+      const location = first?.geometry?.location;
+      if (!location || !Number.isFinite(location.lat) || !Number.isFinite(location.lng)) {
+        return { error: "INVALID_LOCATION" };
+      }
+      return {
+        lat: location.lat,
+        lng: location.lng,
+        formattedAddress: first.formatted_address,
+      };
+    } catch (err: any) {
+      return { error: err?.message || "Network error while fetching geocode" };
     }
-    const data = await res.json();
-    // Log status and error to server console for debugging
-    console.log("Geocode response", {
-      status: data?.status,
-      error: data?.error_message,
-      results: Array.isArray(data?.results) ? data.results.length : 0,
-    });
-    if (data.status !== "OK" || !data.results?.length) {
-      return { error: data.error_message || data.status || "NOT_FOUND" } as const;
-    }
-    const first = data.results[0];
-    const location = first?.geometry?.location;
-    if (!location || !Number.isFinite(location.lat) || !Number.isFinite(location.lng)) {
-      return { error: "INVALID_LOCATION" } as const;
-    }
-    return {
-      lat: location.lat,
-      lng: location.lng,
-      formattedAddress: first.formatted_address,
-    };
   }
 
   const isOk = (value: GeocodeResponse | null): value is GeocodeResult =>
     !!value && "lat" in value && typeof value.lat === "number";
 
+  let lastError: GeocodeError | null = null;
+
   const first = await request(true);
   if (isOk(first)) return first;
+  if (first && "error" in first) lastError = first;
+
   const fallback = await request(false);
   if (isOk(fallback)) return fallback;
-  return null;
+  if (fallback && "error" in fallback) lastError = fallback;
+
+  return lastError;
 }
 
 export async function POST(req: Request) {
@@ -79,10 +93,11 @@ export async function POST(req: Request) {
 
     const result = await geocode(address, countryCode);
     if (!result) {
-      return NextResponse.json({ ok: false, error: "Geocoding failed" }, { status: 404 });
+      return NextResponse.json({ ok: false, error: "Geocoding failed" }, { status: 502 });
     }
     if ("error" in result) {
-      return NextResponse.json({ ok: false, error: result.error }, { status: 400 });
+      const status = typeof result.status === "number" && result.status > 0 ? result.status : 400;
+      return NextResponse.json({ ok: false, error: result.error }, { status });
     }
 
     return NextResponse.json({ ok: true, ...result });

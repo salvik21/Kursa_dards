@@ -29,6 +29,7 @@ export async function GET() {
         placeName: data.placeName ?? null,
         description: data.descriptionPosts ?? data.description ?? "",
         photos: data.photos ?? [],
+        photosHidden: data.photosHidden === true,
         blockedReason: data.blockedReason ?? null,
         blockedAt: data.blockedAt?.toDate ? data.blockedAt.toDate().toISOString() : null,
         blockedBy: data.blockedBy ?? null,

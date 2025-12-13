@@ -116,6 +116,8 @@ export async function POST(req: Request) {
     const geo = normalizeGeo(body.geo);
     const showEmail = normalizeVisibilityFlag(body.showEmail, true);
     const showPhone = normalizeVisibilityFlag(body.showPhone, false);
+    const photosHidden = body.photosHidden === true || body.hidePhotos === true;
+    const hiddenPhotos = Array.isArray(body.hiddenPhotos) ? body.hiddenPhotos.filter(Boolean) : [];
     const privateNote = typeof body.privateNote === "string" ? body.privateNote.trim() : "";
     const descriptionPlace = typeof body.descriptionPlace === "string" ? body.descriptionPlace.trim() : null;
     const doc = {
@@ -130,6 +132,8 @@ export async function POST(req: Request) {
       descriptionHidden: false,
       foundNote: body.foundNote ?? null,
       photos: Array.isArray(body.photos) ? body.photos : [],
+      photosHidden,
+      hiddenPhotos,
       userId: user.uid,
       showEmail,
       showPhone,

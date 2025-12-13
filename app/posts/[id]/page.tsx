@@ -43,6 +43,18 @@ export default async function PostDetailPage({ params }: PageProps) {
     geoFromPlace = null;
   }
 
+  const hiddenPhotos = Array.isArray(data?.hiddenPhotos) ? data.hiddenPhotos.filter(Boolean) : [];
+  const basePhotos: string[] = Array.isArray(data?.photos) ? data.photos : [];
+  // Hide per-photo flags for public visitors; owners/admins can see everything unless photosHidden hides all.
+  const canSeeRestrictedPhotos = isAdmin || (viewer && viewer.uid === data.userId);
+  const publicPhotos = basePhotos.filter((url) => !hiddenPhotos.includes(url));
+  const photos =
+    data?.photosHidden && !canSeeRestrictedPhotos
+      ? []
+      : canSeeRestrictedPhotos
+        ? basePhotos
+        : publicPhotos;
+
   let ownerEmail = data?.userEmail || null;
   let ownerName: string | null = null;
   let ownerPhone: string | null = null;
@@ -69,7 +81,9 @@ export default async function PostDetailPage({ params }: PageProps) {
     placeName: data.placeName ?? null,
     geo: geoFromPlace,
     description: data.descriptionPosts ?? data.description ?? "",
-    photos: data.photos ?? [],
+    photos,
+    photosHidden: data.photosHidden === true,
+    hiddenPhotos,
     createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
     updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : null,
     ownerEmail,
@@ -156,6 +170,11 @@ export default async function PostDetailPage({ params }: PageProps) {
           {post.photos.length > 0 && (
             <div className="pt-2">
               <PhotoGallery photos={post.photos} />
+            </div>
+          )}
+          {post.photosHidden && !post.photos.length && (
+            <div className="rounded border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+              Foto pasl„"ptas p„"c autora izv„"les. Redzamas tikai „?pa…öniekam un administratoriem.
             </div>
           )}
         </div>

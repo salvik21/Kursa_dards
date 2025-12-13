@@ -44,16 +44,26 @@ export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFo
 
   const geocodeViaApi = useCallback(
     async (address: string, countryCode?: string) => {
-      const res = await fetch("/api/geocode", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address, countryCode }),
-      });
-      const json = await res.json();
-      if (!res.ok || !json.ok) {
-        throw new Error(json?.error || "Ģeokodēšana neizdevās");
+      try {
+        const res = await fetch("/api/geocode", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ address, countryCode }),
+        });
+        let json: any = null;
+        try {
+          json = await res.json();
+        } catch {
+          json = null;
+        }
+        if (!res.ok || !json?.ok) {
+          const message = (json && (json.error || json.message)) || "Neizdevas geokodet adresi";
+          throw new Error(message);
+        }
+        return json as { lat: number; lng: number; formattedAddress?: string };
+      } catch (err: any) {
+        throw new Error(err?.message || "Neizdevas geokodet adresi");
       }
-      return json as { lat: number; lng: number; formattedAddress?: string };
     },
     []
   );

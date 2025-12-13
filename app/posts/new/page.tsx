@@ -14,6 +14,8 @@ export default function NewPostPage() {
     placeName: "Nav vietas",
     description: "",
     photos: [],
+    hiddenPhotos: [],
+    hidePhotos: false,
     geo: null,
     showEmail: true,
     showPhone: false,
@@ -24,7 +26,11 @@ export default function NewPostPage() {
     const res = await fetch("/api/posts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        ...payload,
+        photosHidden: payload.hidePhotos === true,
+        hiddenPhotos: payload.hiddenPhotos ?? [],
+      }),
     });
     const json = await res.json();
     if (!res.ok) {

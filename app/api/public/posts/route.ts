@@ -28,6 +28,10 @@ export async function GET(req: Request) {
         const data = d.data() as any;
         const categoryName = categoriesMap.get(data.categoryId) ?? data.categoryName ?? data.category ?? "";
         const postsPlaceId = data.postsPlaceId || d.id;
+        const photosHidden = data.photosHidden === true;
+        const hiddenPhotos = Array.isArray(data.hiddenPhotos) ? data.hiddenPhotos.filter(Boolean) : [];
+        const rawPhotos: string[] = Array.isArray(data.photos) ? data.photos : [];
+        const visiblePhotos = photosHidden ? [] : rawPhotos.filter((url) => !hiddenPhotos.includes(url));
         return {
           id: d.id,
           title: data.title ?? "",
@@ -39,7 +43,9 @@ export async function GET(req: Request) {
           placeName: data.placeName ?? null,
           postsPlaceId,
           description: data.descriptionPosts ?? data.description ?? "",
-          photos: data.photos ?? [],
+          photos: visiblePhotos,
+          photosHidden,
+          hiddenPhotos,
           createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
         };
       });
