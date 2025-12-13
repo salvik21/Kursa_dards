@@ -192,8 +192,7 @@ export default async function PostDetailPage({ params }: PageProps) {
         )}
       </section>
 
-      
-        (post.ownerName || (post.ownerEmail && post.showEmail) || (post.ownerPhone && post.showPhone)) && (
+      {(post.ownerName || (post.ownerEmail && post.showEmail) || (post.ownerPhone && post.showPhone)) && (
         <section className="space-y-2">
           <h2 className="text-xl font-semibold text-gray-900">Īpašnieka informācija</h2>
           <div className="rounded border border-gray-200 bg-gray-50 p-3 text-sm text-gray-800 space-y-1">
@@ -214,7 +213,19 @@ export default async function PostDetailPage({ params }: PageProps) {
             )}
           </div>
         </section>
-        )
+      )}
+
+      <section className="space-y-4">
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold text-gray-900">Sazināties ar autoru</h2>
+          <ContactOwner postId={post.id} ownerEmail={post.ownerEmail} />
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold text-gray-900">Paziņot par sludinājumu</h2>
+          <SubmitComplaint postId={post.id} />
+        </div>
+      </section>
 
     </main>
   );

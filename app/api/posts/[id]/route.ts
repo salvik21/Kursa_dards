@@ -155,6 +155,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       type,
       categoryId,
       placeNamePosts: null,
+      placeName,
       descriptionPosts: description,
       photos,
       tags,

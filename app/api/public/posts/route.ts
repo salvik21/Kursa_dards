@@ -23,10 +23,11 @@ export async function GET(req: Request) {
       .limit(limit)
       .get();
 
-    const posts = snap.docs
+    const rawPosts = snap.docs
       .map((d) => {
         const data = d.data() as any;
         const categoryName = categoriesMap.get(data.categoryId) ?? data.categoryName ?? data.category ?? "";
+        const postsPlaceId = data.postsPlaceId || d.id;
         return {
           id: d.id,
           title: data.title ?? "",
@@ -36,10 +37,36 @@ export async function GET(req: Request) {
           categoryName,
           categoryId: data.categoryId ?? "",
           placeName: data.placeName ?? null,
+          postsPlaceId,
           description: data.descriptionPosts ?? data.description ?? "",
           photos: data.photos ?? [],
           createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
         };
+      });
+
+    // Load place data per post (small per-doc fetch, limit <= 50)
+    const placeMap = new Map<string, any>();
+    await Promise.all(
+      rawPosts.map(async (p) => {
+        const placeId = p.postsPlaceId || p.id;
+        if (!placeId) return;
+        try {
+          const doc = await adminDb.collection("postsPlace").doc(placeId).get();
+          if (doc.exists) {
+            placeMap.set(placeId, doc.data());
+          }
+        } catch {
+          // ignore place fetch errors
+        }
+      })
+    );
+
+    const posts = rawPosts
+      .map((p) => {
+        const placeData = p.postsPlaceId ? placeMap.get(p.postsPlaceId) : null;
+        // Prefer place name stored in postsPlace; fall back to post value if not set
+        const placeName = placeData?.placeNamePlace ?? p.placeName ?? null;
+        return { ...p, placeName, placeGeo: placeData?.geo ?? null };
       })
       // Only show approved posts
       .filter((p) => p.status === "open" || p.status === "resolved")
@@ -52,7 +79,8 @@ export async function GET(req: Request) {
           p.categoryId.toLowerCase() !== category
         )
           return false;
-        if (place && (p.placeName ?? "").toLowerCase() !== place) return false;
+        const placeNameLower = (p.placeName ?? "").toLowerCase().trim();
+        if (place && placeNameLower !== place) return false;
         if (!terms.length) return true;
         const haystack = `${p.title} ${p.description ?? ""} ${p.category ?? ""} ${p.placeName ?? ""}`
           .toLowerCase()
