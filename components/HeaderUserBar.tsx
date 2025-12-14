@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { LogoutButton } from "./LogoutButton";
 import { useRouter } from "next/navigation";
 
@@ -20,7 +20,7 @@ export function HeaderUserBar({ initialUser }: Props) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/me", { cache: "no-store", credentials: "include" });
@@ -39,7 +39,7 @@ export function HeaderUserBar({ initialUser }: Props) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     load();
@@ -50,7 +50,7 @@ export function HeaderUserBar({ initialUser }: Props) {
     };
     window.addEventListener("session-changed", refreshHandler);
     return () => window.removeEventListener("session-changed", refreshHandler);
-  }, []);
+  }, [load, router]);
 
   if (loading && !user) {
     return <span className="text-sm text-gray-600">Ielādē...</span>;

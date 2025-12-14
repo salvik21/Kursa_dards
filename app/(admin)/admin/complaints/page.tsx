@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+/* eslint-disable @next/next/no-img-element */
+import { useCallback, useEffect, useState } from "react";
 import { AdminBackButton } from "@/components/AdminBackButton";
 
 type ComplaintItem = {
@@ -68,7 +69,7 @@ export default function AdminComplaintsPage() {
 
   const complaintsWithPost = complaints.filter((c) => !!c.postId);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -81,9 +82,9 @@ export default function AdminComplaintsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const updateStatus = async (id: string, status: ComplaintItem["status"], opts?: { reload?: boolean }) => {
+  const updateStatus = useCallback(async (id: string, status: ComplaintItem["status"], opts?: { reload?: boolean }) => {
     const reload = opts?.reload !== false;
     setUpdatingId(id);
     setError(null);
@@ -107,17 +108,17 @@ export default function AdminComplaintsPage() {
     } finally {
       setUpdatingId(null);
     }
-  };
+  }, [load]);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   useEffect(() => {
     const toReview = complaintsWithPost.filter((c) => c.status === "accepted");
     if (toReview.length === 0) return;
     toReview.forEach((c) => updateStatus(c.id, "in_review", { reload: false }));
-  }, [complaintsWithPost]);
+  }, [complaintsWithPost, updateStatus]);
 
   const renderPostStatus = (status?: string | null) => {
     if (!status) return null;

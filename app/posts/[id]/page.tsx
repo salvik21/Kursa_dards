@@ -199,7 +199,7 @@ export default async function PostDetailPage({ params }: PageProps) {
           )}
           {post.photosHidden && !post.photos.length && (
             <div className="rounded border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
-              Foto pasl„"ptas p„"c autora izv„"les. Redzamas tikai „?pa…öniekam un administratoriem.
+              Foto paslēptas pēc autora izvēles. Redzamas tikai īpašniekam un administratoriem.
             </div>
           )}
         </div>
@@ -220,7 +220,7 @@ export default async function PostDetailPage({ params }: PageProps) {
         <section className="space-y-2">
           <h2 className="text-xl font-semibold text-gray-900">Tagi</h2>
           <div className="flex flex-wrap gap-2">
-            {post.tags.map((tag) => (
+            {post.tags.map((tag: string) => (
               <span
                 key={tag}
                 className="rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700 border border-blue-100"

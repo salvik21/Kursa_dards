@@ -73,7 +73,7 @@ export async function GET() {
       .map((d) => {
         const data = d.data() as any;
         const geo = normalizeGeo(data.geo);
-        return { postId: d.id, geo, placeName: data.placeNamePlace ?? null, descriptionPlace: data.descriptionPlace ?? null };
+        return { postId: d.id, geo, placeName: data.placeNamePlace ?? data.placeName ?? null, descriptionPlace: data.descriptionPlace ?? null };
       })
       .filter((p) => p.geo);
 
@@ -122,7 +122,7 @@ export async function GET() {
           type: data.type ?? "",
           status: data.status ?? "open",
           category: categoryName,
-          placeName: place?.placeName ?? place?.placeNamePlace ?? data.placeName ?? null,
+          placeName: place?.placeName ?? data.placeName ?? null,
           description: data.descriptionPosts ?? data.description ?? place?.descriptionPlace ?? "",
           photos,
           createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,

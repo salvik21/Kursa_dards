@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { useRef, useState } from "react";
 import { uploadPhotos } from "@/lib/api/upload";
 

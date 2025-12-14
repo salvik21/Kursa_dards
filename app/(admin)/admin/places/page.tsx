@@ -257,6 +257,8 @@ function MapPicker({
     return () => {
       cancelled = true;
     };
+    // lat/lng are handled in the separate syncing effect below; avoid recreating map on every change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted]);
 
   useEffect(() => {

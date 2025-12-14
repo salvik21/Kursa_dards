@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { loadGoogleMaps } from "@/lib/maps";
 
 const radiusOptions = [
@@ -131,7 +131,7 @@ export default function NotificationSettings() {
   const [saving, setSaving] = useState(false);
   const addressInputRef = useRef<HTMLInputElement | null>(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setStatus(null);
     try {
@@ -152,11 +152,11 @@ export default function NotificationSettings() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   useEffect(() => {
     let listener: google.maps.MapsEventListener | null = null;

@@ -8,6 +8,7 @@ type UpsertPayload = {
 };
 
 type LoadedPhoto = { url: string; visible: boolean };
+type LoadPhotosOpts = { includeHidden?: boolean };
 
 function chunk<T>(list: T[], size: number): T[][] {
   const result: T[][] = [];
@@ -66,6 +67,7 @@ export async function deletePostPhotos(postId: string) {
 
 export async function loadPhotosForPosts(postIds: string[], opts?: LoadPhotosOpts) {
   const ids = Array.from(new Set(postIds.filter(Boolean)));
+  const includeHidden = opts?.includeHidden === true;
   const map = new Map<string, LoadedPhoto[]>();
 
   for (const group of chunk(ids, 10)) {
@@ -75,6 +77,7 @@ export async function loadPhotosForPosts(postIds: string[], opts?: LoadPhotosOpt
       const url = data.url ?? data.photoUrl;
       if (!url) return;
       const visible = data.visible !== false;
+      if (!includeHidden && !visible) return;
       const arr = map.get(data.postId) ?? [];
       arr.push({ url, visible });
       map.set(data.postId, arr);
@@ -85,26 +88,9 @@ export async function loadPhotosForPosts(postIds: string[], opts?: LoadPhotosOpt
 }
 
 export async function loadAllPhotosForPosts(postIds: string[]) {
-  return loadPhotosForPosts(postIds);
+  return loadPhotosForPosts(postIds, { includeHidden: true });
 }
 
 export async function loadVisiblePhotosForPosts(postIds: string[]) {
-  const ids = Array.from(new Set(postIds.filter(Boolean)));
-  const map = new Map<string, LoadedPhoto[]>();
-
-  for (const group of chunk(ids, 10)) {
-    const snap = await adminDb.collection("postPhotos").where("postId", "in", group).get();
-    snap.docs.forEach((doc) => {
-      const data = doc.data() as any;
-      const url = data.url ?? data.photoUrl;
-      if (!url) return;
-      const visible = data.visible !== false;
-      if (!visible) return;
-      const arr = map.get(data.postId) ?? [];
-      arr.push({ url, visible });
-      map.set(data.postId, arr);
-    });
-  }
-
-  return map;
+  return loadPhotosForPosts(postIds, { includeHidden: false });
 }

@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
@@ -53,16 +54,18 @@ export default function PostsList() {
   const { data: placesData } = useSWR("/api/public/places", fetcher);
   const { data: tagsData } = useSWR("/api/public/tags", fetcher);
 
-  const categories: Option[] = categoriesData?.categories ?? [];
-  const tagOptions: Option[] =
-    tagsData?.tags?.map((t: any) => ({ id: t.id, name: t.name ?? t.id })) ?? [];
+  const categories: Option[] = useMemo(() => categoriesData?.categories ?? [], [categoriesData?.categories]);
+  const tagOptions: Option[] = useMemo(
+    () => tagsData?.tags?.map((t: any) => ({ id: t.id, name: t.name ?? t.id })) ?? [],
+    [tagsData?.tags]
+  );
   const tagLabelMap = useMemo(() => {
     const m = new Map<string, string>();
     tagOptions.forEach((t) => m.set(t.name.toLowerCase(), t.name));
     return m;
   }, [tagOptions]);
-  const topTags = tagOptions.slice(0, 10);
-  const posts: PostItem[] = data?.posts ?? [];
+  const topTags = useMemo(() => tagOptions.slice(0, 10), [tagOptions]);
+  const posts: PostItem[] = useMemo(() => data?.posts ?? [], [data?.posts]);
   const initialLoading = isLoading && !data;
   const searching = isValidating && !isLoading;
   const hasQuery = Boolean(debouncedSearch || typeFilter || category || place || selectedTags.length);
