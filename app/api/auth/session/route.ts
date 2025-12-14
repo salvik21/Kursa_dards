@@ -22,6 +22,7 @@ export async function POST(request: Request) {
     const snap = await userRef.get();
     if (!snap.exists) {
       await userRef.set({
+        id: decoded.uid,
         email: decoded.email ?? "",
         displayName: decoded.name ?? "",
         role: "user",

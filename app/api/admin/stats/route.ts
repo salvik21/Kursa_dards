@@ -35,19 +35,38 @@ export async function GET(req: Request) {
 
     const snap = await adminDb.collection("posts").orderBy("createdAt", "desc").get();
 
-    const posts: PostSummary[] = snap.docs.map((d) => {
-      const data = d.data() as any;
-      const categoryName = categoriesMap.get(data.categoryId) ?? data.categoryName ?? data.category ?? "";
-      return {
-        id: d.id,
-        title: data.title ?? "",
-        type: data.type ?? "",
-        status: data.status ?? "open",
-        category: categoryName,
-        placeName: data.placeName ?? null,
-        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
-      };
-    });
+    const placeMap = new Map<string, any>();
+    await Promise.all(
+      snap.docs.map(async (doc) => {
+        try {
+          const placeSnap = await adminDb.collection("postsPlace").doc(doc.id).get();
+          if (placeSnap.exists) {
+            placeMap.set(doc.id, placeSnap.data());
+          }
+        } catch {
+          // ignore lookup errors
+        }
+      })
+    );
+
+    const posts: PostSummary[] = snap.docs
+      .map((d) => {
+        const data = d.data() as any;
+        const id = data.id as string | undefined;
+        if (!id) return null;
+        const categoryName = categoriesMap.get(data.categoryId) ?? data.categoryName ?? data.category ?? "";
+        const placeData = placeMap.get(id);
+        return {
+          id,
+          title: data.title ?? "",
+          type: data.type ?? "",
+          status: data.status ?? "open",
+          category: categoryName,
+          placeName: placeData?.placeNamePlace ?? data.placeName ?? null,
+          createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
+        };
+      })
+      .filter(Boolean) as any[];
 
     const stats = {
       totalPosts: posts.length,

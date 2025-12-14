@@ -27,10 +27,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Name is required" }, { status: 400 });
     }
     const cleanName = name.trim();
+    const nameLower = cleanName.toLowerCase();
+
+    // Try to find existing by lowercase name
+    const existing = await adminDb.collection("tags").where("nameLower", "==", nameLower).limit(1).get();
+    if (!existing.empty) {
+      const doc = existing.docs[0];
+      await doc.ref.set({ id: doc.id, name: cleanName, nameLower }, { merge: true });
+      return NextResponse.json({ ok: true, id: doc.id });
+    }
+
     const ref = await adminDb.collection("tags").add({
       name: cleanName,
+      nameLower,
       createdAt: new Date(),
     });
+    await ref.set({ id: ref.id }, { merge: true });
     return NextResponse.json({ ok: true, id: ref.id });
   } catch (error: any) {
     console.error("Create tag error:", error);

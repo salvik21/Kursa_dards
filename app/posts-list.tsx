@@ -8,6 +8,7 @@ type PostItem = {
   title: string;
   type: string;
   category: string;
+  tags?: string[];
   placeName?: string | null;
   description?: string;
   photos?: string[];
@@ -24,6 +25,7 @@ export default function PostsList() {
   const [typeFilter, setTypeFilter] = useState("");
   const [category, setCategory] = useState("");
   const [place, setPlace] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search.trim()), 300);
@@ -36,9 +38,10 @@ export default function PostsList() {
     if (typeFilter) params.set("type", typeFilter);
     if (category) params.set("category", category);
     if (place) params.set("place", place);
+    if (selectedTags.length) params.set("tags", selectedTags.join(","));
     const qs = params.toString();
     return qs ? `?${qs}` : "";
-  }, [debouncedSearch, typeFilter, category, place]);
+  }, [debouncedSearch, typeFilter, category, place, selectedTags]);
 
   const { data, error, isLoading, isValidating } = useSWR(
     `/api/public/posts${query}`,
@@ -48,12 +51,21 @@ export default function PostsList() {
 
   const { data: categoriesData } = useSWR("/api/public/categories", fetcher);
   const { data: placesData } = useSWR("/api/public/places", fetcher);
+  const { data: tagsData } = useSWR("/api/public/tags", fetcher);
 
   const categories: Option[] = categoriesData?.categories ?? [];
+  const tagOptions: Option[] =
+    tagsData?.tags?.map((t: any) => ({ id: t.id, name: t.name ?? t.id })) ?? [];
+  const tagLabelMap = useMemo(() => {
+    const m = new Map<string, string>();
+    tagOptions.forEach((t) => m.set(t.name.toLowerCase(), t.name));
+    return m;
+  }, [tagOptions]);
+  const topTags = tagOptions.slice(0, 10);
   const posts: PostItem[] = data?.posts ?? [];
   const initialLoading = isLoading && !data;
   const searching = isValidating && !isLoading;
-  const hasQuery = Boolean(debouncedSearch || typeFilter || category || place);
+  const hasQuery = Boolean(debouncedSearch || typeFilter || category || place || selectedTags.length);
   const emptyState = !initialLoading && !searching && posts.length === 0;
 
   // Vietu saraksts no DB (ja ir places kolekcija) vai no pašiem sludinājumiem kā rezerves variants.
@@ -155,8 +167,51 @@ export default function PostsList() {
                   {p.name}
                 </option>
               ))}
-            </select>
+              </select>
           </div>
+
+        </div>
+
+        <div className="space-y-1 md:ml-auto md:w-fit md:text-right">
+          <label className="text-xs font-semibold text-gray-700 uppercase block">Tagi</label>
+          <div className="flex flex-wrap gap-2 justify-start md:justify-end">
+            {topTags.map((t) => {
+              const token = t.name.toLowerCase();
+              const checked = selectedTags.includes(token);
+              return (
+                <label
+                  key={t.id}
+                  className="flex items-center gap-1 text-xs text-gray-700 border border-gray-200 px-2 py-1 rounded"
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) => {
+                      setSelectedTags((prev) =>
+                        e.target.checked ? [...prev, token] : prev.filter((v) => v !== token)
+                      );
+                    }}
+                  />
+                  #{t.name}
+                </label>
+              );
+            })}
+          </div>
+          {selectedTags.length ? (
+            <div className="flex flex-wrap gap-1 pt-1 justify-start md:justify-end">
+              {selectedTags.map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setSelectedTags((prev) => prev.filter((v) => v !== t))}
+                  className="flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700 border border-blue-100"
+                >
+                  #{tagLabelMap.get(t) ?? t}
+                  <span className="text-blue-500">✕</span>
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         {searching && (
@@ -189,6 +244,18 @@ export default function PostsList() {
                 {p.description && (
                   <p className="text-sm text-gray-700 line-clamp-2">{p.description}</p>
                 )}
+                {p.tags?.length ? (
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {p.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700 border border-blue-100"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </div>
               {p.photos?.length ? (
                 <img

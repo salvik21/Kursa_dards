@@ -25,7 +25,9 @@ export async function POST(
     }
     const postData = postSnap.data() as any;
 
-    await adminDb.collection("complaints").add({
+    const complaintRef = adminDb.collection("complaints").doc();
+    await complaintRef.set({
+      id: complaintRef.id,
       postId: params.id,
       userId: user?.uid ?? "0",
       reporterName: reporterName || null,

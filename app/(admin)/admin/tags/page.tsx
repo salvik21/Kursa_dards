@@ -20,6 +20,10 @@ export default function TagsPage() {
     setError(null);
     try {
       const res = await fetch("/api/admin/tags", { cache: "no-store" });
+      if (res.status === 403) {
+        setError("Nav atļauts. Tikai administratoriem.");
+        return;
+      }
       if (!res.ok) throw new Error("Neizdevās ielādēt birkas");
       const data = await res.json();
       setTags(data.tags ?? []);
@@ -38,6 +42,7 @@ export default function TagsPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
+        if (res.status === 403) throw new Error("Nav atļauts. Tikai administratoriem.");
         throw new Error(data?.error || "Neizdevās dzēst birku");
       }
       setMessage("Birka dzēsta");
@@ -56,7 +61,7 @@ export default function TagsPage() {
     setMessage(null);
     setError(null);
     if (!name.trim()) {
-      setError("Tag name is required");
+      setError("Birkas nosaukums ir obligāts");
       return;
     }
     setLoading(true);
@@ -68,6 +73,7 @@ export default function TagsPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
+        if (res.status === 403) throw new Error("Nav atļauts. Tikai administratoriem.");
         throw new Error(data?.error || "Neizdevās izveidot birku");
       }
       setName("");

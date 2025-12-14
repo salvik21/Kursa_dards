@@ -3,6 +3,7 @@ import { adminDb } from "@/lib/firebase/admin";
 import { getSessionUser } from "@/lib/auth/server";
 import { buildPostUrl, sendEmail } from "@/lib/email";
 import { distanceKm } from "@/lib/geo";
+import { loadAllPhotosForPosts } from "@/lib/postPhotos";
 
 export const runtime = "nodejs";
 
@@ -16,26 +17,51 @@ export async function GET() {
   categoriesSnap.docs.forEach((d) => categoriesMap.set(d.id, (d.data() as any)?.name ?? ""));
 
   const snap = await adminDb.collection("posts").orderBy("createdAt", "desc").limit(50).get();
-  const posts = snap.docs.map((d) => {
-    const data = d.data() as any;
+  const postIds = snap.docs
+    .map((d) => (d.data() as any)?.id as string | undefined)
+    .filter((id): id is string => Boolean(id));
+  const placeMap = new Map<string, any>();
+  await Promise.all(
+    postIds.map(async (id) => {
+      try {
+        const doc = await adminDb.collection("postsPlace").doc(id).get();
+        if (doc.exists) placeMap.set(id, doc.data());
+      } catch {
+        // ignore lookup errors
+      }
+    })
+  );
+  const photosMap = await loadAllPhotosForPosts(postIds);
+
+  const posts = snap.docs
+    .map((d) => {
+      const data = d.data() as any;
+      const id = data.id as string | undefined;
+      if (!id) return null;
     const categoryName = categoriesMap.get(data.categoryId) ?? data.categoryName ?? data.category ?? "";
+    const placeData = placeMap.get(id);
+    const photoList = photosMap.get(id) ?? [];
+    const hiddenPhotos = photoList.filter((p) => !p.visible).map((p) => p.url);
+    const photos = photoList.map((p) => p.url);
+    const photosHidden = photos.length > 0 && hiddenPhotos.length === photos.length;
     return {
-      id: d.id,
+      id,
       title: data.title ?? "",
       type: data.type ?? "",
       status: data.status ?? "open",
       category: categoryName,
-      placeName: data.placeName ?? null,
+      placeName: placeData?.placeNamePlace ?? data.placeName ?? null,
       description: data.descriptionPosts ?? "",
-      photos: data.photos ?? [],
-      photosHidden: data.photosHidden === true,
+      photos,
+      photosHidden,
       createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
       blockedReason: data.blockedReason ?? null,
       blockedBy: data.blockedBy ?? null,
       blockedAt: data.blockedAt?.toDate ? data.blockedAt.toDate().toISOString() : null,
       privateNote: data.privateNote ?? null,
     };
-  });
+    })
+    .filter(Boolean) as any[];
 
   // Map blockedBy UID -> email
   const blockedIds = Array.from(

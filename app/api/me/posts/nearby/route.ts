@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { FieldPath } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase/admin";
 import { requireSessionUser } from "@/lib/auth/server";
+import { loadVisiblePhotosForPosts } from "@/lib/postPhotos";
 
 export const runtime = "nodejs";
 
@@ -100,9 +101,13 @@ export async function GET() {
         .get();
       snap.docs.forEach((d) => {
         const data = d.data() as any;
-        posts.push({ id: d.id, data });
+        const postId = data.id as string | undefined;
+        if (!postId) return;
+        posts.push({ id: postId, data });
       });
     }
+
+    const photosMap = await loadVisiblePhotosForPosts(ids);
 
     const combined = posts
       .map((p) => {
@@ -110,15 +115,16 @@ export async function GET() {
         const place = within.find((w) => w.postId === p.id);
         const categoryName =
           categoriesMap.get(data.categoryId) ?? data.categoryName ?? data.category ?? "";
+        const photos = photosMap.get(p.id)?.map((ph) => ph.url) ?? [];
         return {
           id: p.id,
           title: data.title ?? "",
           type: data.type ?? "",
           status: data.status ?? "open",
           category: categoryName,
-          placeName: data.placeName ?? place?.placeName ?? null,
+          placeName: place?.placeName ?? place?.placeNamePlace ?? data.placeName ?? null,
           description: data.descriptionPosts ?? data.description ?? place?.descriptionPlace ?? "",
-          photos: data.photos ?? [],
+          photos,
           createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
           distanceKm: place ? Math.round(distanceKm(subs[0].geo, place.geo!) * 100) / 100 : null,
         };

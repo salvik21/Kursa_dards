@@ -5,6 +5,7 @@ import { getSessionUser } from "@/lib/auth/server";
 import PhotoGallery from "../../../../posts/[id]/PhotoGallery";
 import LocationMap from "../../../../posts/[id]/LocationMap";
 import { AdminActions } from "../../../../posts/[id]/AdminActions";
+import { loadAllPhotosForPosts } from "@/lib/postPhotos";
 
 type PageProps = {
   params: { id: string };
@@ -32,6 +33,7 @@ export default async function AdminPostDetailPage({ params, searchParams }: Page
   }
   const data = snap.data() as any;
 
+  let placeName: string | null = null;
   let geo: { lat: number; lng: number } | null = null;
   try {
     const placeSnap = await adminDb.collection("postsPlace").doc(params.id).get();
@@ -39,9 +41,15 @@ export default async function AdminPostDetailPage({ params, searchParams }: Page
     if (placeData?.geo && Number.isFinite(placeData.geo.lat) && Number.isFinite(placeData.geo.lng)) {
       geo = { lat: placeData.geo.lat, lng: placeData.geo.lng };
     }
+    if (placeData?.placeNamePlace) {
+      placeName = placeData.placeNamePlace;
+    }
   } catch {
     geo = null;
   }
+
+  const photosMap = await loadAllPhotosForPosts([params.id]);
+  const photos = photosMap.get(params.id)?.map((p) => p.url) ?? [];
 
   const post = {
     id: snap.id,
@@ -49,9 +57,9 @@ export default async function AdminPostDetailPage({ params, searchParams }: Page
     type: data.type ?? "",
     status: data.status ?? "open",
     category: data.category ?? "",
-    placeName: data.placeName ?? null,
+    placeName: placeName ?? data.placeName ?? null,
     description: data.descriptionPosts ?? data.description ?? "",
-    photos: data.photos ?? [],
+    photos,
     createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
     updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : null,
     geo,

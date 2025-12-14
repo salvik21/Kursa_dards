@@ -7,6 +7,7 @@ import LocationMap from "./LocationMap";
 import PhotoGallery from "./PhotoGallery";
 import { getSessionUser } from "@/lib/auth/server";
 import { AdminActions } from "./AdminActions";
+import { loadAllPhotosForPosts, loadVisiblePhotosForPosts } from "@/lib/postPhotos";
 
 type PageProps = {
   params: { id: string };
@@ -33,23 +34,47 @@ export default async function PostDetailPage({ params }: PageProps) {
 
   // Load geo from postsPlace collection (single doc keyed by postId)
   let geoFromPlace: { lat: number; lng: number } | null = null;
+  let placeNameFromPlace: string | null = null;
   try {
     const placeSnap = await adminDb.collection("postsPlace").doc(params.id).get();
     const placeData = placeSnap.data() as any;
     if (placeData?.geo && Number.isFinite(placeData.geo.lat) && Number.isFinite(placeData.geo.lng)) {
       geoFromPlace = { lat: placeData.geo.lat, lng: placeData.geo.lng };
     }
+    placeNameFromPlace = placeData?.placeNamePlace ?? null;
   } catch {
     geoFromPlace = null;
+    placeNameFromPlace = null;
   }
 
-  const hiddenPhotos = Array.isArray(data?.hiddenPhotos) ? data.hiddenPhotos.filter(Boolean) : [];
-  const basePhotos: string[] = Array.isArray(data?.photos) ? data.photos : [];
+  // Load tags for this post (fall back to stored tag names if lookup fails)
+  let tagNames: string[] = [];
+  try {
+    const postTagsSnap = await adminDb.collection("postTags").where("postId", "==", params.id).get();
+    const tagIds = postTagsSnap.docs.map((d) => (d.data() as any)?.tagId).filter(Boolean);
+    if (tagIds.length) {
+      const tagRefs = tagIds.map((id: string) => adminDb.collection("tags").doc(id));
+      const tagDocs = await adminDb.getAll(...tagRefs);
+      tagNames = tagDocs.map((doc) => ((doc.data() as any)?.name ?? "") as string).filter(Boolean);
+      if (!tagNames.length) tagNames = tagIds;
+    }
+  } catch {
+    tagNames = [];
+  }
+
+  const isOwner = viewer && viewer.uid === data.userId;
+  const photosMap = isOwner || isAdmin
+    ? await loadAllPhotosForPosts([params.id])
+    : await loadVisiblePhotosForPosts([params.id]);
+  const photoList = photosMap.get(params.id) ?? [];
+  const hiddenPhotos = photoList.filter((p) => !p.visible).map((p) => p.url);
+  const basePhotos: string[] = photoList.map((p) => p.url);
+  const photosHidden = basePhotos.length > 0 && hiddenPhotos.length === basePhotos.length;
   // Hide per-photo flags for public visitors; owners/admins can see everything unless photosHidden hides all.
   const canSeeRestrictedPhotos = isAdmin || (viewer && viewer.uid === data.userId);
   const publicPhotos = basePhotos.filter((url) => !hiddenPhotos.includes(url));
   const photos =
-    data?.photosHidden && !canSeeRestrictedPhotos
+    photosHidden && !canSeeRestrictedPhotos
       ? []
       : canSeeRestrictedPhotos
         ? basePhotos
@@ -77,12 +102,12 @@ export default async function PostDetailPage({ params }: PageProps) {
     type: data.type ?? "",
     status: data.status ?? "open",
     category: data.category ?? "",
-    tags: data.tags ?? [],
-    placeName: data.placeName ?? null,
+    tags: tagNames.length ? tagNames : data.tagNames ?? data.tags ?? [],
+    placeName: placeNameFromPlace ?? data.placeName ?? null,
     geo: geoFromPlace,
     description: data.descriptionPosts ?? data.description ?? "",
     photos,
-    photosHidden: data.photosHidden === true,
+    photosHidden,
     hiddenPhotos,
     createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
     updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : null,
@@ -190,6 +215,22 @@ export default async function PostDetailPage({ params }: PageProps) {
         <h2 className="text-xl font-semibold text-gray-900">Apraksts</h2>
         <p className="leading-relaxed text-gray-800 whitespace-pre-wrap">{post.description}</p>
       </section>
+
+      {post.tags?.length ? (
+        <section className="space-y-2">
+          <h2 className="text-xl font-semibold text-gray-900">Tagi</h2>
+          <div className="flex flex-wrap gap-2">
+            {post.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700 border border-blue-100"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {post.privateNote && canSeePrivate && (
         <section className="space-y-2">

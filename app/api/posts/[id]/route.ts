@@ -3,11 +3,17 @@ import { adminDb } from "@/lib/firebase/admin";
 import { getSessionUser } from "@/lib/auth/server";
 import { deletePostWithRelations } from "@/lib/deletePost";
 import { upsertPostPlace } from "@/lib/postsPlace";
-import { syncPostPhotos } from "@/lib/postPhotos";
+import { loadAllPhotosForPosts, loadVisiblePhotosForPosts, syncPostPhotos, deletePostPhotos } from "@/lib/postPhotos";
 
 export const runtime = "nodejs";
 
 const ALLOWED_TYPES = ["lost", "found"];
+
+function chunk<T>(arr: T[], size: number): T[][] {
+  const res: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) res.push(arr.slice(i, i + size));
+  return res;
+}
 
 function normalizeString(value: any) {
   if (typeof value !== "string") return "";
@@ -22,15 +28,46 @@ function normalizeGeo(raw: any) {
   return { lat, lng };
 }
 
+async function ensureTag(tagRaw: string) {
+  const name = (tagRaw || "").trim();
+  if (!name) return null;
+  const token = name.toLowerCase();
+
+  let snap = await adminDb.collection("tags").where("nameLower", "==", token).limit(1).get();
+  if (!snap.empty) {
+    const doc = snap.docs[0];
+    await doc.ref.set({ id: doc.id, name, nameLower: token }, { merge: true });
+    return { id: doc.id, name };
+  }
+
+  snap = await adminDb.collection("tags").where("name", "==", name).limit(1).get();
+  if (!snap.empty) {
+    const doc = snap.docs[0];
+    await doc.ref.set({ id: doc.id, name, nameLower: token }, { merge: true });
+    return { id: doc.id, name };
+  }
+
+  const ref = await adminDb.collection("tags").add({
+    name,
+    nameLower: token,
+    createdAt: new Date(),
+  });
+  await ref.set({ id: ref.id }, { merge: true });
+  return { id: ref.id, name };
+}
+
 async function syncPostTags(postId: string, tags: string[]) {
   const cleanTags = Array.isArray(tags) ? tags.filter(Boolean) : [];
   const existing = await adminDb.collection("postTags").where("postId", "==", postId).get();
   const batch = adminDb.batch();
   existing.docs.forEach((doc) => batch.delete(doc.ref));
-  cleanTags.forEach((tagId) => {
+
+  for (const tagRaw of cleanTags) {
+    const tag = await ensureTag(tagRaw);
+    if (!tag) continue;
     const ref = adminDb.collection("postTags").doc();
-    batch.set(ref, { postId, tagId, createdAt: new Date() });
-  });
+    batch.set(ref, { postId, tagId: tag.id, createdAt: new Date() });
+  }
   await batch.commit();
 }
 
@@ -56,25 +93,44 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     // Try to load geo from postsPlace
     let geoFromPlace: any = null;
     let descriptionPlaceFromPlace: string | null = null;
+    let placeNameFromPlace: string | null = null;
     try {
       const placeSnap = await adminDb.collection("postsPlace").doc(params.id).get();
       const placeData = placeSnap.data() as any;
       geoFromPlace = placeData?.geo ?? null;
       descriptionPlaceFromPlace = placeData?.descriptionPlace ?? null;
+      placeNameFromPlace = placeData?.placeNamePlace ?? null;
     } catch {
       geoFromPlace = null;
       descriptionPlaceFromPlace = null;
+      placeNameFromPlace = null;
     }
 
-    // Resolve category name from categories collection
-    let categoryName = "";
-    if (data?.categoryId) {
-      try {
-        const catSnap = await adminDb.collection("categories").doc(data.categoryId).get();
-        categoryName = (catSnap.data() as any)?.name ?? "";
-      } catch {
-        categoryName = "";
+    const isOwner = data?.userId === user.uid;
+    const photosMap = isOwner || isAdmin
+      ? await loadAllPhotosForPosts([params.id])
+      : await loadVisiblePhotosForPosts([params.id]);
+    const photoList = photosMap.get(params.id) ?? [];
+    const photos = photoList.map((p) => p.url);
+    const hiddenPhotos = photoList.filter((p) => !p.visible).map((p) => p.url);
+    const photosHidden = photos.length > 0 && hiddenPhotos.length === photos.length;
+
+    // load tag ids for the post
+    let tagIds: string[] = [];
+    let tagNames: string[] = [];
+    try {
+      const tagsSnap = await adminDb.collection("postTags").where("postId", "==", params.id).get();
+      tagIds = tagsSnap.docs.map((d) => (d.data() as any)?.tagId).filter(Boolean);
+      if (tagIds.length) {
+        const tagDocs = await adminDb.getAll(...tagIds.map((tid) => adminDb.collection("tags").doc(tid)));
+        tagNames = tagDocs.map((doc) => ((doc.data() as any)?.name ?? "") as string).filter(Boolean);
       }
+      if (!tagNames.length) {
+        tagNames = tagIds;
+      }
+    } catch {
+      tagIds = [];
+      tagNames = [];
     }
 
     return NextResponse.json({
@@ -84,13 +140,18 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
         title: data.title ?? "",
         type: data.type ?? "",
         categoryId: data.categoryId,
-        photos: data.photos ?? [],
-        photosHidden: data.photosHidden === true,
-        hiddenPhotos: Array.isArray(data.hiddenPhotos) ? data.hiddenPhotos.filter(Boolean) : [],
+        description: data.descriptionPosts ?? data.description ?? "",
+        photos,
+        photosHidden,
+        hiddenPhotos,
         showEmail: data.showEmail !== false,
         showPhone: !!data.showPhone,
         privateNote: data.privateNote ?? "",
-        postsPlaceId: data.postsPlaceId ?? params.id,
+        placeName: placeNameFromPlace ?? null,
+        descriptionPlace: descriptionPlaceFromPlace ?? null,
+        geo: geoFromPlace,
+        tags: tagIds,
+        tagNames,
       },
     });
   } catch (error: any) {
@@ -126,15 +187,15 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     const type = normalizeString(payload.type).toLowerCase();
     const categoryId = normalizeString(payload.categoryId || payload.category);
     const placeName = normalizeString(payload.placeName) || null;
-  const description = normalizeString(payload.description);
-  const descriptionPlace = normalizeString(payload.descriptionPlace);
-  const photos = Array.isArray(payload.photos) ? payload.photos.filter(Boolean) : [];
-  const tags = Array.isArray(payload.tags) ? payload.tags.filter(Boolean) : [];
-  const geo = normalizeGeo(payload.geo);
-  const showEmail = typeof payload.showEmail === "boolean" ? payload.showEmail : true;
-  const showPhone = typeof payload.showPhone === "boolean" ? payload.showPhone : false;
-  const photosHidden = payload.photosHidden === true || payload.hidePhotos === true;
-  const hiddenPhotos = Array.isArray(payload.hiddenPhotos) ? payload.hiddenPhotos.filter(Boolean) : [];
+    const description = normalizeString(payload.description);
+    const descriptionPlace = normalizeString(payload.descriptionPlace);
+    const rawPhotos = Array.isArray(payload.photos) ? payload.photos.filter(Boolean) : [];
+    const tags = Array.isArray(payload.tags) ? payload.tags.filter(Boolean) : [];
+    const geo = normalizeGeo(payload.geo);
+    const showEmail = typeof payload.showEmail === "boolean" ? payload.showEmail : true;
+    const showPhone = typeof payload.showPhone === "boolean" ? payload.showPhone : false;
+    const photosHidden = payload.photosHidden === true || payload.hidePhotos === true || payload.photoHidden === true;
+    const hiddenPhotos = Array.isArray(payload.hiddenPhotos) ? payload.hiddenPhotos.filter(Boolean) : [];
     const privateNote = typeof payload.privateNote === "string" ? payload.privateNote.trim() : "";
 
     if (!title || !categoryId || !description) {
@@ -151,15 +212,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       title,
       type,
       categoryId,
-      placeNamePosts: null,
-      placeName,
-    descriptionPosts: description,
-    photos,
-    tags,
-    photosHidden,
-    hiddenPhotos,
-    postsPlaceId: params.id,
-    showEmail,
+      descriptionPosts: description,
+      showEmail,
       showPhone,
       privateNote,
       status: "pending",
@@ -176,13 +230,19 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       postId: params.id,
       geo,
       description: descriptionPlace || null,
-      placeName: null,
+      placeName: placeName || null,
     });
 
-    await syncPostPhotos({
-      postId: params.id,
-      photos,
-    });
+    // Replace photos: clear previous and add each URL separately to allow mixed visibility.
+    await deletePostPhotos(params.id);
+    for (const url of rawPhotos) {
+      const isHidden = photosHidden || hiddenPhotos.includes(url);
+      await syncPostPhotos({
+        postId: params.id,
+        photo: url,
+        hidden: isHidden,
+      });
+    }
 
     return NextResponse.json({ ok: true });
   } catch (error: any) {

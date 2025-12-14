@@ -34,6 +34,38 @@ function normalizeVisibilityFlag(value: any, defaultValue: boolean) {
   return defaultValue;
 }
 
+async function ensureTag(tagRaw: string) {
+  const name = (tagRaw || "").trim();
+  if (!name) return null;
+  const token = name.toLowerCase();
+
+  // try to find by nameLower
+  let snap = await adminDb.collection("tags").where("nameLower", "==", token).limit(1).get();
+  if (!snap.empty) {
+    const doc = snap.docs[0];
+    // ensure nameLower is set
+    await doc.ref.set({ id: doc.id, name, nameLower: token }, { merge: true });
+    return { id: doc.id, name };
+  }
+
+  // fallback by exact name
+  snap = await adminDb.collection("tags").where("name", "==", name).limit(1).get();
+  if (!snap.empty) {
+    const doc = snap.docs[0];
+    await doc.ref.set({ id: doc.id, name, nameLower: token }, { merge: true });
+    return { id: doc.id, name };
+  }
+
+  // create new
+  const ref = await adminDb.collection("tags").add({
+    name,
+    nameLower: token,
+    createdAt: new Date(),
+  });
+  await ref.set({ id: ref.id }, { merge: true });
+  return { id: ref.id, name };
+}
+
 async function syncPostTags(postId: string, tags: string[]) {
   const cleanTags = Array.isArray(tags) ? tags.filter(Boolean) : [];
   const existing = await adminDb.collection("postTags").where("postId", "==", postId).get();
@@ -43,14 +75,16 @@ async function syncPostTags(postId: string, tags: string[]) {
   existing.docs.forEach((doc) => batch.delete(doc.ref));
 
   // add new
-  cleanTags.forEach((tagId) => {
+  for (const tagRaw of cleanTags) {
+    const tag = await ensureTag(tagRaw);
+    if (!tag) continue;
     const ref = adminDb.collection("postTags").doc();
     batch.set(ref, {
       postId,
-      tagId,
+      tagId: tag.id,
       createdAt: new Date(),
     });
-  });
+  }
 
   await batch.commit();
 }
@@ -116,8 +150,10 @@ export async function POST(req: Request) {
     const geo = normalizeGeo(body.geo);
     const showEmail = normalizeVisibilityFlag(body.showEmail, true);
     const showPhone = normalizeVisibilityFlag(body.showPhone, false);
-    const photosHidden = body.photosHidden === true || body.hidePhotos === true;
+    const rawPhotos = Array.isArray(body.photos) ? body.photos.filter(Boolean) : [];
+    const photosHidden = body.photosHidden === true || body.hidePhotos === true || body.photoHidden === true;
     const hiddenPhotos = Array.isArray(body.hiddenPhotos) ? body.hiddenPhotos.filter(Boolean) : [];
+    const placeName = typeof body.placeName === "string" ? body.placeName.trim() : null;
     const privateNote = typeof body.privateNote === "string" ? body.privateNote.trim() : "";
     const descriptionPlace = typeof body.descriptionPlace === "string" ? body.descriptionPlace.trim() : null;
     const doc = {
@@ -125,15 +161,7 @@ export async function POST(req: Request) {
       type: body.type,
       status: "pending",
       categoryId,
-      tags: Array.isArray(body.tags) ? body.tags : [],
-      placeName: null,
-      postsPlaceId: null as string | null,
       descriptionPosts: body.description,
-      descriptionHidden: false,
-      foundNote: body.foundNote ?? null,
-      photos: Array.isArray(body.photos) ? body.photos : [],
-      photosHidden,
-      hiddenPhotos,
       userId: user.uid,
       showEmail,
       showPhone,
@@ -142,26 +170,29 @@ export async function POST(req: Request) {
       updatedAt: now,
     };
 
-    const ref = await adminDb.collection("posts").add({ ...doc, postsPlaceId: null });
+    const ref = adminDb.collection("posts").doc();
+    await ref.set({ ...doc, id: ref.id });
 
     // sync tags -> postTags collection
-    await syncPostTags(ref.id, doc.tags);
+    await syncPostTags(ref.id, Array.isArray(body.tags) ? body.tags : []);
 
     // Keep postsPlace in sync for mapping/location uses
     await upsertPostPlace({
       postId: ref.id,
       geo,
       description: descriptionPlace,
-      placeName: null,
+      placeName,
     });
 
-    // store postsPlaceId now that doc exists
-    await ref.update({ postsPlaceId: ref.id });
-
-    await syncPostPhotos({
-      postId: ref.id,
-      photos: doc.photos,
-    });
+    // Save photos individually so each URL is a separate record (supports hidden/public mix).
+    for (const url of rawPhotos) {
+      const isHidden = photosHidden || hiddenPhotos.includes(url);
+      await syncPostPhotos({
+        postId: ref.id,
+        photo: url,
+        hidden: isHidden,
+      });
+    }
 
     // Notify subscribers about nearby posts (best-effort, non-blocking on failure)
     await sendNotificationsForPost(ref.id, { ...doc, geo });
