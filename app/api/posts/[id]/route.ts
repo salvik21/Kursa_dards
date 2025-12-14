@@ -106,7 +106,6 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
       placeNameFromPlace = null;
     }
 
-    const isOwner = data?.userId === user.uid;
     const photosMap = isOwner || isAdmin
       ? await loadAllPhotosForPosts([params.id])
       : await loadVisiblePhotosForPosts([params.id]);
