@@ -29,11 +29,13 @@ export async function POST(req: Request) {
     }
     const clean = name.trim();
     const ref = await adminDb.collection("places").add({
+      id: null, // placeholder to merge below
       name: clean,
       lat,
       lng,
       createdAt: new Date(),
     });
+    await ref.set({ id: ref.id }, { merge: true });
     return NextResponse.json({ ok: true, id: ref.id });
   } catch (error: any) {
     console.error("Create place error:", error);
