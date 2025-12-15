@@ -10,19 +10,14 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
   const [googlePending, setGooglePending] = useState(false);
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setInfo(null);
     try {
-      const user = await signIn(email, password);
-      if (!user.emailVerified) {
-        setInfo("Email not verified. Check your inbox.");
-      }
+      await signIn(email, password);
       router.push("/me");
     } catch (err: any) {
       setError(err?.message || "Failed to sign in");
@@ -35,7 +30,6 @@ export default function SignInPage() {
     if (googlePending) return;
     setGooglePending(true);
     setError(null);
-    setInfo(null);
     try {
       await signInWithGoogle();
       router.push("/me");
@@ -71,7 +65,6 @@ export default function SignInPage() {
           />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
-        {info && <p className="text-sm text-amber-600">{info}</p>}
         <button
           type="submit"
           disabled={loading}
