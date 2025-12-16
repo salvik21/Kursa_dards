@@ -63,11 +63,16 @@ function ComplaintsHeader({ onRefresh }: { onRefresh: () => void }) {
 
 export default function AdminComplaintsPage() {
   const [complaints, setComplaints] = useState<ComplaintItem[]>([]);
+  const [statusFilter, setStatusFilter] = useState<ComplaintItem["status"] | "all">("all");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const complaintsWithPost = complaints.filter((c) => !!c.postId);
+  const filteredComplaints = useMemo(() => {
+    if (statusFilter === "all") return complaintsWithPost;
+    return complaintsWithPost.filter((c) => c.status === statusFilter);
+  }, [complaintsWithPost, statusFilter]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -145,8 +150,31 @@ export default function AdminComplaintsPage() {
         <p className="text-sm text-gray-600">Sudzibu vel nav.</p>
       )}
 
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-sm font-semibold text-gray-800">Statusa filtrs:</span>
+        {[
+          { value: "all", label: "Visas" },
+          { value: "accepted", label: complaintStatusLabels.accepted.label },
+          { value: "in_review", label: complaintStatusLabels.in_review.label },
+          { value: "closed", label: complaintStatusLabels.closed.label },
+        ].map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => setStatusFilter(opt.value as ComplaintItem["status"] | "all")}
+            className={`rounded px-3 py-1 text-sm font-semibold border transition ${
+              statusFilter === opt.value
+                ? "border-blue-600 bg-blue-50 text-blue-700"
+                : "border-gray-300 bg-white text-gray-800 hover:bg-gray-50"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
       <div className="space-y-4">
-        {complaintsWithPost.map((c) => (
+        {filteredComplaints.map((c) => (
           <article
             key={c.id}
             className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm"

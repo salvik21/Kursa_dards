@@ -25,6 +25,14 @@ const statusColors: Record<string, string> = {
   closed: "bg-gray-100 text-gray-700 border-gray-200",
 };
 
+const statusLabels: Record<string, string> = {
+  pending: "Gaida apstiprinājumu",
+  open: "Atvērts",
+  resolved: "Atrisināts",
+  hidden: "Paslēpts",
+  closed: "Slēgts",
+};
+
 export default function MyPostsPage() {
   const { data, error, isLoading, mutate } = useSWR("/api/me/posts", fetcher);
   const posts: Post[] = data?.posts ?? [];
@@ -94,7 +102,7 @@ export default function MyPostsPage() {
                   <span
                     className={`rounded-full border px-2 py-1 text-xs font-semibold ${statusColors[p.status] ?? ""}`}
                   >
-                    {p.status}
+                    {statusLabels[p.status] ?? p.status}
                   </span>
                   <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-800">
                     {p.type === "lost" ? "Pazudis" : "Atrasts"}
@@ -106,9 +114,9 @@ export default function MyPostsPage() {
                   {p.placeName && ` | ${p.placeName}`}
                   {p.createdAt && ` | ${new Date(p.createdAt).toLocaleDateString()}`}
                 </div>
-                {p.status === "hidden" && p.blockedReason && (
+                {p.status === "hidden" && (
                   <div className="text-xs text-red-700">
-                    Paslēpts administratora dēļ: {p.blockedReason}
+                    Paslēpts administratora dēļ: {p.blockedReason?.trim() || "Iemesls nav norādīts"}
                   </div>
                 )}
               </div>
@@ -119,12 +127,18 @@ export default function MyPostsPage() {
                 >
                   Skatīt
                 </Link>
-                <Link
-                  href={`/posts/${p.id}/edit`}
-                  className="rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
-                >
-                  Rediģēt
-                </Link>
+                {p.status !== "hidden" ? (
+                  <Link
+                    href={`/posts/${p.id}/edit`}
+                    className="rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
+                  >
+                    Rediģēt
+                  </Link>
+                ) : (
+                  <span className="rounded border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-500">
+                    Bloķēts (rediģēt nav atļauts)
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={() => deletePost(p.id)}

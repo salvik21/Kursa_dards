@@ -149,6 +149,8 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
         placeName: placeNameFromPlace ?? null,
         descriptionPlace: descriptionPlaceFromPlace ?? null,
         geo: geoFromPlace,
+        status: data.status ?? "open",
+        blockedReason: data.blockedReason ?? null,
         tags: tagIds,
         tagNames,
       },
@@ -179,6 +181,12 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     const isAdmin = user.role === "admin";
     if (!isOwner && !isAdmin) {
       return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
+    }
+    if (data?.status === "hidden") {
+      return NextResponse.json(
+        { ok: false, error: "Bloķēts sludinājums nav rediģējams; to var tikai dzēst." },
+        { status: 403 }
+      );
     }
 
     const payload = await req.json();

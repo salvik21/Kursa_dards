@@ -184,9 +184,9 @@ export default async function PostDetailPage({ params }: PageProps) {
               {canEdit && (
                 <a
                   href={`/posts/${post.id}/edit`}
-                  className="inline-flex items-center rounded border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700 hover:bg-blue-100"
+                  className="inline-flex items-center rounded bg-blue-600 px-3 py-1 text-sm font-semibold text-white hover:bg-blue-700 transition"
                 >
-                  Rediģēt sludinājumu
+                  Rediģēt
                 </a>
               )}
             </div>

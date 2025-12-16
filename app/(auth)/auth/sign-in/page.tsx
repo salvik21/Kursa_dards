@@ -20,7 +20,10 @@ export default function SignInPage() {
       await signIn(email, password);
       router.push("/me");
     } catch (err: any) {
-      setError(err?.message || "Failed to sign in");
+      const msg = err?.code === "auth/invalid-credential" || err?.code === "auth/invalid-login"
+        ? "Nepareizs e-pasts vai parole."
+        : err?.message || "Neizdevās pieteikties.";
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -34,7 +37,7 @@ export default function SignInPage() {
       await signInWithGoogle();
       router.push("/me");
     } catch (err: any) {
-      setError(err?.message || "Failed to sign in with Google");
+      setError(err?.message || "Neizdevās pieteikties ar Google.");
     } finally {
       setGooglePending(false);
     }

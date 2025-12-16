@@ -59,6 +59,14 @@ const ACTIONS: ActionItem[] = [
   },
 ];
 
+const statusLabels: Record<string, string> = {
+  pending: "Gaida apstiprinājumu",
+  open: "Atvērts",
+  resolved: "Atrisināts",
+  hidden: "Paslēpts",
+  closed: "Slēgts",
+};
+
 export default function MeDashboard({ user }: { user: User }) {
   const items = useMemo(
     () => ACTIONS.filter((a) => !a.onlyAdmin || user.role === "admin"),
@@ -129,7 +137,9 @@ export default function MeDashboard({ user }: { user: User }) {
               >
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">{p.title || "Bez nosaukuma"}</span>
-                  <span className="text-xs uppercase text-gray-500">{p.status}</span>
+                  <span className="text-xs uppercase text-gray-500">
+                    {statusLabels[p.status] ?? p.status}
+                  </span>
                 </div>
                 <div className="text-xs text-gray-600">
                   {(p.type === "lost" ? "Pazudis" : p.type === "found" ? "Atrasts" : p.type) || ""}
@@ -140,9 +150,6 @@ export default function MeDashboard({ user }: { user: User }) {
                 <div className="flex gap-2">
                   <Link href={`/posts/${p.id}`} className="text-blue-600 hover:underline">
                     Skatīt
-                  </Link>
-                  <Link href={`/posts/${p.id}/edit`} className="text-blue-600 hover:underline">
-                    Rediģēt
                   </Link>
                 </div>
               </div>
@@ -192,7 +199,9 @@ export default function MeDashboard({ user }: { user: User }) {
               >
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">{p.title || "Bez nosaukuma"}</span>
-                  <span className="text-xs uppercase text-gray-500">{p.status}</span>
+                  <span className="text-xs uppercase text-gray-500">
+                    {statusLabels[p.status] ?? p.status}
+                  </span>
                 </div>
                 <div className="text-xs text-gray-600">
                   {(p.type === "lost" ? "Pazudis" : p.type === "found" ? "Atrasts" : p.type) || ""}

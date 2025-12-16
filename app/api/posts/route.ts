@@ -117,13 +117,13 @@ async function sendNotificationsForPost(postId: string, post: any) {
     const dist = distanceKm(geo, target);
     if (dist > radiusKm) return;
 
-    const subject = `New post near you: ${post.title ?? postId}`;
-    const text = `A new announcement was published within ${radiusKm} km of your saved location.
+    const subject = `Jauns ieraksts netālu no jums: ${post.title ?? postId}`;
+    const text = `Jauns sludinājums publicēts ${radiusKm} km rādiusā no jūsu saglabātās vietas.
 
-Title: ${post.title ?? "Post"}
-Category: ${categoryName}
-Distance: ${dist.toFixed(2)} km
-Link: ${postUrl}
+Nosaukums: ${post.title ?? "Ieraksts"}
+Kategorija: ${categoryName}
+Attālums: ${dist.toFixed(2)} km
+Saite: ${postUrl}
 `;
 
     await sendEmail({
@@ -140,7 +140,7 @@ export async function POST(req: Request) {
   try {
     const user = await getSessionUser();
     if (!user) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ ok: false, error: "Neautorizēts" }, { status: 401 });
     }
 
     const body = await req.json();
@@ -199,9 +199,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, id: ref.id });
   } catch (error: any) {
-    console.error("Create post error:", error);
+    console.error("Kļūda veidojot ierakstu:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to create post" },
+      { ok: false, error: error?.message || "Neizdevās izveidot ierakstu" },
       { status: 500 }
     );
   }

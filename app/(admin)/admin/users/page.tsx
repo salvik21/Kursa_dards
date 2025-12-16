@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AdminBackButton } from "@/components/AdminBackButton";
 
@@ -17,6 +17,7 @@ type UserItem = {
 
 export default function UsersPage() {
   const [users, setUsers] = useState<UserItem[]>([]);
+  const [filter, setFilter] = useState<"all" | "admin" | "user" | "blocked">("all");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -45,6 +46,19 @@ export default function UsersPage() {
   useEffect(() => {
     load();
   }, []);
+
+  const filteredUsers = useMemo(() => {
+    switch (filter) {
+      case "admin":
+        return users.filter((u) => u.role === "admin");
+      case "user":
+        return users.filter((u) => u.role !== "admin");
+      case "blocked":
+        return users.filter((u) => u.blocked);
+      default:
+        return users;
+    }
+  }, [users, filter]);
 
   const toggleBlock = async (id: string, blocked: boolean) => {
     setUpdatingId(id);
@@ -128,11 +142,34 @@ export default function UsersPage() {
       {error && <p className="text-sm text-red-600">{error}</p>}
       {loading && <p className="text-sm text-gray-600">Ielādē...</p>}
 
-      {users.length === 0 && !loading ? (
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-sm font-semibold text-gray-800">Filtrēt:</span>
+        {[
+          { value: "all", label: "Visi" },
+          { value: "admin", label: "Administratori" },
+          { value: "user", label: "Lietotāji" },
+          { value: "blocked", label: "Bloķētie" },
+        ].map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => setFilter(opt.value as any)}
+            className={`rounded px-3 py-1 text-sm font-semibold border transition ${
+              filter === opt.value
+                ? "border-blue-600 bg-blue-50 text-blue-700"
+                : "border-gray-300 bg-white text-gray-800 hover:bg-gray-50"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
+      {filteredUsers.length === 0 && !loading ? (
         <p className="text-sm text-gray-600">Lietotāji nav atrasti.</p>
       ) : (
         <div className="space-y-3">
-          {users.map((u) => (
+          {filteredUsers.map((u) => (
             <div
               key={u.id}
               className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
@@ -150,16 +187,6 @@ export default function UsersPage() {
                   )}
                 </div>
                 <div className="flex flex-col items-end gap-1 text-xs">
-                  <span
-                    className={`rounded-full px-2 py-1 ${
-                      u.blocked ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"
-                    }`}
-                  >
-                    {u.blocked ? "Bloķēts" : "Aktīvs"}
-                  </span>
-                  <span className="rounded-full bg-gray-100 px-2 py-1 text-gray-700">
-                    {u.canLogin === false ? "Pieteikšanās liegta" : "Pieteikšanās atļauta"}
-                  </span>
                   <button
                     type="button"
                     onClick={() => toggleBlock(u.id, !u.blocked)}

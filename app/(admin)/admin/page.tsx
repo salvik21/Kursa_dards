@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth/server";
+import { adminDb } from "@/lib/firebase/admin";
+import { AdminContactEmailForm } from "./AdminContactEmailForm";
 
 export const runtime = "nodejs";
 
@@ -12,6 +14,15 @@ export default async function AdminHome() {
   if (user.role !== "admin") {
     redirect("/me");
   }
+
+  const pendingSnap = await adminDb.collection("posts").where("status", "==", "pending").limit(1).get();
+  const hasPending = !pendingSnap.empty;
+  const complaintsOpenSnap = await adminDb
+    .collection("complaints")
+    .where("status", "in", ["accepted", "in_review"])
+    .limit(1)
+    .get();
+  const hasComplaints = !complaintsOpenSnap.empty;
 
   return (
     <main className="p-6 space-y-6">
@@ -31,10 +42,21 @@ export default async function AdminHome() {
       </header>
 
       <section className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-2">
+        <div
+          className={`rounded-xl border p-4 shadow-sm space-y-2 ${
+            hasPending ? "border-amber-400 bg-amber-50" : "border-gray-200 bg-white"
+          }`}
+        >
           <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">Sludinājumu moderācija</h2>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-gray-900">Sludinājumu moderācija</h2>
+                {hasPending && (
+                  <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 border border-amber-200">
+                    Ir jauni pārskatīšanai
+                  </span>
+                )}
+              </div>
               <p className="text-sm text-gray-600">Pārskatīt jaunus sludinājumus, mainīt statusu, slēpt spamu.</p>
             </div>
           </div>
@@ -142,10 +164,23 @@ export default async function AdminHome() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-2">
+      <AdminContactEmailForm />
+
+      <section
+        className={`rounded-xl border p-4 shadow-sm space-y-2 ${
+          hasComplaints ? "border-amber-400 bg-amber-50" : "border-gray-200 bg-white"
+        }`}
+      >
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">Sūdzības</h2>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-gray-900">Sūdzības</h2>
+              {hasComplaints && (
+                <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 border border-amber-200">
+                  Ir jaunas sūdzības
+                </span>
+              )}
+            </div>
             <p className="text-sm text-gray-600">Pārskatīt sūdzības un bloķēt sludinājumus pēc vajadzības.</p>
           </div>
         </div>

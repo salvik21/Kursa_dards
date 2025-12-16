@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AdminBackButton } from "@/components/AdminBackButton";
@@ -22,6 +22,13 @@ type PostItem = {
   blockedAt?: string | null;
   privateNote?: string | null;
 };
+
+const STATUS_FILTERS = [
+  { value: "all", label: "Visi" },
+  { value: "pending", label: "Gaida pārskatīšanu" },
+  { value: "open", label: "Publicētie" },
+  { value: "hidden", label: "Bloķētie" },
+];
 
 function PostsHeader({ onRefresh }: { onRefresh: () => void }) {
   return (
@@ -50,6 +57,7 @@ function PostsHeader({ onRefresh }: { onRefresh: () => void }) {
 export default function AdminPostsPage() {
   const router = useRouter();
   const [posts, setPosts] = useState<PostItem[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -74,6 +82,11 @@ export default function AdminPostsPage() {
   useEffect(() => {
     load();
   }, []);
+
+  const filteredPosts = useMemo(() => {
+    if (statusFilter === "all") return posts;
+    return posts.filter((p) => p.status === statusFilter);
+  }, [posts, statusFilter]);
 
   const setStatus = async (id: string, status: string, blockReason?: string) => {
     setUpdatingId(id);
@@ -118,11 +131,31 @@ export default function AdminPostsPage() {
       {error && <p className="text-sm text-red-600">{error}</p>}
       {loading && <p className="text-sm text-gray-600">Loading...</p>}
 
-      {posts.length === 0 && !loading ? (
+      <div className="flex items-center gap-3">
+        <label className="text-sm font-semibold text-gray-800">Statusa filtrs:</label>
+        <div className="flex gap-2 flex-wrap">
+          {STATUS_FILTERS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setStatusFilter(opt.value)}
+              className={`rounded px-3 py-1 text-sm font-semibold border transition ${
+                statusFilter === opt.value
+                  ? "border-blue-600 bg-blue-50 text-blue-700"
+                  : "border-gray-300 bg-white text-gray-800 hover:bg-gray-50"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {filteredPosts.length === 0 && !loading ? (
         <p className="text-sm text-gray-600">No posts found.</p>
       ) : (
         <div className="space-y-3">
-          {posts.map((p) => {
+          {filteredPosts.map((p) => {
             const isNew =
               p.createdAt && !Number.isNaN(Date.parse(p.createdAt))
                 ? Date.now() - new Date(p.createdAt).getTime() < 1000 * 60 * 60 * 24
@@ -203,9 +236,6 @@ export default function AdminPostsPage() {
                       Bloķēts: {p.blockedReason} {p.blockedByEmail ? `(bloķēja ${p.blockedByEmail})` : ""}
                     </span>
                   )}
-                  <span className="text-xs text-gray-600">
-                    Pārbaudīja: {p.blockedByEmail || "nav pārbaudīts"}
-                  </span>
                 </div>
               </div>
             </article>

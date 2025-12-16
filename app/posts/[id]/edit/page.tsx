@@ -22,6 +22,16 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
         if (!res.ok) {
           throw new Error(json?.error || "Neizdevās ielādēt ierakstu");
         }
+        if (json.post?.status === "hidden") {
+          const reason = json.post?.blockedReason ? ` Iemesls: ${json.post.blockedReason}.` : "";
+          setError(`Šis sludinājums ir bloķēts un to var tikai dzēst.${reason}`);
+          setLoading(false);
+          return;
+        }
+        const tagList =
+          (Array.isArray(json.post.tagNames) && json.post.tagNames.length ? json.post.tagNames : json.post.tags) ??
+          [];
+        const tags = Array.from(new Set(tagList.filter(Boolean)));
         setInitialValues({
           title: json.post.title ?? "",
           type: (json.post.type as PostType) ?? "lost",
@@ -31,7 +41,7 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
           photos: json.post.photos ?? [],
           hiddenPhotos: json.post.hiddenPhotos ?? [],
           hidePhotos: json.post.photosHidden === true,
-          tags: json.post.tags ?? [],
+          tags,
           geo: json.post.geo ?? null,
           showEmail: json.post.showEmail !== false,
           showPhone: !!json.post.showPhone,
@@ -74,8 +84,8 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
     return (
       <main className="mx-auto max-w-3xl p-6 space-y-4">
         <p className="text-sm text-red-600">{error || "Neizdevās ielādēt ierakstu"}</p>
-        <Link href="/" className="text-blue-600 hover:underline text-sm">
-          Atpakaļ uz sākumlapu
+        <Link href="/me/posts" className="text-blue-600 hover:underline text-sm">
+          Atpakaļ uz “Mani sludinājumi”
         </Link>
       </main>
     );
@@ -83,20 +93,26 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
 
   return (
     <main className="mx-auto max-w-3xl p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Rediģēt ierakstu</h1>
-          <p className="text-sm text-gray-600">Atjaunojiet ieraksta informāciju un saglabājiet.</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Rediģēt ierakstu</h1>
+            <p className="text-sm text-gray-600">Atjaunojiet ieraksta informāciju un saglabājiet.</p>
+          </div>
+          <div className="flex gap-2">
+            <Link
+              href={`/posts/${params.id}`}
+              className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
+            >
+              Skatīt ierakstu
+            </Link>
+            <Link
+              href="/"
+              className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
+            >
+              Atpakaļ uz sākumlapu
+            </Link>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Link href={`/posts/${params.id}`} className="text-blue-600 hover:underline text-sm">
-            Skatīt ierakstu
-          </Link>
-          <Link href="/" className="text-blue-600 hover:underline text-sm">
-            Atpakaļ uz sākumlapu
-          </Link>
-        </div>
-      </div>
 
       <PostForm mode="edit" initialValues={initialValues} onSubmit={updatePost} onCancelHref={`/posts/${params.id}`} />
     </main>

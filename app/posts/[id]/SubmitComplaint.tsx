@@ -30,6 +30,7 @@ export default function SubmitComplaint({ postId }: { postId: string }) {
       setReason("");
       setName("");
       setEmail("");
+      setOpen(false);
     } catch (err: any) {
       const msg = err?.message || "Neizdevās nosūtīt sūdzību";
       setStatus(msg);

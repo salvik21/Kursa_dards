@@ -7,16 +7,23 @@ export type SessionUser = {
   email?: string;
   emailVerified?: boolean;
   role?: "user" | "admin";
+  blocked?: boolean;
+  canLogin?: boolean;
 };
 
-async function fetchUserRole(uid: string): Promise<SessionUser["role"]> {
+async function fetchUserMeta(uid: string): Promise<Pick<SessionUser, "role" | "blocked" | "canLogin">> {
   try {
     const snap = await adminDb.collection("users").doc(uid).get();
-    if (!snap.exists) return undefined;
-    return snap.get("role") ?? undefined;
+    if (!snap.exists) return {};
+    const data = snap.data() as any;
+    return {
+      role: data?.role ?? undefined,
+      blocked: data?.blocked === true,
+      canLogin: data?.canLogin !== false,
+    };
   } catch (error) {
-    console.error("Failed to load user role:", error);
-    return undefined;
+    console.error("Failed to load user meta:", error);
+    return {};
   }
 }
 
@@ -31,13 +38,20 @@ export async function getSessionUser(required = false): Promise<SessionUser | nu
 
   try {
     const decoded = await adminAuth.verifySessionCookie(token, true);
-    const role = await fetchUserRole(decoded.uid);
+    const meta = await fetchUserMeta(decoded.uid);
+
+    if (meta.blocked || meta.canLogin === false) {
+      if (required) {
+        throw new Error("Blocked");
+      }
+      return null;
+    }
 
     return {
       uid: decoded.uid,
       email: decoded.email,
       emailVerified: decoded.email_verified,
-      role,
+      ...meta,
     };
   } catch (error) {
     if (required) {

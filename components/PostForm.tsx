@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { defaultPlaceOptions, defaultTagOptions } from "./post-form/constants";
 import { DetailsStep } from "./post-form/DetailsStep";
 import { LocationStep } from "./post-form/LocationStep";
@@ -12,6 +13,7 @@ import { fetchCategories, fetchPlaces, fetchTags } from "@/lib/api/public";
 import { useCallback } from "react";
 
 export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFormProps) {
+  const router = useRouter();
   const [values, setValues] = useState<PostFormValues>(initialValues);
   const [locationMode, setLocationMode] = useState<LocationMode>("list");
   const [availableTags, setAvailableTags] = useState<string[]>(defaultTagOptions);
@@ -254,6 +256,7 @@ export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFo
         geo: geoPayload,
       });
       setMessage(mode === "create" ? "Ieraksts izveidots." : "Ieraksts atjaunināts.");
+      router.push("/me");
     } catch (err: any) {
       setError(err?.message || "Neizdevās saglabāt ierakstu");
     } finally {

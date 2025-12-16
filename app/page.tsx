@@ -14,6 +14,14 @@ export default function Home() {
         </div>
         <PostsList />
       </section>
+
+      <footer className="mt-10 border-t border-gray-200 pt-6 max-w-5xl mx-auto text-sm text-gray-700 space-y-1">
+        <div className="text-center">
+          <a href="/about" className="text-blue-600 hover:underline">
+            Uzziniet par mums un kā iesniegt ieteikumus.
+          </a>
+        </div>
+      </footer>
     </main>
   );
 }
