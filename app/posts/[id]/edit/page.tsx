@@ -29,9 +29,14 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
           return;
         }
         const tagList =
-          (Array.isArray(json.post.tagNames) && json.post.tagNames.length ? json.post.tagNames : json.post.tags) ??
-          [];
-        const tags = Array.from(new Set(tagList.filter(Boolean)));
+          (Array.isArray(json.post.tagNames) && json.post.tagNames.length ? json.post.tagNames : json.post.tags) ?? [];
+        const tags: string[] = Array.from(
+          new Set(
+            (tagList as unknown[])
+              .filter((t): t is string => typeof t === "string" && t.trim().length > 0)
+              .map((t) => t.trim())
+          )
+        );
         setInitialValues({
           title: json.post.title ?? "",
           type: (json.post.type as PostType) ?? "lost",

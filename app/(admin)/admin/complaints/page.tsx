@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 /* eslint-disable @next/next/no-img-element */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AdminBackButton } from "@/components/AdminBackButton";
 
 type ComplaintItem = {
