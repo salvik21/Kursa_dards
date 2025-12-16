@@ -9,6 +9,9 @@ import {
   signOut,
   updateProfile,
   GoogleAuthProvider,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
 } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "./client";
@@ -122,4 +125,14 @@ export async function applyEmailVerification(oobCode: string) {
 
 export async function confirmPasswordResetAction(oobCode: string, newPassword: string) {
   await confirmPasswordReset(auth, oobCode, newPassword);
+}
+
+export async function changePassword(currentPassword: string, newPassword: string) {
+  const user = auth.currentUser;
+  if (!user || !user.email) {
+    throw new Error("Nav aktīva lietotāja");
+  }
+  const credential = EmailAuthProvider.credential(user.email, currentPassword);
+  await reauthenticateWithCredential(user, credential);
+  await updatePassword(user, newPassword);
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, FormEvent } from "react";
+import { changePassword } from "@/lib/firebase/auth-client";
 
 type Profile = {
   name: string;
@@ -14,6 +15,11 @@ export default function EditProfileForm() {
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [pwdSaving, setPwdSaving] = useState(false);
+  const [pwdStatus, setPwdStatus] = useState<string | null>(null);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -76,7 +82,29 @@ export default function EditProfileForm() {
     }
   };
 
+  const onChangePassword = async (e: FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      setPwdStatus("Jaunā parole un apstiprinājums nesakrīt.");
+      return;
+    }
+    setPwdSaving(true);
+    setPwdStatus(null);
+    try {
+      await changePassword(currentPassword, newPassword);
+      setPwdStatus("Parole atjaunināta.");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err: any) {
+      setPwdStatus(err?.message || "Neizdevās atjaunināt paroli.");
+    } finally {
+      setPwdSaving(false);
+    }
+  };
+
   return (
+    <>
     <section className="mt-6 rounded border border-gray-200 bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
@@ -141,5 +169,58 @@ export default function EditProfileForm() {
         </div>
       </form>
     </section>
+
+    <section className="mt-6 rounded border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Paroles maiņa</h2>
+          <p className="text-sm text-gray-600">Atjaunojiet savu pieteikšanās paroli.</p>
+        </div>
+      </div>
+
+      <form onSubmit={onChangePassword} className="mt-4 space-y-3">
+        <div className="space-y-1">
+          <label className="text-sm font-semibold text-gray-800">Pašreizējā parole</label>
+          <input
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            required
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm font-semibold text-gray-800">Jaunā parole</label>
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            required
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm font-semibold text-gray-800">Apstipriniet jauno paroli</label>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            required
+          />
+        </div>
+        {pwdStatus && <p className="text-sm text-amber-700">{pwdStatus}</p>}
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="submit"
+            disabled={pwdSaving}
+            className="rounded bg-blue-600 px-4 py-2 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
+          >
+            {pwdSaving ? "Saglabā..." : "Atjaunot paroli"}
+          </button>
+        </div>
+      </form>
+    </section>
+    </>
   );
 }
