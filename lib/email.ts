@@ -16,10 +16,12 @@ function ensureTransporter() {
 }
 
 export function buildPostUrl(id: string) {
+  const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null;
   const base =
     process.env.PUBLIC_APP_URL ||
     process.env.NEXT_PUBLIC_SITE_URL ||
-    "http://localhost:3000";
+    vercelUrl ||
+    "https://kursa-dards.vercel.app";
   return `${base.replace(/\/$/, "")}/posts/${id}`;
 }
 

@@ -108,8 +108,8 @@ export default function EditProfileForm() {
     <section className="mt-6 rounded border border-gray-200 bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Profile</h2>
-          <p className="text-sm text-gray-600">Update your name and phone.</p>
+          <h2 className="text-lg font-semibold text-gray-900">Profils</h2>
+          <p className="text-sm text-gray-600">Atjaunojiet savu vārdu un tālruni.</p>
         </div>
         <button
           type="button"
@@ -117,13 +117,13 @@ export default function EditProfileForm() {
           disabled={loading}
           className="rounded border border-gray-300 px-3 py-1 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition disabled:opacity-60"
         >
-          {loading ? "Refreshing..." : "Refresh"}
+          {loading ? "Atsvaidzina..." : "Atsvaidzināt"}
         </button>
       </div>
 
       <form onSubmit={onSubmit} className="mt-4 space-y-3">
         <div className="space-y-1">
-          <label className="text-sm font-semibold text-gray-800">Name</label>
+          <label className="text-sm font-semibold text-gray-800">Vārds</label>
           <input
             value={profile.name}
             onChange={(e) => setProfile((p) => ({ ...p, name: e.target.value }))}
@@ -132,7 +132,7 @@ export default function EditProfileForm() {
           />
         </div>
         <div className="space-y-1">
-          <label className="text-sm font-semibold text-gray-800">Phone</label>
+          <label className="text-sm font-semibold text-gray-800">Tālrunis</label>
           <input
             value={profile.phone}
             onChange={(e) => setProfile((p) => ({ ...p, phone: e.target.value }))}
@@ -141,13 +141,13 @@ export default function EditProfileForm() {
           />
         </div>
         <div className="space-y-1">
-          <label className="text-sm font-semibold text-gray-800">Email</label>
+          <label className="text-sm font-semibold text-gray-800">E-pasts</label>
           <input
             value={profile.email}
             onChange={(e) => setProfile((p) => ({ ...p, email: e.target.value }))}
             className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
-          <p className="text-xs text-gray-500">This email is used for contact; it does not change your login.</p>
+          <p className="text-xs text-gray-500">Šis e-pasts ir paredzēts saziņai; tas nemaina jūsu pieteikšanās e-pastu.</p>
         </div>
         {status && <p className="text-sm text-amber-700">{status}</p>}
         <div className="flex flex-wrap items-center gap-3">
@@ -156,7 +156,7 @@ export default function EditProfileForm() {
             disabled={saving}
             className="rounded bg-blue-600 px-4 py-2 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
           >
-            {saving ? "Saving..." : "Save changes"}
+            {saving ? "Saglabā..." : "Saglabāt izmaiņas"}
           </button>
           <button
             type="button"
@@ -164,7 +164,7 @@ export default function EditProfileForm() {
             onClick={onDeleteAccount}
             className="rounded bg-red-600 px-4 py-2 text-white font-semibold hover:bg-red-700 transition disabled:opacity-60"
           >
-            {deleting ? "Deleting..." : "Delete account"}
+            {deleting ? "Dzēš..." : "Dzēst kontu"}
           </button>
         </div>
       </form>
