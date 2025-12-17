@@ -203,12 +203,7 @@ export default function AdminComplaintsPage() {
 
                 <div className="text-xs text-gray-600 flex flex-wrap items-center gap-2">
                   {c.createdAt && <span>{new Date(c.createdAt).toLocaleString()}</span>}
-                  {(c.reporterName || c.reporterEmail) && (
-                    <span>
-                      Ziņotājs: {c.reporterName || c.reporterEmail}
-                      {c.reporterEmail && c.reporterName ? ` (${c.reporterEmail})` : ""}
-                    </span>
-                  )}
+                  {c.reporterEmail && <span>Ziņotājs: {c.reporterEmail}</span>}
                 </div>
 
                 {c.postSnippet && (

@@ -69,7 +69,6 @@ export async function GET() {
         id: d.id,
         postId: data.postId,
         userId: data.userId ?? null,
-        reporterName: data.reporterName ?? null,
         reporterEmail: data.reporterEmail ?? null,
         reason: data.reason ?? "",
         status: data.status ?? "accepted",

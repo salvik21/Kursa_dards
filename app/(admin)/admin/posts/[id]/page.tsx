@@ -77,7 +77,6 @@ export default async function AdminPostDetailPage({ params, searchParams }: Page
     id: string;
     reason?: string | null;
     createdAt?: string | null;
-    reporterName?: string | null;
     reporterEmail?: string | null;
   }[] = [];
   if (from === "complaints") {
@@ -95,7 +94,6 @@ export default async function AdminPostDetailPage({ params, searchParams }: Page
           id: d.id,
           reason: c?.reason ?? null,
           createdAt: c?.createdAt?.toDate ? c.createdAt.toDate().toISOString() : null,
-          reporterName: c?.reporterName ?? null,
           reporterEmail: c?.reporterEmail ?? null,
         };
       });
@@ -155,12 +153,7 @@ export default async function AdminPostDetailPage({ params, searchParams }: Page
               >
                 <div className="flex flex-wrap items-center justify-between gap-2 text-amber-800 font-semibold">
                   <span>{c.createdAt ? new Date(c.createdAt).toLocaleString() : "Nav datuma"}</span>
-                  {(c.reporterName || c.reporterEmail) && (
-                    <span className="font-normal">
-                      Ziņotājs: {c.reporterName || c.reporterEmail}
-                      {c.reporterEmail && c.reporterName ? ` (${c.reporterEmail})` : ""}
-                    </span>
-                  )}
+                  {c.reporterEmail && <span className="font-normal">Ziņotājs: {c.reporterEmail}</span>}
                 </div>
                 <div className="text-sm leading-relaxed mt-1">{c.reason || "Nav norādīts iemesls"}</div>
               </li>
