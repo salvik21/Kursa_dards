@@ -96,15 +96,17 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     let placeNameFromPlace: string | null = null;
     try {
       const placeSnap = await adminDb.collection("postsPlace").doc(params.id).get();
-      const placeData = placeSnap.data() as any;
-      geoFromPlace = placeData?.geo ?? null;
-      descriptionPlaceFromPlace = placeData?.descriptionPlace ?? null;
-      placeNameFromPlace = placeData?.placeNamePlace ?? null;
-    } catch {
-      geoFromPlace = null;
-      descriptionPlaceFromPlace = null;
-      placeNameFromPlace = null;
-    }
+    const placeData = placeSnap.data() as any;
+    const lat = Number(placeData?.lat ?? placeData?.geo?.lat);
+    const lng = Number(placeData?.lng ?? placeData?.geo?.lng);
+    geoFromPlace = Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+    descriptionPlaceFromPlace = placeData?.descriptionPlace ?? null;
+    placeNameFromPlace = placeData?.placeNamePlace ?? null;
+  } catch {
+    geoFromPlace = null;
+    descriptionPlaceFromPlace = null;
+    placeNameFromPlace = null;
+  }
 
     const photosMap = isOwner || isAdmin
       ? await loadAllPhotosForPosts([params.id])

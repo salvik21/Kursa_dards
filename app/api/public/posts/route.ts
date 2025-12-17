@@ -109,12 +109,15 @@ export async function GET(req: Request) {
     const posts = rawPosts
       .map((p) => {
         const placeData = placeMap.get(p.id);
+        const lat = Number(placeData?.lat ?? placeData?.geo?.lat);
+        const lng = Number(placeData?.lng ?? placeData?.geo?.lng);
+        const placeGeo = Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
         // Prefer place name stored in postsPlace; fall back to post value if not set
         const placeName = placeData?.placeNamePlace ?? p.placeName ?? null;
         const photos = photoMap.get(p.id)?.map((ph) => ph.url) ?? [];
         const tagIds = postTagsMap.get(p.id) ?? [];
         const tagNames = tagIds.map((id) => tagIdToName.get(id) ?? id);
-        return { ...p, photos, placeName, placeGeo: placeData?.geo ?? null, tagIds, tagNames };
+        return { ...p, photos, placeName, placeGeo, tagIds, tagNames };
       })
       // Only show approved posts
       .filter((p) => p.status === "open" || p.status === "resolved")

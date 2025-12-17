@@ -46,7 +46,6 @@ export async function syncPostPhotos({ postId, photo, hidden }: UpsertPayload) {
         postId,
         url,
         visible: hidden !== true,
-        hidden: hidden === true,
         createdAt: now,
         updatedAt: now,
       },

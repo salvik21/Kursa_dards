@@ -41,15 +41,13 @@ export async function GET() {
     const subsSnap = await adminDb.collection("subscriptions").where("userId", "==", user.uid).get();
     const subs = subsSnap.docs
       .map((d) => ({ id: d.id, ...(d.data() as any) }))
-      .filter(
-        (s) =>
-          s.enabled &&
-          ALLOWED_RADII.includes(Number(s.radiusKm)) &&
-          normalizeGeo(s.location?.geo)
-      )
+      .filter((s) => {
+        const geo = normalizeGeo({ lat: s.lat, lng: s.lng });
+        return s.enabled && ALLOWED_RADII.includes(Number(s.radiusKm)) && geo;
+      })
       .map((s) => ({
         id: s.id,
-        geo: normalizeGeo(s.location?.geo)!,
+        geo: normalizeGeo({ lat: s.lat, lng: s.lng })!,
         radiusKm: Number(s.radiusKm),
       }));
 
@@ -72,7 +70,7 @@ export async function GET() {
     const placeEntries = placesSnap.docs
       .map((d) => {
         const data = d.data() as any;
-        const geo = normalizeGeo(data.geo);
+        const geo = normalizeGeo({ lat: data.lat ?? data.geo?.lat, lng: data.lng ?? data.geo?.lng });
         return { postId: d.id, geo, placeName: data.placeNamePlace ?? data.placeName ?? null, descriptionPlace: data.descriptionPlace ?? null };
       })
       .filter((p) => p.geo);

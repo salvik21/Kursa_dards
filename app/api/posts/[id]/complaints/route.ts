@@ -10,7 +10,7 @@ export async function POST(
 ) {
   try {
     const user = await getSessionUser();
-    const { reason, reporterName, reporterEmail } = await req.json();
+    const { reason, reporterEmail } = await req.json();
 
     if (!reason || typeof reason !== "string" || !reason.trim()) {
       return NextResponse.json(
@@ -30,12 +30,9 @@ export async function POST(
       id: complaintRef.id,
       postId: params.id,
       userId: user?.uid ?? "0",
-      reporterName: reporterName || null,
       reporterEmail: user?.email ?? reporterEmail ?? null,
       reason: reason.trim(),
       status: "accepted",
-      postTitle: postData?.title ?? null,
-      postStatus: postData?.status ?? null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

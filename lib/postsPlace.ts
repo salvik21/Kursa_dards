@@ -39,7 +39,8 @@ export async function upsertPostPlace(payload: UpsertPayload) {
       {
         id: payload.postId,
         postId: payload.postId,
-        geo,
+        lat: geo.lat,
+        lng: geo.lng,
         descriptionPlace: payload.description ?? null,
         placeNamePlace: payload.placeName ?? null,
         createdAt,

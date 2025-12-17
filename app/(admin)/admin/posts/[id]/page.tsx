@@ -38,8 +38,10 @@ export default async function AdminPostDetailPage({ params, searchParams }: Page
   try {
     const placeSnap = await adminDb.collection("postsPlace").doc(params.id).get();
     const placeData = placeSnap.data() as any;
-    if (placeData?.geo && Number.isFinite(placeData.geo.lat) && Number.isFinite(placeData.geo.lng)) {
-      geo = { lat: placeData.geo.lat, lng: placeData.geo.lng };
+    const lat = Number(placeData?.lat ?? placeData?.geo?.lat);
+    const lng = Number(placeData?.lng ?? placeData?.geo?.lng);
+    if (Number.isFinite(lat) && Number.isFinite(lng)) {
+      geo = { lat, lng };
     }
     if (placeData?.placeNamePlace) {
       placeName = placeData.placeNamePlace;

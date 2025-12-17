@@ -7,24 +7,17 @@ export const runtime = "nodejs";
 const ALLOWED_RADII = [0.5, 1, 2, 3, 4];
 
 type NormalizedLocation = {
-  geo: { lat: number; lng: number };
-  address?: string;
-  region?: string;
+  lat: number;
+  lng: number;
 };
 
 function normalizeLocation(raw: any): NormalizedLocation | null {
   if (!raw || typeof raw !== "object") return null;
-  const lat = Number(raw.geo?.lat);
-  const lng = Number(raw.geo?.lng);
+  const lat = Number(raw.lat ?? raw.geo?.lat);
+  const lng = Number(raw.lng ?? raw.geo?.lng);
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
 
-  const address = typeof raw.address === "string" ? raw.address.trim() : undefined;
-  const region = typeof raw.region === "string" ? raw.region.trim() : undefined;
-
-  const result: NormalizedLocation = { geo: { lat, lng } };
-  if (address) result.address = address;
-  if (region) result.region = region;
-  return result;
+  return { lat, lng };
 }
 
 export async function GET() {
@@ -67,11 +60,11 @@ export async function POST(req: Request) {
     const now = new Date();
     const payload = {
       userId: user.uid,
-      userEmail: user.email ?? "",
       name,
       enabled,
       radiusKm: Number(body.radiusKm),
-      location: location ?? null,
+      lat: location?.lat ?? null,
+      lng: location?.lng ?? null,
       createdAt: now,
       updatedAt: now,
     };
@@ -123,12 +116,15 @@ export async function PATCH(req: Request) {
     if (body.enabled !== undefined) {
       update.enabled = !!body.enabled;
     }
-    if (body.location !== undefined) {
-      const location = normalizeLocation(body.location);
-      if (update.enabled && !location) {
+    if (body.location !== undefined || body.lat !== undefined || body.lng !== undefined) {
+      const location = normalizeLocation(
+        body.location !== undefined ? body.location : { lat: body.lat, lng: body.lng }
+      );
+      if ((update.enabled ?? data.enabled) && !location) {
         return NextResponse.json({ ok: false, error: "Location is required" }, { status: 400 });
       }
-      update.location = location ?? null;
+      update.lat = location?.lat ?? null;
+      update.lng = location?.lng ?? null;
     }
 
     await ref.update(update);

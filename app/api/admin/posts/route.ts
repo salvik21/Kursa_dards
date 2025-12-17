@@ -121,7 +121,7 @@ async function notifySubscriptions(postId: string, post: any) {
 
   const jobs = subsSnap.docs.map(async (docSnap) => {
     const data = docSnap.data() as any;
-    const target = normalizeGeo(data.location?.geo);
+    const target = normalizeGeo({ lat: data.lat ?? data.location?.geo?.lat, lng: data.lng ?? data.location?.geo?.lng });
     const radiusKm = Number(data.radiusKm);
     const to = data.userEmail || data.email;
     if (!to || !target || !ALLOWED_RADII.includes(radiusKm)) return;

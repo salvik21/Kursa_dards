@@ -16,7 +16,8 @@ type Subscription = {
   name: string;
   enabled: boolean;
   radiusKm: number;
-  location?: { geo?: { lat?: number; lng?: number }; address?: string | null } | null;
+  lat?: number | null;
+  lng?: number | null;
 };
 
 type SubscriptionResponse = {
@@ -207,10 +208,9 @@ export default function NotificationSettings() {
     setName(sub.name);
     setEnabled(sub.enabled);
     setRadius(sub.radiusKm);
-    const geo = sub.location?.geo;
-    setLat(geo?.lat?.toString() ?? "");
-    setLng(geo?.lng?.toString() ?? "");
-    setAddress(sub.location?.address ?? "");
+    setLat(sub.lat != null ? sub.lat.toString() : "");
+    setLng(sub.lng != null ? sub.lng.toString() : "");
+    setAddress("");
     setStatus(null);
   };
 
@@ -231,13 +231,8 @@ export default function NotificationSettings() {
         name: name.trim() || "Bez nosaukuma",
         enabled,
         radiusKm: radius,
-        location:
-          lat && lng
-            ? {
-                geo: { lat: Number(lat), lng: Number(lng) },
-                address: address.trim() || undefined,
-              }
-            : undefined,
+        lat: lat ? Number(lat) : undefined,
+        lng: lng ? Number(lng) : undefined,
       };
 
       const res = await fetch("/api/me/subscription", {
