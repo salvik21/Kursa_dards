@@ -16,9 +16,9 @@ export default function ForgotPasswordPage() {
     setInfo(null);
     try {
       await sendResetEmail(email);
-      setInfo("Check your email for a reset link.");
+      setInfo("Pārbaudi e-pastu, lai saņemtu saiti paroles atjaunošanai.");
     } catch (err: any) {
-      setError(err?.message || "Failed to send reset email");
+      setError(err?.message || "Neizdevās nosūtīt paroles atjaunošanas e-pastu");
     } finally {
       setLoading(false);
     }
@@ -26,10 +26,10 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="mx-auto max-w-md p-6">
-      <h1 className="text-2xl font-semibold mb-4">Reset password</h1>
+      <h1 className="text-2xl font-semibold mb-4">Atjaunot paroli</h1>
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="space-y-2">
-          <label className="block text-sm font-medium">Email</label>
+          <label className="block text-sm font-medium">E-pasts</label>
           <input
             type="email"
             value={email}
@@ -45,13 +45,13 @@ export default function ForgotPasswordPage() {
           disabled={loading}
           className="w-full rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
         >
-          {loading ? "Sending..." : "Send reset link"}
+          {loading ? "Sūtam..." : "Sūtīt atjaunošanas saiti"}
         </button>
       </form>
       <p className="mt-4 text-sm">
-        Remembered?{" "}
+        Atceries paroli?{" "}
         <a href="/auth/sign-in" className="text-blue-600 underline">
-          Back to sign in
+          Atpakaļ uz pieteikšanos
         </a>
       </p>
     </div>
