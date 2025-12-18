@@ -138,3 +138,33 @@ export async function PATCH(req: Request) {
     );
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const user = await requireSessionUser();
+    const body = await req.json();
+    const id = typeof body.id === "string" ? body.id : "";
+    if (!id) {
+      return NextResponse.json({ ok: false, error: "Subscription id is required" }, { status: 400 });
+    }
+
+    const ref = adminDb.collection("subscriptions").doc(id);
+    const snap = await ref.get();
+    if (!snap.exists) {
+      return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
+    }
+    const data = snap.data() as any;
+    if (data.userId !== user.uid) {
+      return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
+    }
+
+    await ref.delete();
+    return NextResponse.json({ ok: true });
+  } catch (error: any) {
+    console.error("DELETE /api/me/subscription error:", error);
+    return NextResponse.json(
+      { ok: false, error: error?.message || "Failed to delete subscription" },
+      { status: error?.message === "Unauthenticated" ? 401 : 500 }
+    );
+  }
+}

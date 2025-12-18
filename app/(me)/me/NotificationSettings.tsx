@@ -130,6 +130,7 @@ export default function NotificationSettings() {
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const addressInputRef = useRef<HTMLInputElement | null>(null);
 
   const load = useCallback(async () => {
@@ -262,6 +263,38 @@ export default function NotificationSettings() {
     }
   };
 
+  const onDelete = async () => {
+    if (!currentId) return;
+    const confirmed = window.confirm("Dzēst šo brīdinājumu? Šo darbību nevar atsaukt.");
+    if (!confirmed) return;
+
+    setDeleting(true);
+    setStatus(null);
+    try {
+      const res = await fetch("/api/me/subscription", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: currentId }),
+      });
+      const json: SubscriptionResponse = await res.json();
+      if (!res.ok || !json.ok) {
+        throw new Error(json?.error || "Failed to delete subscription");
+      }
+      const remaining = list.filter((s) => s.id !== currentId);
+      setList(remaining);
+      if (remaining.length > 0) {
+        selectForEdit(remaining[0]);
+      } else {
+        resetForm();
+      }
+      setStatus("Brīdinājums dzēsts.");
+    } catch (err: any) {
+      setStatus(err?.message || "Neizdevās dzēst brīdinājumu");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <section className="mt-6 rounded border border-gray-200 bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between">
@@ -269,14 +302,11 @@ export default function NotificationSettings() {
           <h2 className="text-lg font-semibold text-gray-900">Paziņojumi pēc rādiusa</h2>
           <p className="text-sm text-gray-600">Veido vairākus brīdinājumus ar savu nosaukumu un atrašanās vietu.</p>
         </div>
-        <button
-          type="button"
-          onClick={load}
-          disabled={loading}
-          className="rounded border border-gray-300 px-3 py-1 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition disabled:opacity-60"
-        >
-          {loading ? "Atjauno..." : "Atjaunot"}
-        </button>
+        {loading && (
+          <span className="text-sm text-gray-600" aria-live="polite">
+            Atjauno...
+          </span>
+        )}
       </div>
 
       <div className="mt-4 space-y-3">
@@ -374,15 +404,27 @@ export default function NotificationSettings() {
           </p>
         )}
 
-          {status && <p className="text-sm text-amber-700">{status}</p>}
+        {status && <p className="text-sm text-amber-700">{status}</p>}
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded bg-blue-600 px-4 py-2 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
-        >
-          {saving ? "Saglabā..." : "Saglabāt iestatījumus"}
-        </button>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded bg-blue-600 px-4 py-2 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
+          >
+            {saving ? "Saglabā..." : "Saglabāt iestatījumus"}
+          </button>
+          {currentId && (
+            <button
+              type="button"
+              onClick={onDelete}
+              disabled={deleting}
+              className="rounded border border-red-200 px-4 py-2 text-red-700 font-semibold hover:bg-red-50 transition disabled:opacity-60"
+            >
+              {deleting ? "Dzēš..." : "Dzēst brīdinājumu"}
+            </button>
+          )}
+        </div>
       </form>
     </section>
   );
