@@ -129,12 +129,12 @@ export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFo
     fetchPlaces().then((options) => {
       if (options.length) {
         setAvailablePlaces(options);
-        if (!values.placeName) {
+        if (!values.placeName && locationMode === "list") {
           setValues((prev) => ({ ...prev, placeName: options[0]?.name ?? "Nav vietas" }));
         }
       }
     });
-  }, [values.placeName]);
+  }, [values.placeName, locationMode]);
 
   const placeOptions = useMemo(() => availablePlaces, [availablePlaces]);
 
@@ -243,7 +243,7 @@ export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFo
           throw new Error("Ievadiet koordinātas vai izvēlieties punktu kartē.");
         }
         geoPayload = { lat: Number(lat), lng: Number(lng) };
-        placeNamePayload = "koordinātas";
+        placeNamePayload = placeNamePayload || "koordinātas";
       }
 
       const selectedCategory = availableCategories.find((c) => c.id === values.category);

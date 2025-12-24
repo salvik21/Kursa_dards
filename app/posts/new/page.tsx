@@ -46,7 +46,7 @@ export default function NewPostPage() {
           <h1 className="text-3xl font-bold text-gray-900">Izveidot ierakstu</h1>
           <p className="text-sm text-gray-600">Aizpildiet laukus un iesniedziet.</p>
         </div>
-        <Link href="/me" className="text-blue-600 hover:underline text-sm">
+        <Link href="/me" className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition">
           Atpakaļ uz kontu
         </Link>
       </div>

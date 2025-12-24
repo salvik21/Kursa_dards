@@ -104,19 +104,19 @@ export default function EditProfileForm() {
   };
 
   return (
-    <>
+    <div className="w-full max-w-4xl mx-auto">
       <section className="mt-6 rounded border border-gray-200 bg-white p-4 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">Profils</h2>
-          <p className="text-sm text-gray-600">Atjaunojiet savu vārdu un tālruni.</p>
+        <div className="flex flex-col items-center gap-1 text-center">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Profils</h2>
+            <p className="text-sm text-gray-600">Atjaunojiet savu vārdu un tālruni.</p>
+          </div>
+          {loading && (
+            <span className="text-sm text-gray-600" aria-live="polite">
+              Atsvaidzina...
+            </span>
+          )}
         </div>
-        {loading && (
-          <span className="text-sm text-gray-600" aria-live="polite">
-            Atsvaidzina...
-          </span>
-        )}
-      </div>
 
         <form onSubmit={onSubmit} className="mt-4 space-y-3">
           <div className="space-y-1">
@@ -147,7 +147,7 @@ export default function EditProfileForm() {
             <p className="text-xs text-gray-500">Šis e-pasts ir paredzēts saziņai; tas nemaina jūsu pieteikšanās e-pastu.</p>
           </div>
           {status && <p className="text-sm text-amber-700">{status}</p>}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <button
               type="submit"
               disabled={saving}
@@ -168,7 +168,7 @@ export default function EditProfileForm() {
       </section>
 
       <section className="mt-6 rounded border border-gray-200 bg-white p-4 shadow-sm">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col items-center gap-1 text-center">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">Paroles maiņa</h2>
             <p className="text-sm text-gray-600">Atjaunojiet savu pieteikšanās paroli.</p>
@@ -207,7 +207,7 @@ export default function EditProfileForm() {
             />
           </div>
           {pwdStatus && <p className="text-sm text-amber-700">{pwdStatus}</p>}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <button
               type="submit"
               disabled={pwdSaving}
@@ -218,6 +218,6 @@ export default function EditProfileForm() {
           </div>
         </form>
       </section>
-    </>
+    </div>
   );
 }
