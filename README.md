@@ -1,50 +1,77 @@
-# Next.js + TypeScript Starter
+# Kursa dards — Pazudetas un atrastas lietas
 
-This repo is a minimal Next.js app using the App Router and TypeScript.
+Tisa ir kursa darba projekta lietotne pazuduso un atrasto lietu publicesanai un mekleSanai. Lietotaji var veidot sludinajumus, pievienot foto un lokaciju, un sazineties ar atrastam lietam ar e-pasta formas palidzibu.
 
-## Requirements
+## Galvenas funkcijas
+- Publiska sludinajumu parskatisana un mekleSana
+- PazuduSa/atrasta lieta: apraksts, foto, statuss, lokacija
+- Kontakta forma, lai nosutit e-pastu sludinajuma autoram
+- Lietotaju konti: profila dati, mani sludinajumi, pazinojumi
+- Admin panelis: lietotaji, sludinajumi, tags, kategorijas, vietas, statistika
 
-- Node.js 18.17+ (or 20+ recommended)
-- A package manager: npm (default), yarn, or pnpm
+## Tehnologijas
+- Next.js 14 (App Router), React, TypeScript
+- Tailwind CSS
+- Firebase (Auth/Firestore) un firebase-admin
+- Supabase (failu glabasana)
+- Google Maps API
+- Jest + Testing Library
 
-## Setup
-
-Install dependencies (using npm by default):
+## UzstadiSana
+1) Instalacija:
 
 ```bash
 npm install
 ```
 
-Or with yarn:
+2) Izveido .env.local no parauga:
 
 ```bash
-yarn
+copy .env.local.example .env.local
 ```
 
-Or with pnpm:
+3) Aizpildi vides mainigos .env.local (skat. zemak)
+
+4) Palaid izstrades vidi:
 
 ```bash
-pnpm install
+npm run dev
 ```
 
-## Scripts
+## Vides mainigie
+Pamatatbalsts ir definets `c:\Users\alax2\Desktop\Pro\Kursa_dards\.env.local.example`.
+Nepieciesamie mainigie:
+- `NEXT_PUBLIC_FIREBASE_API_KEY`
+- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+- `NEXT_PUBLIC_FIREBASE_APP_ID`
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_CLIENT_EMAIL`
+- `FIREBASE_PRIVATE_KEY`
+- `FIREBASE_STORAGE_BUCKET`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_BUCKET_NAME`
+- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`
 
-- `npm run dev` â€” start dev server on http://localhost:3000
-- `npm run build` â€” build for production
-- `npm run start` â€” run production server
-- `npm run lint` â€” run ESLint
+## Skripti
+- `npm run dev` — izstrades servers
+- `npm run build` — produkcijas build
+- `npm run start` — palaist build
+- `npm run lint` — ESLint
+- `npm run typecheck` — TypeScript parbaude
+- `npm run test` — Jest
 
-## Project Structure
+## Projekta struktura
+- `app/` — App Router lapas un API routes
+- `components/` — UI komponenti
+- `lib/` — paligfunkcijas un integracijas
+- `types/` — kopigie tipi
+- `public/` — statiskie faili
 
-- `app/` â€” App Router entry (`layout.tsx`, `page.tsx`)
-- `app/globals.css` â€” global styles
-- `public/` â€” static assets
-- `next.config.ts` â€” Next.js config (TypeScript)
-- `tsconfig.json` â€” TypeScript config
-- `.eslintrc.json` â€” ESLint config
-
-## Notes
-
-- Strict mode and typed routes are enabled.
-- Adjust `package.json` to your preferred package manager if needed.
-
+## Deploy
+Ieteicams Vercel. Pievieno visus `.env.local` mainigos Vercel Environment Variables un izpildi `npm run build`.
