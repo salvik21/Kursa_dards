@@ -19,7 +19,7 @@ export function PhotosStep({ values, onUpdate, onUploadingChange }: PhotosStepPr
             checked={values.hidePhotos === true}
             onChange={(e) => onUpdate("hidePhotos", e.target.checked)}
           />
-          Paslēpt foto publiski
+          Paslept foto publiski
           <span className="text-xs text-gray-500">(redzamas tikai jums un administratoriem)</span>
         </label>
       )}

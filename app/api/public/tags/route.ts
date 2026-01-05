@@ -10,6 +10,6 @@ export async function GET() {
     return NextResponse.json({ ok: true, tags });
   } catch (error: any) {
     console.error("Public tags error:", error);
-    return NextResponse.json({ ok: false, error: "Failed to load tags" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "Neizdevas ieladet birkas" }, { status: 500 });
   }
 }

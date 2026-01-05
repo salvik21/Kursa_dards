@@ -5,14 +5,11 @@ export type ComplaintStatus = "accepted" | "in_review" | "closed";
 export interface Complaint {
   id: string;
   postId: string;
-  userId: string; // "0" for гостевой запрос
-  reason: string;
-  status: ComplaintStatus;
+  userId: string; // Lietotājs, kas iesniedzis sūdzību
+  reason: string; // Sūdzības iemesls
+  status: ComplaintStatus;  // Sūdzības statuss
   createdAt: Timestamp;
   updatedAt?: Timestamp;
-  postTitle?: string;
-  postStatus?: string;
-  reporterName?: string | null;
   reporterEmail?: string | null;
   blockReason?: string | null;
   blockedByAdminId?: string | null;

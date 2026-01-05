@@ -17,12 +17,13 @@ export default function SignInPage() {
     setLoading(true);
     setError(null);
     try {
+      // Autorizacija ar Firebase un sesijas izveide servera puse.
       await signIn(email, password);
       router.push("/me");
     } catch (err: any) {
       const msg = err?.code === "auth/invalid-credential" || err?.code === "auth/invalid-login"
         ? "Nepareizs e-pasts vai parole."
-        : err?.message || "Neizdevās pieteikties.";
+        : err?.message || "Neizdevas pieteikties.";
       setError(msg);
     } finally {
       setLoading(false);
@@ -34,10 +35,11 @@ export default function SignInPage() {
     setGooglePending(true);
     setError(null);
     try {
+      // Google OAuth pierakstisanas un sesijas izveide.
       await signInWithGoogle();
       router.push("/me");
     } catch (err: any) {
-      setError(err?.message || "Neizdevās pieteikties ar Google.");
+      setError(err?.message || "Neizdevas pieteikties ar Google.");
     } finally {
       setGooglePending(false);
     }
@@ -45,7 +47,7 @@ export default function SignInPage() {
 
   return (
     <div className="mx-auto max-w-md p-6">
-      <h1 className="text-2xl font-semibold mb-4">Pieslēgties</h1>
+      <h1 className="text-2xl font-semibold mb-4">Pieslegties</h1>
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="space-y-2">
           <label className="block text-sm font-medium">E-pasts</label>
@@ -73,7 +75,7 @@ export default function SignInPage() {
           disabled={loading}
           className="w-full rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
         >
-          {loading ? "Pieslēdzas..." : "Pieslēgties"}
+          {loading ? "Piesledzas..." : "Pieslegties"}
         </button>
       </form>
       <div className="mt-4 flex items-center gap-3">
@@ -105,7 +107,7 @@ export default function SignInPage() {
             fill="#EA4335"
           />
         </svg>
-        Turpināt ar Google
+        Turpinat ar Google
       </button>
       <p className="mt-4 text-sm">
         <a href="/auth/forgot-password" className="text-blue-600 underline">

@@ -18,7 +18,7 @@ export const runtime = "nodejs";
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const snap = await adminDb.collection("posts").doc(params.id).get();
   const data = snap.data() as any;
-  const title = data?.title ?? "Sludinājums";
+  const title = data?.title ?? "Sludinajums";
   return { title };
 }
 
@@ -160,7 +160,7 @@ export default async function PostDetailPage({ params }: PageProps) {
           href="/"
           className="inline-flex items-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
         >
-          Atpakaļ uz sākumu
+          Atpakal uz sakumu
         </a>
       </div>
 
@@ -188,7 +188,7 @@ export default async function PostDetailPage({ params }: PageProps) {
                   href={`/posts/${post.id}/edit`}
                   className="inline-flex items-center rounded bg-blue-600 px-3 py-1 text-sm font-semibold text-white hover:bg-blue-700 transition"
                 >
-                  Rediģēt
+                  Rediget
                 </a>
               )}
             </div>
@@ -201,7 +201,7 @@ export default async function PostDetailPage({ params }: PageProps) {
           )}
           {post.photosHidden && !post.photos.length && (
             <div className="rounded border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
-              Foto paslēptas pēc autora izvēles. Redzamas tikai īpašniekam un administratoriem.
+              Foto pasleptas pec autora izveles. Redzamas tikai ipasniekam un administratoriem.
             </div>
           )}
         </div>
@@ -209,7 +209,7 @@ export default async function PostDetailPage({ params }: PageProps) {
 
       {post.status === "hidden" && post.blockedReason && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-          Sludinājumu paslēpa administrators. Iemesls: {post.blockedReason}
+          Sludinajumu paslepa administrators. Iemesls: {post.blockedReason}
         </div>
       )}
 
@@ -236,7 +236,7 @@ export default async function PostDetailPage({ params }: PageProps) {
 
       {post.privateNote && canSeePrivate && (
         <section className="space-y-2">
-          <h2 className="text-xl font-semibold text-gray-900">Privāta piezīme</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Privata piezime</h2>
           <div className="rounded border border-gray-200 bg-yellow-50 p-3 text-sm text-gray-800">
             {post.privateNote}
           </div>
@@ -244,23 +244,23 @@ export default async function PostDetailPage({ params }: PageProps) {
       )}
 
       <section className="space-y-2">
-        <h2 className="text-xl font-semibold text-gray-900">Atrašanās vieta</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Atrasanas vieta</h2>
         {post.geo ? (
           <div className="rounded border border-gray-200 bg-gray-50 p-3 text-gray-800">
             <LocationMap lat={Number(post.geo.lat)} lng={Number(post.geo.lng)} label={post.placeName || post.title} />
           </div>
         ) : (
-          <p className="text-gray-700">Nav norādīta atrašanās vieta.</p>
+          <p className="text-gray-700">Nav noradita atrasanas vieta.</p>
         )}
       </section>
 
       {(post.ownerName || (post.ownerEmail && post.showEmail) || (post.ownerPhone && post.showPhone)) && (
         <section className="space-y-2">
-          <h2 className="text-xl font-semibold text-gray-900">Īpašnieka informācija</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Ipasnieka informacija</h2>
           <div className="rounded border border-gray-200 bg-gray-50 p-3 text-sm text-gray-800 space-y-1">
             {post.ownerName && (
               <div>
-                <span className="font-semibold">Vārds:</span> {post.ownerName}
+                <span className="font-semibold">Vards:</span> {post.ownerName}
               </div>
             )}
             {post.ownerEmail && post.showEmail && (
@@ -270,7 +270,7 @@ export default async function PostDetailPage({ params }: PageProps) {
             )}
             {post.ownerPhone && post.showPhone && (
               <div>
-                <span className="font-semibold">Tālrunis:</span> {post.ownerPhone}
+                <span className="font-semibold">Talrunis:</span> {post.ownerPhone}
               </div>
             )}
           </div>
@@ -279,12 +279,12 @@ export default async function PostDetailPage({ params }: PageProps) {
 
       <section className="space-y-4">
         <div className="space-y-2">
-          <h2 className="text-xl font-semibold text-gray-900">Sazināties ar autoru</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Sazinaties ar autoru</h2>
           <ContactOwner postId={post.id} ownerEmail={post.ownerEmail} />
         </div>
 
         <div className="space-y-2">
-          <h2 className="text-xl font-semibold text-gray-900">Paziņot par sludinājumu</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Pazinot par sludinajumu</h2>
           <SubmitComplaint postId={post.id} />
         </div>
       </section>

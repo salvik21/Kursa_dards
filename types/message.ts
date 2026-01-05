@@ -3,12 +3,12 @@ import { Timestamp } from "firebase/firestore";
 export interface Message {
   id: string;
 
-  postId: string;     // объявление
-  toUserId: string;   // владелец объявления
+  postId: string;     // sludinājuma ID
+  toUserId: string;   // kam sūtīts
 
-  userId?: string;    // автор, если авторизован
-  fromName?: string;  // если гость
-  fromEmail?: string; // если гость
+  userId?: string;    // autor, ja autentificēts
+  fromName?: string;  // ja viesis
+  fromEmail?: string; // ja viesis
 
   content: string;
   createdAt: Timestamp;

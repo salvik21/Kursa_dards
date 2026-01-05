@@ -23,11 +23,11 @@ export default function PlacesPage() {
     setError(null);
     try {
       const res = await fetch("/api/admin/places", { cache: "no-store" });
-      if (!res.ok) throw new Error("Failed to load places");
+      if (!res.ok) throw new Error("Neizdevas ieladet vietas");
       const data = await res.json();
       setPlaces(data.places ?? []);
     } catch (err: any) {
-      setError(err?.message || "Failed to load places");
+      setError(err?.message || "Neizdevas ieladet vietas");
     }
   };
 
@@ -40,7 +40,7 @@ export default function PlacesPage() {
     setMessage(null);
     setError(null);
     if (!name.trim() || !lat.trim() || !lng.trim()) {
-      setError("Nepieciešams vietas nosaukums un koordinātas");
+      setError("Nepieciesams vietas nosaukums un koordinatas");
       return;
     }
     setLoading(true);
@@ -56,7 +56,7 @@ export default function PlacesPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || "Neizdevās izveidot vietu");
+        throw new Error(data?.error || "Neizdevas izveidot vietu");
       }
       setName("");
       setLat(defaultLat);
@@ -64,7 +64,7 @@ export default function PlacesPage() {
       setMessage("Vieta izveidota");
       loadPlaces();
     } catch (err: any) {
-      setError(err?.message || "Neizdevās izveidot vietu");
+      setError(err?.message || "Neizdevas izveidot vietu");
     } finally {
       setLoading(false);
     }
@@ -80,12 +80,12 @@ export default function PlacesPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || "Neizdevās dzēst vietu");
+        throw new Error(data?.error || "Neizdevas dzest vietu");
       }
-      setMessage("Vieta dzēsta");
+      setMessage("Vieta dzesta");
       loadPlaces();
     } catch (err: any) {
-      setError(err?.message || "Neizdevās dzēst vietu");
+      setError(err?.message || "Neizdevas dzest vietu");
     }
   };
 
@@ -93,8 +93,8 @@ export default function PlacesPage() {
     <main className="mx-auto max-w-3xl p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Vietu pārvaldība</h1>
-          <p className="text-sm text-gray-700">Administratori var pievienot vai noņemt iepriekš sagatavotus vietu nosaukumus.</p>
+          <h1 className="text-3xl font-bold text-gray-900">Vietu parvaldiba</h1>
+          <p className="text-sm text-gray-700">Administratori var pievienot vai nonemt ieprieks sagatavotus vietu nosaukumus.</p>
         </div>
         <AdminBackButton />
       </div>
@@ -106,7 +106,7 @@ export default function PlacesPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="piem., Centrālais parks, Galvenā stacija"
+            placeholder="piem., Centralais parks, Galvena stacija"
           />
         </div>
         <div className="grid gap-3 md:grid-cols-2">
@@ -144,15 +144,15 @@ export default function PlacesPage() {
           disabled={loading}
           className="inline-flex items-center rounded bg-blue-600 px-4 py-2 text-white font-semibold shadow hover:bg-blue-700 disabled:opacity-60"
         >
-          {loading ? "Saglabā..." : "Pievienot vietu"}
+          {loading ? "Saglaba..." : "Pievienot vietu"}
         </button>
       </form>
 
       <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-3">
-        <h2 className="text-lg font-semibold text-gray-900">Esošās vietas</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Esosas vietas</h2>
         {error && <p className="text-sm text-red-600">{error}</p>}
         {places.length === 0 ? (
-          <p className="text-sm text-gray-600">Vietas vēl nav pievienotas.</p>
+          <p className="text-sm text-gray-600">Vietas vel nav pievienotas.</p>
         ) : (
           <ul className="space-y-2">
             {places.map((place) => (
@@ -174,7 +174,7 @@ export default function PlacesPage() {
                   onClick={() => removePlace(place.id)}
                   className="rounded bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-100"
                 >
-                  Dzēst
+                  Dzest
                 </button>
               </li>
             ))}
@@ -282,9 +282,9 @@ function MapPicker({
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-semibold text-gray-800">Atrašanās vieta kartē</label>
+      <label className="text-sm font-semibold text-gray-800">Atrasanas vieta karte</label>
       <div ref={mapRef} className="h-64 w-full rounded border border-gray-300" role="presentation" />
-      <p className="text-xs text-gray-600">Noklikšķiniet kartē vai pavelciet marķieri, lai norādītu koordinātas.</p>
+      <p className="text-xs text-gray-600">Noklikskiniet karte vai pavelciet markieri, lai noraditu koordinatas.</p>
     </div>
   );
 }

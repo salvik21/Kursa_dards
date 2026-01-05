@@ -7,23 +7,15 @@ export interface GeoPoint {
   lat: number;
   lng: number;
 }
-
-// Previous nested location shape kept for reference; remove when no longer used.
-// export interface Geo {
-//   address?: string;
-//   region?: string;
-//   geo: GeoPoint;
-// }
-
 export interface Post {
-  id: string;
-  userId: string;
+  id: string; 
+  userId: string;   
 
-  title: string;
-  type: PostType;
-  status: PostStatus;
-  category: string;
-  tags: string[];
+  title: string;  
+  type: PostType; 
+  status: PostStatus; 
+  category: string; 
+  tags: string[]; 
 
   placeName?: string;
   // Flattened optional geo per plan (use this going forward)
@@ -32,7 +24,6 @@ export interface Post {
   // location?: Geo;
 
   description: string;
-  photosHidden?: boolean;
   descriptionHidden?: boolean;
   blockedReason?: string;
   blockedBy?: string;

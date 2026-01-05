@@ -14,7 +14,7 @@ export default function ContactOwner({ postId, ownerEmail }: { postId: string; o
     e.preventDefault();
     setStatus(null);
     if (!message.trim()) {
-      setStatus("Ziņa ir obligāta.");
+      setStatus("Zina ir obligata.");
       return;
     }
     setLoading(true);
@@ -25,11 +25,11 @@ export default function ContactOwner({ postId, ownerEmail }: { postId: string; o
         body: JSON.stringify({ email, phone, message }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Neizdevās nosūtīt");
-      setStatus("Ziņa nosūtīta autoram.");
+      if (!res.ok) throw new Error(json?.error || "Neizdevas nosutit");
+      setStatus("Zina nosutita autoram.");
       setMessage("");
     } catch (err: any) {
-      setStatus(err?.message || "Neizdevās nosūtīt");
+      setStatus(err?.message || "Neizdevas nosutit");
     } finally {
       setLoading(false);
     }
@@ -42,14 +42,14 @@ export default function ContactOwner({ postId, ownerEmail }: { postId: string; o
         onClick={() => setOpen((v) => !v)}
         className="rounded bg-blue-600 px-4 py-2 text-white font-semibold hover:bg-blue-700 transition"
       >
-        {open ? "Paslēpt formu" : "Sazināties ar autoru"}
+        {open ? "Paslept formu" : "Sazinaties ar autoru"}
       </button>
 
       {open && (
         <form onSubmit={onSubmit} className="space-y-3 rounded border border-gray-200 bg-white p-4 shadow-sm">
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-1">
-              <label className="text-sm font-semibold text-gray-800">Jūsu e-pasts (pēc izvēles)</label>
+              <label className="text-sm font-semibold text-gray-800">Jusu e-pasts (pec izveles)</label>
               <input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -58,7 +58,7 @@ export default function ContactOwner({ postId, ownerEmail }: { postId: string; o
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-semibold text-gray-800">Tālrunis (pēc izvēles)</label>
+              <label className="text-sm font-semibold text-gray-800">Talrunis (pec izveles)</label>
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
@@ -68,13 +68,13 @@ export default function ContactOwner({ postId, ownerEmail }: { postId: string; o
             </div>
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-800">Ziņa *</label>
+            <label className="text-sm font-semibold text-gray-800">Zina *</label>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={4}
               className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="Uzrakstiet īsu ziņu autoram..."
+              placeholder="Uzrakstiet isu zinu autoram..."
             />
           </div>
           {status && <p className="text-sm text-amber-700">{status}</p>}
@@ -83,7 +83,7 @@ export default function ContactOwner({ postId, ownerEmail }: { postId: string; o
             disabled={loading}
             className="rounded bg-blue-600 px-4 py-2 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
           >
-            {loading ? "Sūtīšana..." : "Sūtīt ziņu"}
+            {loading ? "Sutisana..." : "Sutit zinu"}
           </button>
         </form>
       )}

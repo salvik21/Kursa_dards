@@ -117,12 +117,12 @@ async function sendNotificationsForPost(postId: string, post: any) {
     const dist = distanceKm(geo, target);
     if (dist > radiusKm) return;
 
-    const subject = `Jauns ieraksts netālu no jums: ${post.title ?? postId}`;
-    const text = `Jauns sludinājums publicēts ${radiusKm} km rādiusā no jūsu saglabātās vietas.
+    const subject = `Jauns ieraksts netalu no jums: ${post.title ?? postId}`;
+    const text = `Jauns sludinajums publicets ${radiusKm} km radiusa no jusu saglabatas vietas.
 
 Nosaukums: ${post.title ?? "Ieraksts"}
 Kategorija: ${categoryName}
-Attālums: ${dist.toFixed(2)} km
+Attalums: ${dist.toFixed(2)} km
 Saite: ${postUrl}
 `;
 
@@ -140,7 +140,7 @@ export async function POST(req: Request) {
   try {
     const user = await getSessionUser();
     if (!user) {
-      return NextResponse.json({ ok: false, error: "Neautorizēts" }, { status: 401 });
+      return NextResponse.json({ ok: false, error: "Neautorizets" }, { status: 401 });
     }
 
     const body = await req.json();
@@ -199,9 +199,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, id: ref.id });
   } catch (error: any) {
-    console.error("Kļūda veidojot ierakstu:", error);
+    console.error("Kluda veidojot ierakstu:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Neizdevās izveidot ierakstu" },
+      { ok: false, error: error?.message || "Neizdevas izveidot ierakstu" },
       { status: 500 }
     );
   }

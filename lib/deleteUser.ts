@@ -1,9 +1,25 @@
+import type { Query } from "firebase-admin/firestore";
 import { adminAuth, adminDb } from "./firebase/admin";
 import { deletePostWithRelations } from "./deletePost";
 
 type DeleteUserOptions = {
   protectLastAdmin?: boolean;
 };
+
+const BATCH_LIMIT = 400;
+
+async function deleteQuery(query: Query) {
+  // Delete in small batches to respect Firestore limits.
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const snap = await query.limit(BATCH_LIMIT).get();
+    if (snap.empty) break;
+    const batch = adminDb.batch();
+    snap.docs.forEach((doc) => batch.delete(doc.ref));
+    await batch.commit();
+    if (snap.size < BATCH_LIMIT) break;
+  }
+}
 
 export async function deleteUserAccount(uid: string, options: DeleteUserOptions = {}) {
   const { protectLastAdmin = true } = options;
@@ -24,6 +40,13 @@ export async function deleteUserAccount(uid: string, options: DeleteUserOptions 
   for (const doc of postsSnap.docs) {
     await deletePostWithRelations(doc.id);
   }
+
+  // Delete complaints created by the user
+  await deleteQuery(adminDb.collection("complaints").where("userId", "==", uid));
+
+  // Delete messages linked to the user (top-level collection)
+  await deleteQuery(adminDb.collection("messages").where("userId", "==", uid));
+  await deleteQuery(adminDb.collection("messages").where("toUserId", "==", uid));
 
   // Delete subscriptions
   const subsSnap = await adminDb.collection("subscriptions").where("userId", "==", uid).get();

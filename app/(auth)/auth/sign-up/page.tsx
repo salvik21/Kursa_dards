@@ -21,10 +21,10 @@ export default function SignUpPage() {
     setInfo(null);
     try {
       await signUp({ email, password, displayName });
-      setInfo("Check your email to verify your account, then sign in.");
+      setInfo("Konts izveidots. Vari pieslegties.");
       router.push("/auth/sign-in");
     } catch (err: any) {
-      setError(err?.message || "Failed to sign up");
+      setError(err?.message || "Neizdevas registreties");
     } finally {
       setLoading(false);
     }
@@ -39,7 +39,7 @@ export default function SignUpPage() {
       await signInWithGoogle();
       router.push("/me");
     } catch (err: any) {
-      setError(err?.message || "Failed to continue with Google");
+      setError(err?.message || "Neizdevas turpinat ar Google");
     } finally {
       setGooglePending(false);
     }
@@ -47,20 +47,20 @@ export default function SignUpPage() {
 
   return (
     <div className="mx-auto max-w-md p-6">
-      <h1 className="text-2xl font-semibold mb-4">Create account</h1>
+      <h1 className="text-2xl font-semibold mb-4">Izveidot kontu</h1>
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="space-y-2">
-          <label className="block text-sm font-medium">Name</label>
+          <label className="block text-sm font-medium">Vards</label>
           <input
             type="text"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Optional"
+            placeholder="Neobligats"
             className="w-full rounded border px-3 py-2"
           />
         </div>
         <div className="space-y-2">
-          <label className="block text-sm font-medium">Email</label>
+          <label className="block text-sm font-medium">E-pasts</label>
           <input
             type="email"
             value={email}
@@ -70,7 +70,7 @@ export default function SignUpPage() {
           />
         </div>
         <div className="space-y-2">
-          <label className="block text-sm font-medium">Password</label>
+          <label className="block text-sm font-medium">Parole</label>
           <input
             type="password"
             value={password}
@@ -86,7 +86,7 @@ export default function SignUpPage() {
           disabled={loading}
           className="w-full rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
         >
-          {loading ? "Creating..." : "Sign up"}
+          {loading ? "Veido..." : "Registreties"}
         </button>
       </form>
       <div className="mt-4 flex items-center gap-3">
@@ -118,12 +118,12 @@ export default function SignUpPage() {
             fill="#EA4335"
           />
         </svg>
-        Continue with Google
+        Turpinat ar Google
       </button>
       <p className="mt-4 text-sm">
-        Already have an account?{" "}
+        Jau ir konts?{" "}
         <a href="/auth/sign-in" className="text-blue-600 underline">
-          Sign in
+          Pieslegties
         </a>
       </p>
     </div>

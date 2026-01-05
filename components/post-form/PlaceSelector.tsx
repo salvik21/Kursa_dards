@@ -21,7 +21,7 @@ export function PlaceSelector({ value, options, onChange }: PlaceSelectorProps) 
           </option>
         ))}
       </select>
-      <p className="text-xs text-gray-600">Izvēlieties iepriekš iestatītu vietu vai opciju {"\""}Nav vietas{"\""}</p>
+      <p className="text-xs text-gray-600">Izvelieties ieprieks iestatitu vietu vai opciju {"\""}Nav vietas{"\""}</p>
     </div>
   );
 }

@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   try {
     const { name } = await req.json();
     if (!name || typeof name !== "string" || !name.trim()) {
-      return NextResponse.json({ ok: false, error: "Name is required" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Nosaukums ir obligats" }, { status: 400 });
     }
     const clean = name.trim();
     const docRef = adminDb.collection("categories").doc();
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, id: docRef.id });
   } catch (error: any) {
     console.error("Create category error:", error);
-    return NextResponse.json({ ok: false, error: error?.message || "Failed to create category" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: error?.message || "Neizdevas izveidot kategoriju" }, { status: 500 });
   }
 }
 
@@ -52,6 +52,6 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (error: any) {
     console.error("Delete category error:", error);
-    return NextResponse.json({ ok: false, error: error?.message || "Failed to delete category" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: error?.message || "Neizdevas dzest category" }, { status: 500 });
   }
 }

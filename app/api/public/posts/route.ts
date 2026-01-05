@@ -146,6 +146,6 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: true, posts, query: q });
   } catch (error: any) {
     console.error("Public posts error:", error);
-    return NextResponse.json({ ok: false, error: "Failed to load posts" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "Neizdevas ieladet sludinajumus" }, { status: 500 });
   }
 }

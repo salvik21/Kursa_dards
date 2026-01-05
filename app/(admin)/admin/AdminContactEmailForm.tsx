@@ -16,10 +16,10 @@ export function AdminContactEmailForm() {
       try {
         const res = await fetch("/api/admin/settings/contact", { cache: "no-store" });
         const json = await res.json();
-        if (!res.ok) throw new Error(json?.error || "Neizdevās ielādēt kontaktu");
+        if (!res.ok) throw new Error(json?.error || "Neizdevas ieladet kontaktu");
         setEmail(json.email ?? "");
       } catch (err: any) {
-        setError(err?.message || "Neizdevās ielādēt kontaktu");
+        setError(err?.message || "Neizdevas ieladet kontaktu");
       } finally {
         setLoading(false);
       }
@@ -38,10 +38,10 @@ export function AdminContactEmailForm() {
         body: JSON.stringify({ email }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Neizdevās saglabāt");
-      setSuccess("Kontakta e-pasts saglabāts.");
+      if (!res.ok) throw new Error(json?.error || "Neizdevas saglabat");
+      setSuccess("Kontakta e-pasts saglabats.");
     } catch (err: any) {
-      setError(err?.message || "Neizdevās saglabāt");
+      setError(err?.message || "Neizdevas saglabat");
     } finally {
       setSaving(false);
     }
@@ -52,12 +52,12 @@ export function AdminContactEmailForm() {
       <div>
         <h2 className="text-lg font-semibold text-gray-900">Kontakta e-pasts</h2>
         <p className="text-sm text-gray-600">
-          E-pasts, kas tiks rādīts lapas kājenē ieteikumiem par birkām/kategorijām.
+          E-pasts, kas tiks radits lapas kajene ieteikumiem par birkam/kategorijam.
         </p>
       </div>
       <div className="space-y-2">
         <label className="text-sm font-semibold text-gray-800" htmlFor="contact-email">
-          Administrācijas e-pasts
+          Administracijas e-pasts
         </label>
         <input
           id="contact-email"
@@ -76,7 +76,7 @@ export function AdminContactEmailForm() {
           disabled={saving || loading}
           className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 transition disabled:opacity-60"
         >
-          {saving ? "Saglabā..." : "Saglabāt"}
+          {saving ? "Saglaba..." : "Saglabat"}
         </button>
         {success && <span className="text-sm text-green-700">{success}</span>}
         {error && <span className="text-sm text-red-600">{error}</span>}

@@ -21,14 +21,14 @@ export default function TagsPage() {
     try {
       const res = await fetch("/api/admin/tags", { cache: "no-store" });
       if (res.status === 403) {
-        setError("Nav atļauts. Tikai administratoriem.");
+        setError("Nav atlauts. Tikai administratoriem.");
         return;
       }
-      if (!res.ok) throw new Error("Neizdevās ielādēt birkas");
+      if (!res.ok) throw new Error("Neizdevas ieladet birkas");
       const data = await res.json();
       setTags(data.tags ?? []);
     } catch (err: any) {
-      setError(err?.message || "Neizdevās ielādēt birkas");
+      setError(err?.message || "Neizdevas ieladet birkas");
     }
   };
 
@@ -42,13 +42,13 @@ export default function TagsPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        if (res.status === 403) throw new Error("Nav atļauts. Tikai administratoriem.");
-        throw new Error(data?.error || "Neizdevās dzēst birku");
+        if (res.status === 403) throw new Error("Nav atlauts. Tikai administratoriem.");
+        throw new Error(data?.error || "Neizdevas dzest birku");
       }
-      setMessage("Birka dzēsta");
+      setMessage("Birka dzesta");
       loadTags();
     } catch (err: any) {
-      setError(err?.message || "Neizdevās dzēst birku");
+      setError(err?.message || "Neizdevas dzest birku");
     }
   };
 
@@ -61,7 +61,7 @@ export default function TagsPage() {
     setMessage(null);
     setError(null);
     if (!name.trim()) {
-      setError("Birkas nosaukums ir obligāts");
+      setError("Birkas nosaukums ir obligats");
       return;
     }
     setLoading(true);
@@ -73,14 +73,14 @@ export default function TagsPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        if (res.status === 403) throw new Error("Nav atļauts. Tikai administratoriem.");
-        throw new Error(data?.error || "Neizdevās izveidot birku");
+        if (res.status === 403) throw new Error("Nav atlauts. Tikai administratoriem.");
+        throw new Error(data?.error || "Neizdevas izveidot birku");
       }
       setName("");
       setMessage("Birka izveidota");
       loadTags();
     } catch (err: any) {
-      setError(err?.message || "Neizdevās izveidot birku");
+      setError(err?.message || "Neizdevas izveidot birku");
     } finally {
       setLoading(false);
     }
@@ -90,8 +90,8 @@ export default function TagsPage() {
     <main className="mx-auto max-w-3xl p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Pārvaldīt birkas</h1>
-          <p className="text-sm text-gray-700">Admini var pievienot birkas, ko lietot sludinājumos.</p>
+          <h1 className="text-3xl font-bold text-gray-900">Parvaldit birkas</h1>
+          <p className="text-sm text-gray-700">Admini var pievienot birkas, ko lietot sludinajumos.</p>
         </div>
         <AdminBackButton />
       </div>
@@ -113,15 +113,15 @@ export default function TagsPage() {
           disabled={loading}
           className="inline-flex items-center rounded bg-blue-600 px-4 py-2 text-white font-semibold shadow hover:bg-blue-700 disabled:opacity-60"
         >
-          {loading ? "Saglabā..." : "Pievienot birku"}
+          {loading ? "Saglaba..." : "Pievienot birku"}
         </button>
       </form>
 
       <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-3">
-        <h2 className="text-lg font-semibold text-gray-900">Esošās birkas</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Esosas birkas</h2>
         {error && <p className="text-sm text-red-600">{error}</p>}
         {tags.length === 0 ? (
-          <p className="text-sm text-gray-600">Birkas vēl nav pievienotas.</p>
+          <p className="text-sm text-gray-600">Birkas vel nav pievienotas.</p>
         ) : (
           <ul className="grid gap-2 md:grid-cols-2">
             {tags.map((tag) => (
@@ -135,7 +135,7 @@ export default function TagsPage() {
                   onClick={() => removeTag(tag.id)}
                   className="rounded bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-100"
                 >
-                  Dzēst
+                  Dzest
                 </button>
               </li>
             ))}

@@ -33,7 +33,7 @@ export function LogoutButton({ onLoggedOut }: LogoutButtonProps) {
       disabled={loading}
       className="rounded border border-gray-300 px-3 py-1 font-semibold text-gray-800 hover:bg-gray-50 transition"
     >
-      {loading ? "Notiek izrakstīšanās..." : "Izrakstīties"}
+      {loading ? "Notiek izrakstisanas..." : "Izrakstities"}
     </button>
   );
 }

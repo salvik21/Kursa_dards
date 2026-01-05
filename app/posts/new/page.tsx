@@ -34,7 +34,7 @@ export default function NewPostPage() {
     });
     const json = await res.json();
     if (!res.ok) {
-      throw new Error(json?.error || "Neizdevās izveidot ierakstu");
+      throw new Error(json?.error || "Neizdevas izveidot ierakstu");
     }
     router.push("/me");
   };
@@ -47,7 +47,7 @@ export default function NewPostPage() {
           <p className="text-sm text-gray-600">Aizpildiet laukus un iesniedziet.</p>
         </div>
         <Link href="/me" className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition">
-          Atpakaļ uz kontu
+          Atpakal uz kontu
         </Link>
       </div>
 

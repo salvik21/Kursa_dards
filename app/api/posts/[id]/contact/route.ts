@@ -81,7 +81,7 @@ Link: ${postUrl}
 
         <div style="margin: 0 0 12px; padding: 12px; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px;">
           <p style="margin: 0 0 6px; font-weight: 600; color: #111827;">Sender</p>
-          <p style="margin: 0; color: #374151;">Email: ${escapeHtml(visitorEmail || "not provided")}</p>
+          <p style="margin: 0; color: #374151;">E-pasts: ${escapeHtml(visitorEmail || "nav noradits")}</p>
           <p style="margin: 4px 0 0; color: #374151;">Phone: ${escapeHtml(visitorPhone || "not provided")}</p>
         </div>
 
@@ -115,7 +115,7 @@ Link: ${postUrl}
   } catch (error: any) {
     console.error("Contact owner error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to send message" },
+      { ok: false, error: error?.message || "Neizdevas nosutit zinu" },
       { status: 500 }
     );
   }

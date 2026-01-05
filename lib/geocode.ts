@@ -23,7 +23,7 @@ export async function geocodeAddress(address: string, countryCode?: string): Pro
     const url = `https://maps.googleapis.com/maps/api/geocode/json?${params.toString()}`;
     const res = await fetch(url);
     if (!res.ok) {
-      throw new Error("Failed to fetch geocode");
+      throw new Error("Neizdevas iegut geokodesanas datus");
     }
     const data = await res.json();
     if (data.status !== "OK" || !data.results?.length) {

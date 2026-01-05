@@ -21,9 +21,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "No file" }, { status: 400 });
   }
 
+  // Izveido unikalu faila nosaukumu, saglabajot paplasinajumu.
   const ext = (file.name?.split(".").pop() || "bin").toLowerCase();
   const path = `${folder}/${randomUUID()}.${ext}`;
 
+  // Konverte failu uz Buffer, lai to var augspieladet Supabase Storage.
   const buffer = Buffer.from(await file.arrayBuffer());
   const { data, error } = await supabaseServer.storage
     .from(bucket)

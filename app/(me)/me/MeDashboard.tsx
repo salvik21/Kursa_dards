@@ -28,43 +28,43 @@ type ActionItem = {
 const ACTIONS: ActionItem[] = [
   {
     id: "new",
-    title: "Izveidot jaunu sludinājumu",
-    description: "Pievieno jaunu pazudušu vai atrastu priekšmetu ar foto un aprakstu.",
+    title: "Izveidot jaunu sludinajumu",
+    description: "Pievieno jaunu pazudusu vai atrastu prieksmetu ar foto un aprakstu.",
     href: "/posts/new",
   },
   {
     id: "posts",
-    title: "Mani sludinājumi",
-    description: "Skatīt, rediģēt vai dzēst savus sludinājumus.",
+    title: "Mani sludinajumi",
+    description: "Skatit, rediget vai dzest savus sludinajumus.",
     href: "/me/posts",
   },
   {
     id: "admin",
     title: "Administratora panelis",
-    description: "Moderēt sludinājumus, pārvaldīt lietotājus, birkas, vietas un statistiku.",
+    description: "Moderet sludinajumus, parvaldit lietotajus, birkas, vietas un statistiku.",
     href: "/admin",
     onlyAdmin: true,
   },
   {
     id: "profile",
     title: "Profils un kontakti",
-    description: "Atjauno kontaktinformāciju un konta detaļas.",
+    description: "Atjauno kontaktinformaciju un konta detalas.",
     href: "/me/profile",
   },
   {
     id: "notifications",
-    title: "Paziņojumu iestatījumi",
-    description: "Pārvaldi abonementus un attālumus, par kuriem saņem paziņojumus.",
+    title: "Pazinojumu iestatijumi",
+    description: "Parvaldi abonementus un attalumus, par kuriem sanem pazinojumus.",
     href: "/me/notifications",
   },
 ];
 
 const statusLabels: Record<string, string> = {
-  pending: "Gaida apstiprinājumu",
-  open: "Atvērts",
-  resolved: "Atrisināts",
-  hidden: "Paslēpts",
-  closed: "Slēgts",
+  pending: "Gaida apstiprinajumu",
+  open: "Atverts",
+  resolved: "Atrisinats",
+  hidden: "Paslepts",
+  closed: "Slegts",
 };
 
 export default function MeDashboard({ user }: { user: User }) {
@@ -98,7 +98,7 @@ export default function MeDashboard({ user }: { user: User }) {
             >
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-gray-900">{item.title}</span>
-                <span className="text-blue-500 text-xs">→</span>
+                <span className="text-blue-500 text-xs">&rarr;</span>
               </div>
               <p className="text-xs text-gray-600 mt-1">{item.description}</p>
             </Link>
@@ -108,21 +108,21 @@ export default function MeDashboard({ user }: { user: User }) {
 
       <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-3">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Mani sludinājumi</h2>
-          <p className="text-sm text-gray-600">Skatīt, rediģēt vai dzēst savus sludinājumus.</p>
+          <h2 className="text-lg font-semibold text-gray-900">Mani sludinajumi</h2>
+          <p className="text-sm text-gray-600">Skatit, rediget vai dzest savus sludinajumus.</p>
         </div>
-        {myPostsLoading && <p className="text-sm text-gray-600">Ielādē manus sludinājumus...</p>}
+        {myPostsLoading && <p className="text-sm text-gray-600">Ielade manus sludinajumus...</p>}
         {myPostsError && (
           <p className="text-sm text-red-600">
-            Neizdevās ielādēt manus sludinājumus.{" "}
+            Neizdevas ieladet manus sludinajumus.{" "}
             <Link href="/me/posts" className="text-blue-600 underline">
-              Atvērt lapu
+              Atvert lapu
             </Link>
           </p>
         )}
         {!myPostsLoading && !myPostsError && myPosts.length === 0 && (
           <p className="text-sm text-gray-700">
-            Pagaidām nav sludinājumu.{" "}
+            Pagaidam nav sludinajumu.{" "}
             <Link href="/posts/new" className="text-blue-600 underline">
               Izveido pirmo.
             </Link>
@@ -143,20 +143,20 @@ export default function MeDashboard({ user }: { user: User }) {
                 </div>
                 <div className="text-xs text-gray-600">
                   {(p.type === "lost" ? "Pazudis" : p.type === "found" ? "Atrasts" : p.type) || ""}
-                  {p.category ? ` • ${p.category}` : ""}
-                  {p.placeName ? ` • ${p.placeName}` : ""}
-                  {p.createdAt ? ` • ${new Date(p.createdAt).toLocaleDateString()}` : ""}
+                  {p.category ? ` - ${p.category}` : ""}
+                  {p.placeName ? ` - ${p.placeName}` : ""}
+                  {p.createdAt ? ` - ${new Date(p.createdAt).toLocaleDateString()}` : ""}
                 </div>
                 <div className="flex gap-2">
                   <Link href={`/posts/${p.id}`} className="text-blue-600 hover:underline">
-                    Skatīt
+                    Skatit
                   </Link>
                 </div>
               </div>
             ))}
             {myPosts.length > 5 && (
               <Link href="/me/posts" className="text-sm text-blue-600 underline">
-                Rādīt visus manus sludinājumus
+                Radit visus manus sludinajumus
               </Link>
             )}
           </div>
@@ -165,30 +165,30 @@ export default function MeDashboard({ user }: { user: User }) {
 
       <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-3">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Sludinājumi pēc manām paziņojumu zonām</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Sludinajumi pec manam pazinojumu zonam</h2>
           <p className="text-sm text-gray-600">
-            Parāda pēdējos sludinājumus, kas ir tuvu tavām aktīvajām abonementu lokācijām.
+            Parada pedejos sludinajumus, kas ir tuvu tavam aktivajam abonementu lokacijam.
           </p>
         </div>
         {!hasSubs && (
           <p className="text-sm text-gray-700">
-            Nav aktīvu abonementu ar lokāciju.{" "}
+            Nav aktivu abonementu ar lokaciju.{" "}
             <Link href="/me/notifications" className="text-blue-600 underline">
-              Atvērt paziņojumu iestatījumus
+              Atvert pazinojumu iestatijumus
             </Link>
           </p>
         )}
-        {hasSubs && nearbyLoading && <p className="text-sm text-gray-600">Ielādē tuvākos sludinājumus...</p>}
+        {hasSubs && nearbyLoading && <p className="text-sm text-gray-600">Ielade tuvakos sludinajumus...</p>}
         {hasSubs && nearbyError && (
           <p className="text-sm text-red-600">
-            Neizdevās ielādēt tuvākos sludinājumus.{" "}
+            Neizdevas ieladet tuvakos sludinajumus.{" "}
             <Link href="/posts" className="text-blue-600 underline">
-              Atvērt katalogu
+              Atvert katalogu
             </Link>
           </p>
         )}
         {hasSubs && !nearbyLoading && !nearbyError && nearbyPosts.length === 0 && (
-          <p className="text-sm text-gray-700">Pagaidām nav sludinājumu tavos rādiusos.</p>
+          <p className="text-sm text-gray-700">Pagaidam nav sludinajumu tavos radiusos.</p>
         )}
         {hasSubs && !nearbyLoading && !nearbyError && nearbyPosts.length > 0 && (
           <div className="space-y-2">
@@ -205,14 +205,14 @@ export default function MeDashboard({ user }: { user: User }) {
                 </div>
                 <div className="text-xs text-gray-600">
                   {(p.type === "lost" ? "Pazudis" : p.type === "found" ? "Atrasts" : p.type) || ""}
-                  {p.category ? ` • ${p.category}` : ""}
-                  {p.placeName ? ` • ${p.placeName}` : ""}
-                  {p.distanceKm != null ? ` • ~${p.distanceKm} km` : ""}
-                  {p.createdAt ? ` • ${new Date(p.createdAt).toLocaleDateString()}` : ""}
+                  {p.category ? ` - ${p.category}` : ""}
+                  {p.placeName ? ` - ${p.placeName}` : ""}
+                  {p.distanceKm != null ? ` - ~${p.distanceKm} km` : ""}
+                  {p.createdAt ? ` - ${new Date(p.createdAt).toLocaleDateString()}` : ""}
                 </div>
                 <div className="flex gap-2">
                   <Link href={`/posts/${p.id}`} className="text-blue-600 hover:underline">
-                    Skatīt
+                    Skatit
                   </Link>
                 </div>
               </div>

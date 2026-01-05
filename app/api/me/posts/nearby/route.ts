@@ -136,7 +136,7 @@ export async function GET() {
   } catch (error: any) {
     console.error("GET /api/me/posts/nearby error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to load nearby posts" },
+      { ok: false, error: error?.message || "Neizdevas ieladet tuvakos sludinajumus" },
       { status: error?.message === "Unauthenticated" ? 401 : 500 }
     );
   }

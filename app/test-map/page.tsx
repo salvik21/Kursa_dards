@@ -13,7 +13,7 @@ export default function TestMapPage() {
 
       <LocationSelector
         presets={[
-          { id: "center", label: "Rīga centrs", geo: { lat: 56.9496, lng: 24.1052 } },
+          { id: "center", label: "Riga centrs", geo: { lat: 56.9496, lng: 24.1052 } },
           { id: "park", label: "Park" },
         ]}
         onChange={setSelection}

@@ -8,7 +8,7 @@ type AdminBackButtonProps = {
   className?: string;
 };
 
-export function AdminBackButton({ href = "/admin", label = "Atpakaļ uz adminu", className = "" }: AdminBackButtonProps) {
+export function AdminBackButton({ href = "/admin", label = "Atpakal uz adminu", className = "" }: AdminBackButtonProps) {
   return (
     <Link
       href={href}

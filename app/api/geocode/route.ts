@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
@@ -34,7 +34,7 @@ async function geocode(address: string, countryCode?: string): Promise<GeocodeRe
 
       if (!res.ok) {
         const message =
-          (data && (data.error_message || data.status)) || res.statusText || "Failed to reach geocoding service";
+          (data && (data.error_message || data.status)) || res.statusText || "Neizdevas sasniegt geokodesanas servisu";
         return { error: `Geocode HTTP ${res.status}: ${message}`, status: res.status };
       }
 

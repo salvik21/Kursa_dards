@@ -24,8 +24,8 @@ export default async function AdminPostDetailPage({ params, searchParams }: Page
   const from = typeof searchParams?.from === "string" ? searchParams.from : null;
   const backHref = from === "complaints" ? "/admin/complaints" : "/admin/posts";
   const backLabel =
-    from === "complaints" ? "Atpakaļ uz sūdzību sarakstu" : "Atpakaļ uz sludinājumu sarakstu";
-  const contextLabel = from === "complaints" ? "Admin · Sūdzības" : "Admin · Sludinājums";
+    from === "complaints" ? "Atpakal uz sudzibu sarakstu" : "Atpakal uz sludinajumu sarakstu";
+  const contextLabel = from === "complaints" ? "Admin - Sudzibas" : "Admin - Sludinajums";
 
   const snap = await adminDb.collection("posts").doc(params.id).get();
   if (!snap.exists) {
@@ -68,6 +68,7 @@ export default async function AdminPostDetailPage({ params, searchParams }: Page
     ownerEmail: data.userEmail ?? null,
     ownerName: data.ownerName ?? null,
     ownerPhone: data.ownerPhone ?? null,
+    userId: data.userId ?? null,
     privateNote: data.privateNote ?? "",
     blockedReason: data.blockedReason ?? null,
   };
@@ -140,7 +141,7 @@ export default async function AdminPostDetailPage({ params, searchParams }: Page
       {from === "complaints" && postComplaints.length > 0 && (
         <section className="space-y-2 rounded border border-amber-200 bg-amber-50 p-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-amber-800">Sūdzības</h2>
+            <h2 className="text-lg font-semibold text-amber-800">Sudzibas</h2>
             <span className="text-xs font-semibold text-amber-700">
               {postComplaints.length} {postComplaints.length === 1 ? "ieraksts" : "ieraksti"}
             </span>
@@ -153,9 +154,9 @@ export default async function AdminPostDetailPage({ params, searchParams }: Page
               >
                 <div className="flex flex-wrap items-center justify-between gap-2 text-amber-800 font-semibold">
                   <span>{c.createdAt ? new Date(c.createdAt).toLocaleString() : "Nav datuma"}</span>
-                  {c.reporterEmail && <span className="font-normal">Ziņotājs: {c.reporterEmail}</span>}
+                  {c.reporterEmail && <span className="font-normal">Zinotajs: {c.reporterEmail}</span>}
                 </div>
-                <div className="text-sm leading-relaxed mt-1">{c.reason || "Nav norādīts iemesls"}</div>
+                <div className="text-sm leading-relaxed mt-1">{c.reason || "Nav noradits iemesls"}</div>
               </li>
             ))}
           </ul>
@@ -179,7 +180,7 @@ export default async function AdminPostDetailPage({ params, searchParams }: Page
 
       {post.status === "hidden" && post.blockedReason && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-          Sludinājumu paslēpa administrators. Iemesls: {post.blockedReason}
+          Sludinajumu paslepa administrators. Iemesls: {post.blockedReason}
         </div>
       )}
 
@@ -190,7 +191,7 @@ export default async function AdminPostDetailPage({ params, searchParams }: Page
 
       {post.privateNote && (
         <section className="space-y-2">
-          <h2 className="text-xl font-semibold text-gray-900">Privāta piezīme</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Privata piezime</h2>
           <div className="rounded border border-gray-200 bg-yellow-50 p-3 text-sm text-gray-800">
             {post.privateNote}
           </div>
@@ -198,22 +199,22 @@ export default async function AdminPostDetailPage({ params, searchParams }: Page
       )}
 
       <section className="space-y-2">
-        <h2 className="text-xl font-semibold text-gray-900">Atrašanās vieta</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Atrasanas vieta</h2>
         {post.geo ? (
           <div className="rounded border border-gray-200 bg-gray-50 p-3 text-gray-800">
             <LocationMap lat={Number(post.geo.lat)} lng={Number(post.geo.lng)} label={post.placeName || post.title} />
           </div>
         ) : (
-          <p className="text-gray-700">Nav norādīta atrašanās vieta.</p>
+          <p className="text-gray-700">Nav noradita atrasanas vieta.</p>
         )}
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-xl font-semibold text-gray-900">Īpašnieka informācija</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Ipasnieka informacija</h2>
         <div className="rounded border border-gray-200 bg-gray-50 p-3 text-sm text-gray-800 space-y-1">
           {post.ownerName && (
             <div>
-              <span className="font-semibold">Vārds:</span> {post.ownerName}
+              <span className="font-semibold">Vards:</span> {post.ownerName}
             </div>
           )}
           {post.ownerEmail && (
@@ -223,19 +224,24 @@ export default async function AdminPostDetailPage({ params, searchParams }: Page
           )}
           {post.ownerPhone && (
             <div>
-              <span className="font-semibold">Tālrunis:</span> {post.ownerPhone}
+              <span className="font-semibold">Talrunis:</span> {post.ownerPhone}
             </div>
           )}
           {!post.ownerName && !post.ownerEmail && !post.ownerPhone && (
-            <div className="text-gray-600">Īpašnieka dati nav norādīti.</div>
+            <div className="text-gray-600">Ipasnieka dati nav noraditi.</div>
           )}
         </div>
       </section>
 
       <section className="space-y-3 rounded border border-gray-200 bg-white p-4">
-        <h2 className="text-lg font-semibold text-gray-900">Moderācija</h2>
-        <p className="text-sm text-gray-700">Apstipriniet, bloķējiet vai dzēsiet šo sludinājumu.</p>
-        <AdminActions postId={post.id} status={post.status} blockedReason={post.blockedReason ?? ""} />
+        <h2 className="text-lg font-semibold text-gray-900">Moderacija</h2>
+        <p className="text-sm text-gray-700">Apstipriniet, blokejiet vai dzesiet so sludinajumu.</p>
+        <AdminActions
+          postId={post.id}
+          status={post.status}
+          blockedReason={post.blockedReason ?? ""}
+          userId={post.userId}
+        />
       </section>
     </main>
   );

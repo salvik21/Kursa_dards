@@ -33,19 +33,19 @@ export function LocationStep({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <label className="text-sm font-semibold text-gray-800">Kā iestatīt atrašanās vietu?</label>
+        <label className="text-sm font-semibold text-gray-800">Ka iestatit atrasanas vietu?</label>
         <div className="flex flex-wrap gap-3 text-sm">
           <label className="inline-flex items-center gap-2">
             <input type="radio" name="loc-mode" checked={locationMode === "list"} onChange={() => onLocationModeChange("list")} />
-            Izvēlēties no saraksta
+            Izveleties no saraksta
           </label>
           <label className="inline-flex items-center gap-2">
             <input type="radio" name="loc-mode" checked={locationMode === "address"} onChange={() => onLocationModeChange("address")} />
-            Ievadīt adresi
+            Ievadit adresi
           </label>
           <label className="inline-flex items-center gap-2">
             <input type="radio" name="loc-mode" checked={locationMode === "map"} onChange={() => onLocationModeChange("map")} />
-            Izvēlēties kartē
+            Izveleties karte
           </label>
         </div>
       </div>
@@ -67,7 +67,7 @@ export function LocationStep({
         <div className="space-y-4">
           <MapPicker lat={lat} lng={lng} onChange={onLatLngChange} />
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-800">Vietas nosaukums (pēc izvēles)</label>
+            <label className="text-sm font-semibold text-gray-800">Vietas nosaukums (pec izveles)</label>
             <input
               value={values.placeName}
               onChange={(e) => onPlaceNameChange(e.target.value)}

@@ -17,21 +17,21 @@ export default async function AboutPage() {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-10 text-center space-y-4">
         <h1 className="text-3xl font-bold text-gray-900">Par mums</h1>
         <p className="text-base text-gray-700">
-          Platforma “Pazaudētās un atrastās lietas” ir izveidota, lai palīdzētu cilvēkiem atrast pazaudētas mantas un
-          atgriezt tās to īpašniekiem.
+          Platforma &quot;Pazaudetas un atrastas lietas&quot; ir izveidota, lai palidzetu cilvekiem atrast pazaudetas mantas un
+          atgriezt tas to ipasniekiem.
         </p>
         <p className="text-base text-gray-700">
-          Vietne ļauj lietotājiem publicēt informāciju par pazaudētām vai atrastām lietām, izmantot kategorijas un tagus,
-          kā arī ērti meklēt nepieciešamo informāciju.
+          Vietne lauj lietotajiem publicet informaciju par pazaudetam vai atrastam lietam, izmantot kategorijas un tagus,
+          ka ari erti meklet nepieciesamo informaciju.
         </p>
         <p className="text-base text-gray-700">
-          Mūsu mērķis ir nodrošināt vienkāršu, saprotamu un pieejamu risinājumu ikvienam.
+          Musu merkis ir nodrosinat vienkarsu, saprotamu un pieejamu risinajumu ikvienam.
         </p>
 
-        <h2 className="text-xl font-semibold text-gray-900 pt-4">Saziņa ar administrāciju</h2>
+        <h2 className="text-xl font-semibold text-gray-900 pt-4">Sazina ar administraciju</h2>
         <p className="text-base text-gray-700">
-          Ja jums ir jautājumi, ieteikumi vai priekšlikumi par jaunu kategoriju vai tagu pievienošanu,
-          lūdzu, sazinieties ar vietnes administrāciju, rakstot uz e-pastu:{" "}
+          Ja jums ir jautajumi, ieteikumi vai priekslikumi par jaunu kategoriju vai tagu pievienosanu,
+          ludzu, sazinieties ar vietnes administraciju, rakstot uz e-pastu:{" "}
           {contactEmail ? (
             <a href={`mailto:${contactEmail}`} className="text-blue-600 hover:underline">
               {contactEmail}

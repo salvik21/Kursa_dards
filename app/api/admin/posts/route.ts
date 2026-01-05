@@ -150,10 +150,10 @@ export async function PATCH(req: Request) {
   try {
     const { id, status, blockReason } = await req.json();
     if (!id || typeof id !== "string" || !status || typeof status !== "string") {
-      return NextResponse.json({ ok: false, error: "Invalid payload" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Nekorekts pieprasijums" }, { status: 400 });
     }
     if (!["pending", "open", "resolved", "hidden", "closed"].includes(status)) {
-      return NextResponse.json({ ok: false, error: "Invalid status" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Nekorekts statuss" }, { status: 400 });
     }
     const postSnap = await adminDb.collection("posts").doc(id).get();
     if (!postSnap.exists) {
@@ -241,7 +241,7 @@ Link: ${postUrl}
   } catch (error: any) {
     console.error("Update post error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to update post" },
+      { ok: false, error: error?.message || "Neizdevas atjauninat post" },
       { status: 500 }
     );
   }

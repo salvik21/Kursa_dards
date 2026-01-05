@@ -10,6 +10,6 @@ export async function GET() {
     return NextResponse.json({ ok: true, categories });
   } catch (error: any) {
     console.error("Public categories error:", error);
-    return NextResponse.json({ ok: false, error: "Failed to load categories" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "Neizdevas ieladet kategorijas" }, { status: 500 });
   }
 }

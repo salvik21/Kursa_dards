@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   try {
     const { name, lat, lng } = await req.json();
     if (!name || typeof name !== "string" || !name.trim()) {
-      return NextResponse.json({ ok: false, error: "Name is required" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Nosaukums ir obligats" }, { status: 400 });
     }
     if (typeof lat !== "number" || typeof lng !== "number" || Number.isNaN(lat) || Number.isNaN(lng)) {
       return NextResponse.json({ ok: false, error: "Valid lat/lng required" }, { status: 400 });
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, id: ref.id });
   } catch (error: any) {
     console.error("Create place error:", error);
-    return NextResponse.json({ ok: false, error: error?.message || "Failed to create place" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: error?.message || "Neizdevas izveidot vietu" }, { status: 500 });
   }
 }
 
@@ -57,6 +57,6 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (error: any) {
     console.error("Delete place error:", error);
-    return NextResponse.json({ ok: false, error: error?.message || "Failed to delete place" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: error?.message || "Neizdevas dzest place" }, { status: 500 });
   }
 }

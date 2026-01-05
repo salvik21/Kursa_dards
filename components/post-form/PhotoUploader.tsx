@@ -27,7 +27,7 @@ export function PhotoUploader({ value, hidden = [], onChange, onHiddenChange, on
       // Keep only hidden photos that still exist after adding new ones
       onHiddenChange?.(hidden.filter((u) => combined.includes(u)));
     } catch (err: any) {
-      setError(err?.message || "Neizdevās augšupielādēt");
+      setError(err?.message || "Neizdevas augsupieladet");
     } finally {
       setUploading(false);
       onUploadingChange?.(false);
@@ -59,10 +59,10 @@ export function PhotoUploader({ value, hidden = [], onChange, onHiddenChange, on
           disabled={uploading}
           className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 transition disabled:opacity-60"
         >
-          Izvēlēties failus
+          Izveleties failus
         </button>
         <span className="text-xs text-gray-600">
-          {value.length === 0 ? "Faili nav atlasīti" : `${value.length} fail(i) atlasīti`}
+          {value.length === 0 ? "Faili nav atlasiti" : `${value.length} fail(i) atlasiti`}
         </span>
       </div>
       <input
@@ -80,7 +80,7 @@ export function PhotoUploader({ value, hidden = [], onChange, onHiddenChange, on
           const isHidden = hidden.includes(url);
           return (
             <div key={url} className="relative overflow-hidden rounded border border-gray-200">
-              <img src={url} alt="augšupielādēts foto" className="h-28 w-full object-cover" />
+              <img src={url} alt="augsupieladets foto" className="h-28 w-full object-cover" />
               <div className="absolute left-1 top-1 flex flex-col gap-1">
                 <button
                   type="button"
@@ -89,11 +89,11 @@ export function PhotoUploader({ value, hidden = [], onChange, onHiddenChange, on
                     isHidden ? "bg-yellow-600 text-white" : "bg-white/80 text-gray-800 border border-gray-200"
                   }`}
                 >
-                  {isHidden ? "Slēpt" : "Rādīt"}
+                  {isHidden ? "Slept" : "Radit"}
                 </button>
                 {isHidden && (
                   <span className="rounded bg-yellow-500/80 px-2 py-1 text-[10px] font-semibold text-white shadow">
-                    Paslēpts
+                    Paslepts
                   </span>
                 )}
               </div>
@@ -102,13 +102,13 @@ export function PhotoUploader({ value, hidden = [], onChange, onHiddenChange, on
                 onClick={() => removePhoto(url)}
                 className="absolute right-1 top-1 rounded bg-white/80 px-2 py-1 text-xs font-semibold text-red-600 shadow"
               >
-                Noņemt
+                Nonemt
               </button>
             </div>
           );
         })}
       </div>
-      {uploading && <p className="text-sm text-gray-600">Augšupielādē...</p>}
+      {uploading && <p className="text-sm text-gray-600">Augsupielade...</p>}
     </div>
   );
 }

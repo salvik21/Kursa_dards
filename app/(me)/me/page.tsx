@@ -16,7 +16,7 @@ export default async function MeHome() {
         <div className="w-full text-center">
           <h1 className="text-2xl font-semibold mb-2">Mans konts</h1>
           <p className="text-sm text-gray-700">
-            Pieslēgts kā {user.email ?? user.uid} (loma: {user.role ?? "nezināma"})
+            Pieslegts ka {user.email ?? user.uid} (loma: {user.role ?? "nezinama"})
           </p>
         </div>
         <div className="w-full">

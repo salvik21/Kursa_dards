@@ -71,7 +71,7 @@ export default function PostsList() {
   const hasQuery = Boolean(debouncedSearch || typeFilter || category || place || selectedTags.length);
   const emptyState = !initialLoading && !searching && posts.length === 0;
 
-  // Vietu saraksts no DB (ja ir places kolekcija) vai no pašiem sludinājumiem kā rezerves variants.
+  // Vietu saraksts no DB (ja ir places kolekcija) vai no pasiem sludinajumiem ka rezerves variants.
   const placeOptions: Option[] = useMemo(() => {
     const apiPlaces: Option[] = placesData?.places ?? [];
     if (apiPlaces.length) return apiPlaces;
@@ -90,9 +90,9 @@ export default function PostsList() {
       <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-4">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-3">
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-gray-800">Meklēšana un filtrēšana</p>
+            <p className="text-sm font-semibold text-gray-800">Meklesana un filtresana</p>
             <p className="text-xs text-gray-500">
-              Meklē pēc nosaukuma vai apraksta un izvēlies kategoriju, statusu un vietu.
+              Mekle pec nosaukuma vai apraksta un izvelies kategoriju, statusu un vietu.
             </p>
           </div>
           <div className="flex w-full max-w-md items-center gap-2">
@@ -100,7 +100,7 @@ export default function PostsList() {
               id="post-search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Meklē pazudušos vai atrastos sludinājumus"
+              placeholder="Mekle pazudusos vai atrastos sludinajumus"
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             {search ? (
@@ -109,7 +109,7 @@ export default function PostsList() {
                 onClick={() => setSearch("")}
                 className="rounded-md border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
               >
-                Notīrīt
+                Notirit
               </button>
             ) : null}
           </div>
@@ -210,7 +210,7 @@ export default function PostsList() {
                   className="flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700 border border-blue-100"
                 >
                   #{tagLabelMap.get(t) ?? t}
-                  <span className="text-blue-500">✕</span>
+                  <span className="text-blue-500">x</span>
                 </button>
               ))}
             </div>
@@ -218,16 +218,16 @@ export default function PostsList() {
         </div>
 
         {searching && (
-          <p className="text-xs text-gray-500">{hasQuery ? "Meklē..." : "Ielādē..."}</p>
+          <p className="text-xs text-gray-500">{hasQuery ? "Mekle..." : "Ielade..."}</p>
         )}
       </div>
 
-      {error && <p className="text-sm text-red-600">Neizdevās ielādēt sludinājumus</p>}
-      {initialLoading && <p className="text-sm text-gray-600">Ielādē...</p>}
+      {error && <p className="text-sm text-red-600">Neizdevas ieladet sludinajumus</p>}
+      {initialLoading && <p className="text-sm text-gray-600">Ielade...</p>}
 
       {emptyState ? (
         <p className="text-sm text-gray-600">
-          {hasQuery ? "Nav sludinājumu, kas atbilst filtriem." : "Pagaidām nav sludinājumu."}
+          {hasQuery ? "Nav sludinajumu, kas atbilst filtriem." : "Pagaidam nav sludinajumu."}
         </p>
       ) : (
         <div className="space-y-3">

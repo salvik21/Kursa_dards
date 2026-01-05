@@ -26,11 +26,11 @@ const statusColors: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  pending: "Gaida apstiprinājumu",
-  open: "Atvērts",
-  resolved: "Atrisināts",
-  hidden: "Paslēpts",
-  closed: "Slēgts",
+  pending: "Gaida apstiprinajumu",
+  open: "Atverts",
+  resolved: "Atrisinats",
+  hidden: "Paslepts",
+  closed: "Slegts",
 };
 
 export default function MyPostsPage() {
@@ -40,17 +40,17 @@ export default function MyPostsPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const deletePost = async (id: string) => {
-    const confirmed = window.confirm("Dzēst šo sludinājumu un tā datus?");
+    const confirmed = window.confirm("Dzest so sludinajumu un ta datus?");
     if (!confirmed) return;
     setDeletingId(id);
     setDeleteError(null);
     try {
       const res = await fetch(`/api/posts/${id}`, { method: "DELETE" });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Neizdevās dzēst sludinājumu");
+      if (!res.ok) throw new Error(json?.error || "Neizdevas dzest sludinajumu");
       mutate();
     } catch (err: any) {
-      setDeleteError(err?.message || "Neizdevās dzēst sludinājumu");
+      setDeleteError(err?.message || "Neizdevas dzest sludinajumu");
     } finally {
       setDeletingId(null);
     }
@@ -60,8 +60,8 @@ export default function MyPostsPage() {
     <main className="mx-auto max-w-4xl p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Mani sludinājumi</h1>
-          <p className="text-sm text-gray-700">Skatiet un rediģējiet savus sludinājumus.</p>
+          <h1 className="text-2xl font-bold text-gray-900">Mani sludinajumi</h1>
+          <p className="text-sm text-gray-700">Skatiet un redigejiet savus sludinajumus.</p>
         </div>
         <div className="flex gap-2">
           <Link
@@ -74,20 +74,20 @@ export default function MyPostsPage() {
             href="/me"
             className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
           >
-            Atpakaļ
+            Atpakal
           </Link>
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-600">Neizdevās ielādēt sludinājumus</p>}
+      {error && <p className="text-sm text-red-600">Neizdevas ieladet sludinajumus</p>}
       {deleteError && <p className="text-sm text-red-600">{deleteError}</p>}
-      {isLoading && <p className="text-sm text-gray-600">Ielādē...</p>}
+      {isLoading && <p className="text-sm text-gray-600">Ielade...</p>}
 
       {!isLoading && posts.length === 0 ? (
         <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700 shadow-sm">
-          Pagaidām nav sludinājumu.{" "}
+          Pagaidam nav sludinajumu.{" "}
           <Link href="/posts/new" className="text-blue-600 hover:underline">
-            Izveidojiet savu pirmo sludinājumu.
+            Izveidojiet savu pirmo sludinajumu.
           </Link>
         </div>
       ) : (
@@ -116,7 +116,7 @@ export default function MyPostsPage() {
                 </div>
                 {p.status === "hidden" && (
                   <div className="text-xs text-red-700">
-                    Paslēpts administratora dēļ: {p.blockedReason?.trim() || "Iemesls nav norādīts"}
+                    Paslepts administratora del: {p.blockedReason?.trim() || "Iemesls nav noradits"}
                   </div>
                 )}
               </div>
@@ -125,18 +125,18 @@ export default function MyPostsPage() {
                   href={`/posts/${p.id}`}
                   className="rounded border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
                 >
-                  Skatīt
+                  Skatit
                 </Link>
                 {p.status !== "hidden" ? (
                   <Link
                     href={`/posts/${p.id}/edit`}
                     className="rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
                   >
-                    Rediģēt
+                    Rediget
                   </Link>
                 ) : (
                   <span className="rounded border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-500">
-                    Bloķēts (rediģēt nav atļauts)
+                    Blokets (rediget nav atlauts)
                   </span>
                 )}
                 <button
@@ -145,7 +145,7 @@ export default function MyPostsPage() {
                   disabled={deletingId === p.id}
                   className="rounded bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700 transition disabled:opacity-60"
                 >
-                  {deletingId === p.id ? "Notiek dzēšana..." : "Dzēst"}
+                  {deletingId === p.id ? "Notiek dzesana..." : "Dzest"}
                 </button>
               </div>
             </div>

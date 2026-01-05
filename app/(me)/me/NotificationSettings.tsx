@@ -107,13 +107,13 @@ function MapPointPicker({
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-semibold text-gray-800">Atzīme kartē</label>
+      <label className="text-sm font-semibold text-gray-800">Atzime karte</label>
       <div
         ref={mapRef}
         className="h-80 w-full rounded border border-gray-300"
         role="presentation"
       />
-      <p className="text-xs text-gray-600">Klikšķini kartē vai velc marķieri, lai norādītu koordinātes.</p>
+      <p className="text-xs text-gray-600">Klikskini karte vai velc markieri, lai noraditu koordinates.</p>
     </div>
   );
 }
@@ -140,7 +140,7 @@ export default function NotificationSettings() {
       const res = await fetch("/api/me/subscription", { cache: "no-store" });
       const json: SubscriptionResponse = await res.json();
       if (!res.ok || !json.ok) {
-        throw new Error(json?.error || "Failed to load settings");
+        throw new Error(json?.error || "Neizdevas ieladet iestatijumus");
       }
       const items = json.subscriptions ?? [];
       setList(items);
@@ -150,7 +150,7 @@ export default function NotificationSettings() {
         resetForm();
       }
     } catch (err: any) {
-      setStatus(err?.message || "Neizdevās ielādēt iestatījumus");
+      setStatus(err?.message || "Neizdevas ieladet iestatijumus");
     } finally {
       setLoading(false);
     }
@@ -221,7 +221,7 @@ export default function NotificationSettings() {
     setStatus(null);
 
     if (enabled && (!lat || !lng)) {
-      setStatus("Lūdzu, novieto punktu uz kartes.");
+      setStatus("Ludzu, novieto punktu uz kartes.");
       setSaving(false);
       return;
     }
@@ -243,7 +243,7 @@ export default function NotificationSettings() {
       });
       const json: SubscriptionResponse = await res.json();
       if (!res.ok || !json.ok) {
-        throw new Error(json?.error || "Failed to save settings");
+        throw new Error(json?.error || "Neizdevas saglabat iestatijumus");
       }
       if (json.subscription) {
         setList((prev) => {
@@ -255,9 +255,9 @@ export default function NotificationSettings() {
         });
         setCurrentId(json.subscription.id);
       }
-      setStatus(enabled ? "E-pasta paziņojumi saglabāti." : "Brīdinājums saglabāts (izslēgts).");
+      setStatus(enabled ? "E-pasta pazinojumi saglabati." : "Bridinajums saglabats (izslegts).");
     } catch (err: any) {
-      setStatus(err?.message || "Neizdevās saglabāt iestatījumus");
+      setStatus(err?.message || "Neizdevas saglabat iestatijumus");
     } finally {
       setSaving(false);
     }
@@ -265,7 +265,7 @@ export default function NotificationSettings() {
 
   const onDelete = async () => {
     if (!currentId) return;
-    const confirmed = window.confirm("Dzēst šo brīdinājumu? Šo darbību nevar atsaukt.");
+    const confirmed = window.confirm("Dzest so bridinajumu? So darbibu nevar atsaukt.");
     if (!confirmed) return;
 
     setDeleting(true);
@@ -278,7 +278,7 @@ export default function NotificationSettings() {
       });
       const json: SubscriptionResponse = await res.json();
       if (!res.ok || !json.ok) {
-        throw new Error(json?.error || "Failed to delete subscription");
+        throw new Error(json?.error || "Neizdevas dzest subscription");
       }
       const remaining = list.filter((s) => s.id !== currentId);
       setList(remaining);
@@ -287,9 +287,9 @@ export default function NotificationSettings() {
       } else {
         resetForm();
       }
-      setStatus("Brīdinājums dzēsts.");
+      setStatus("Bridinajums dzests.");
     } catch (err: any) {
-      setStatus(err?.message || "Neizdevās dzēst brīdinājumu");
+      setStatus(err?.message || "Neizdevas dzest bridinajumu");
     } finally {
       setDeleting(false);
     }
@@ -299,8 +299,8 @@ export default function NotificationSettings() {
     <section className="mt-6 rounded border border-gray-200 bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Paziņojumi pēc rādiusa</h2>
-          <p className="text-sm text-gray-600">Veido vairākus brīdinājumus ar savu nosaukumu un atrašanās vietu.</p>
+          <h2 className="text-lg font-semibold text-gray-900">Pazinojumi pec radiusa</h2>
+          <p className="text-sm text-gray-600">Veido vairakus bridinajumus ar savu nosaukumu un atrasanas vietu.</p>
         </div>
         {loading && (
           <span className="text-sm text-gray-600" aria-live="polite">
@@ -322,7 +322,7 @@ export default function NotificationSettings() {
                   : "border-gray-300 text-gray-800 hover:bg-gray-50"
               }`}
             >
-              {sub.name || "Bez nosaukuma"} · {sub.radiusKm} km
+              {sub.name || "Bez nosaukuma"} - {sub.radiusKm} km
             </button>
           ))}
           <button
@@ -330,18 +330,18 @@ export default function NotificationSettings() {
             onClick={resetForm}
             className="rounded border border-dashed border-gray-300 px-3 py-1 text-sm font-semibold text-gray-800 hover:bg-gray-50"
           >
-            + Jauns brīdinājums
+            + Jauns bridinajums
           </button>
         </div>
       </div>
 
       <form onSubmit={onSubmit} className="mt-4 space-y-4">
         <div className="space-y-1">
-          <label className="text-sm font-semibold text-gray-800">Brīdinājuma nosaukums</label>
+          <label className="text-sm font-semibold text-gray-800">Bridinajuma nosaukums</label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="piem., Mājas, Darbs, vecāku mājas"
+            placeholder="piem., Majas, Darbs, vecaku majas"
             className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
@@ -353,12 +353,12 @@ export default function NotificationSettings() {
             onChange={(e) => setEnabled(e.target.checked)}
             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
-          Ieslēgt e-pasta paziņojumus
+          Ieslegt e-pasta pazinojumus
         </label>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-800">Rādiuss</label>
+            <label className="text-sm font-semibold text-gray-800">Radiuss</label>
             <div className="flex flex-wrap gap-2">
               {radiusOptions.map((opt) => (
                 <button
@@ -375,16 +375,16 @@ export default function NotificationSettings() {
                 </button>
               ))}
             </div>
-            <p className="text-xs text-gray-600">Izvēlies, cik tālu no punkta meklēt sludinājumus.</p>
+            <p className="text-xs text-gray-600">Izvelies, cik talu no punkta meklet sludinajumus.</p>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-800">Adrese (pēc izvēles)</label>
+            <label className="text-sm font-semibold text-gray-800">Adrese (pec izveles)</label>
             <input
               ref={addressInputRef}
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              placeholder="piem., Ielas nosaukums 1, Pilsēta"
+              placeholder="piem., Ielas nosaukums 1, Pilseta"
               className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
@@ -412,7 +412,7 @@ export default function NotificationSettings() {
             disabled={saving}
             className="rounded bg-blue-600 px-4 py-2 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
           >
-            {saving ? "Saglabā..." : "Saglabāt iestatījumus"}
+            {saving ? "Saglaba..." : "Saglabat iestatijumus"}
           </button>
           {currentId && (
             <button
@@ -421,7 +421,7 @@ export default function NotificationSettings() {
               disabled={deleting}
               className="rounded border border-red-200 px-4 py-2 text-red-700 font-semibold hover:bg-red-50 transition disabled:opacity-60"
             >
-              {deleting ? "Dzēš..." : "Dzēst brīdinājumu"}
+              {deleting ? "Dzes..." : "Dzest bridinajumu"}
             </button>
           )}
         </div>

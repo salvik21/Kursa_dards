@@ -1,5 +1,6 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "./firebase/admin";
+import { supabaseServer } from "./supabase/server";
 
 type UpsertPayload = {
   postId: string;
@@ -21,6 +22,22 @@ function chunk<T>(list: T[], size: number): T[][] {
 function buildPhotoId(url: string) {
   // Deterministic id per URL.
   return Buffer.from(url).toString("base64").replace(/[+/=]/g, "").slice(0, 140);
+}
+
+function parseSupabasePublicUrl(url: string) {
+  try {
+    const parsed = new URL(url);
+    const marker = "/storage/v1/object/public/";
+    const idx = parsed.pathname.indexOf(marker);
+    if (idx === -1) return null;
+    const rest = parsed.pathname.slice(idx + marker.length);
+    const [bucket, ...pathParts] = rest.split("/");
+    if (!bucket || !pathParts.length) return null;
+    const path = decodeURIComponent(pathParts.join("/"));
+    return { bucket, path };
+  } catch {
+    return null;
+  }
 }
 
 export async function syncPostPhotos({ postId, photo, hidden }: UpsertPayload) {
@@ -59,6 +76,27 @@ export async function syncPostPhotos({ postId, photo, hidden }: UpsertPayload) {
 export async function deletePostPhotos(postId: string) {
   const snap = await adminDb.collection("postPhotos").where("postId", "==", postId).get();
   if (snap.empty) return;
+  const urls = snap.docs.map((doc) => (doc.data() as any)?.url).filter(Boolean) as string[];
+  if (supabaseServer && urls.length) {
+    const bucketMap = new Map<string, string[]>();
+    for (const url of urls) {
+      const parsed = parseSupabasePublicUrl(url);
+      if (!parsed) continue;
+      const list = bucketMap.get(parsed.bucket) ?? [];
+      list.push(parsed.path);
+      bucketMap.set(parsed.bucket, list);
+    }
+
+    for (const [bucket, paths] of bucketMap.entries()) {
+      for (const group of chunk(paths, 100)) {
+        const { error } = await supabaseServer.storage.from(bucket).remove(group);
+        if (error) {
+          console.error("Supabase delete error:", error);
+        }
+      }
+    }
+  }
+
   const batch = adminDb.batch();
   snap.docs.forEach((doc) => batch.delete(doc.ref));
   await batch.commit();

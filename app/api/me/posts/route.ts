@@ -72,7 +72,7 @@ export async function GET() {
   } catch (error: any) {
     console.error("GET /api/me/posts error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to load posts" },
+      { ok: false, error: error?.message || "Neizdevas ieladet sludinajumus" },
       { status: error?.message === "Unauthenticated" ? 401 : 500 }
     );
   }

@@ -126,7 +126,7 @@ export async function GET(req: Request) {
   } catch (error: any) {
     console.error("Admin stats error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to build stats" },
+      { ok: false, error: error?.message || "Neizdevas izveidot statistiku" },
       { status: 500 }
     );
   }

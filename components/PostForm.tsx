@@ -180,7 +180,7 @@ export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFo
     };
     setFieldErrors(errs);
     if (errs.title || errs.category || errs.description) {
-      setMessage("Lūdzu, aizpildiet obligātos laukus: virsraksts, kategorija, apraksts.");
+      setMessage("Ludzu, aizpildiet obligatos laukus: virsraksts, kategorija, apraksts.");
       return false;
     }
     return true;
@@ -199,7 +199,7 @@ export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFo
 
   const handleSubmit = async () => {
     if (photoUploading) {
-      setError("Pagaidiet, līdz foto augšupielādējas.");
+      setError("Pagaidiet, lidz foto augsupieladejas.");
       setStep(2);
       return;
     }
@@ -228,22 +228,22 @@ export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFo
       } else if (locationMode === "address") {
         if (!addressString) {
           setStep(1);
-          throw new Error('Ievadiet adresi vai izmantojiet "Izvēlēties kartē", lai iestatītu koordinātas.');
+          throw new Error('Ievadiet adresi vai izmantojiet "Izveleties karte", lai iestatitu koordinatas.');
         }
         const geocoded = await geocodeViaApi(addressString, countryCodeMap[addressCountry] || undefined);
         if (!geocoded) {
           setStep(1);
-          throw new Error('Neizdevās pārvērst adresi koordinātēs. Pārbaudiet adresi vai izvēlieties "Izvēlēties kartē".');
+          throw new Error('Neizdevas parverst adresi koordinates. Parbaudiet adresi vai izvelieties "Izveleties karte".');
         }
         geoPayload = { lat: geocoded.lat, lng: geocoded.lng };
         placeNamePayload = "adrese";
       } else if (locationMode === "map") {
         if (!lat || !lng || Number.isNaN(Number(lat)) || Number.isNaN(Number(lng))) {
           setStep(1);
-          throw new Error("Ievadiet koordinātas vai izvēlieties punktu kartē.");
+          throw new Error("Ievadiet koordinatas vai izvelieties punktu karte.");
         }
         geoPayload = { lat: Number(lat), lng: Number(lng) };
-        placeNamePayload = placeNamePayload || "koordinātas";
+        placeNamePayload = placeNamePayload || "koordinatas";
       }
 
       const selectedCategory = availableCategories.find((c) => c.id === values.category);
@@ -255,10 +255,10 @@ export function PostForm({ mode, initialValues, onSubmit, onCancelHref }: PostFo
         description: descriptionPayload,
         geo: geoPayload,
       });
-      setMessage(mode === "create" ? "Ieraksts izveidots." : "Ieraksts atjaunināts.");
+      setMessage(mode === "create" ? "Ieraksts izveidots." : "Ieraksts atjauninats.");
       router.push("/me");
     } catch (err: any) {
-      setError(err?.message || "Neizdevās saglabāt ierakstu");
+      setError(err?.message || "Neizdevas saglabat ierakstu");
     } finally {
       setSaving(false);
     }

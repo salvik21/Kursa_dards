@@ -38,7 +38,7 @@ export async function GET() {
               postPhoto = postData.photos[0];
             }
             const raw = (postData?.description || postData?.descriptionPosts || "")?.toString?.() ?? "";
-            postSnippet = raw.length > 400 ? `${raw.slice(0, 400)}…` : raw;
+            postSnippet = raw.length > 400 ? `${raw.slice(0, 400)}...` : raw;
           }
         } catch {
           // ignore secondary lookup errors
@@ -101,11 +101,11 @@ export async function PATCH(req: Request) {
   try {
     const { id, status, blockReason } = await req.json();
     if (!id || typeof id !== "string") {
-      return NextResponse.json({ ok: false, error: "Invalid payload" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Nekorekts pieprasijums" }, { status: 400 });
     }
 
     if (status && !["accepted", "in_review", "closed"].includes(status)) {
-      return NextResponse.json({ ok: false, error: "Invalid status" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Nekorekts statuss" }, { status: 400 });
     }
 
     const complaintRef = adminDb.collection("complaints").doc(id);
@@ -131,7 +131,7 @@ export async function PATCH(req: Request) {
     if (blockReason) {
       if (!complaint.postId) {
         return NextResponse.json(
-          { ok: false, error: "Невозможно заблокировать: пост не найден" },
+          { ok: false, error: "Nevar noblokeret: sludinajums nav atrasts" },
           { status: 400 }
         );
       }
@@ -160,7 +160,7 @@ export async function PATCH(req: Request) {
   } catch (error: any) {
     console.error("Update complaint error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to update complaint" },
+      { ok: false, error: error?.message || "Neizdevas atjauninat complaint" },
       { status: 500 }
     );
   }

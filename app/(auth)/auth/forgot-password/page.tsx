@@ -15,10 +15,11 @@ export default function ForgotPasswordPage() {
     setError(null);
     setInfo(null);
     try {
+      // Nosuta paroles atjaunosanas e-pastu caur Firebase.
       await sendResetEmail(email);
-      setInfo("Pārbaudi e-pastu, lai saņemtu saiti paroles atjaunošanai.");
+      setInfo("Parbaudi e-pastu, lai sanemtu saiti paroles atjaunosanai.");
     } catch (err: any) {
-      setError(err?.message || "Neizdevās nosūtīt paroles atjaunošanas e-pastu");
+      setError(err?.message || "Neizdevas nosutit paroles atjaunosanas e-pastu");
     } finally {
       setLoading(false);
     }
@@ -45,13 +46,13 @@ export default function ForgotPasswordPage() {
           disabled={loading}
           className="w-full rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
         >
-          {loading ? "Sūtam..." : "Sūtīt atjaunošanas saiti"}
+          {loading ? "Sutam..." : "Sutit atjaunosanas saiti"}
         </button>
       </form>
       <p className="mt-4 text-sm">
         Atceries paroli?{" "}
         <a href="/auth/sign-in" className="text-blue-600 underline">
-          Atpakaļ uz pieteikšanos
+          Atpakal uz pieteiksanos
         </a>
       </p>
     </div>

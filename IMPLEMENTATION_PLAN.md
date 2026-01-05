@@ -14,7 +14,7 @@
 - Create core folders: `app/(public)`, `app/(auth)`, `app/(me)`, `app/(admin)`, `lib/`, `components/`, `types/`, `app/api/*`.
 
 **Phase 1 — Auth (Day 2–4)**
-- Email/password registration, login, logout with email verification (Firebase Auth). - Done
+- Email/password registration, login, logout (Firebase Auth). - Done
 - Password reset flow (email link). - Done
 - Protect routes via middleware and server-side session checks. - Done
 - User profile document created on first login; include role: `user|admin`. - Done
@@ -117,19 +117,19 @@ Phase 0 - Project Setup (Day 1-2)
 
 Phase 1 - Auth (Day 2-4)
 - Objectives
-  - Email/password auth with email verification and password reset; guard protected routes.
+- Email/password auth with password reset; guard protected routes.
 - Tasks
-  - Pages: `app/(auth)/auth/sign-in/page.tsx`, `app/(auth)/auth/register/page.tsx`, `app/(auth)/auth/forgot/page.tsx`, `app/(auth)/auth/reset/page.tsx`, `app/(auth)/auth/verify/page.tsx`.
+  - Pages: `app/(auth)/auth/sign-in/page.tsx`, `app/(auth)/auth/register/page.tsx`, `app/(auth)/auth/forgot/page.tsx`, `app/(auth)/auth/reset/page.tsx`.
   - Forms: Zod schemas; React Hook Form; minimal error messages; loading/disabled states.
-  - Firebase Auth flows: `createUserWithEmailAndPassword`, `sendEmailVerification`, `signInWithEmailAndPassword`, `sendPasswordResetEmail`, `signOut`.
+  - Firebase Auth flows: `createUserWithEmailAndPassword`, `signInWithEmailAndPassword`, `sendPasswordResetEmail`, `signOut`.
   - Server session: `lib/auth.ts` with `getServerUser()` using Admin SDK to verify ID token from cookies/headers in server components/actions.
   - On first login, create `users/{uid}` doc with `{ email, role: 'user', createdAt }`.
   - Header/UI: auth-aware navigation; sign-out server action.
 - APIs
   - `app/api/auth/session/route.ts` GET: returns `{ uid, email, role }` if valid token.
-  - Optional: `app/api/auth/verify/route.ts` to handle email OOB code confirmation.
+  - Optional: `app/api/auth/verify/route.ts` to handle OOB code confirmation.
 - Acceptance
-  - Register -> receive verification email -> login -> access protected pages -> logout works.
+  - Register -> login -> access protected pages -> logout works.
 
 Phase 2 - Data Model (Day 3-5)
 - Objectives

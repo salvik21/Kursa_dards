@@ -15,16 +15,16 @@ export default async function NotificationsPage() {
       <div className="w-full max-w-5xl">
         <div className="mb-4 flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Paziņojumi pēc rādiusa</h1>
+            <h1 className="text-2xl font-semibold text-gray-900">Pazinojumi pec radiusa</h1>
             <p className="text-sm text-gray-700">
-              Izvēlies punktu kartē un rādiusu, lai saņemtu e-pastus par jauniem sludinājumiem tuvumā.
+              Izvelies punktu karte un radiusu, lai sanemtu e-pastus par jauniem sludinajumiem tuvuma.
             </p>
           </div>
           <a
             href="/me"
             className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
           >
-            Atpakaļ uz profilu
+            Atpakal uz profilu
           </a>
         </div>
 

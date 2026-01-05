@@ -27,14 +27,14 @@ export default function EditProfileForm() {
     try {
       const res = await fetch("/api/me", { cache: "no-store" });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Neizdevās ielādēt profilu");
+      if (!res.ok) throw new Error(json?.error || "Neizdevas ieladet profilu");
       setProfile({
         name: json.user?.name ?? "",
         email: json.user?.email ?? "",
         phone: json.user?.phone ?? "",
       });
     } catch (err: any) {
-      setStatus(err?.message || "Neizdevās ielādēt profilu");
+      setStatus(err?.message || "Neizdevas ieladet profilu");
     } finally {
       setLoading(false);
     }
@@ -55,28 +55,28 @@ export default function EditProfileForm() {
         body: JSON.stringify({ name: profile.name, phone: profile.phone, email: profile.email }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Neizdevās atjaunināt profilu");
-      setStatus("Profils atjaunināts");
+      if (!res.ok) throw new Error(json?.error || "Neizdevas atjauninat profilu");
+      setStatus("Profils atjauninats");
     } catch (err: any) {
-      setStatus(err?.message || "Neizdevās atjaunināt profilu");
+      setStatus(err?.message || "Neizdevas atjauninat profilu");
     } finally {
       setSaving(false);
     }
   };
 
   const onDeleteAccount = async () => {
-    const confirmed = window.confirm("Dzēst kontu un visus ierakstus? Šo darbību nevar atsaukt.");
+    const confirmed = window.confirm("Dzest kontu un visus ierakstus? So darbibu nevar atsaukt.");
     if (!confirmed) return;
     setDeleting(true);
     setStatus(null);
     try {
       const res = await fetch("/api/me", { method: "DELETE" });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Neizdevās dzēst kontu");
-      setStatus("Konts dzēsts");
+      if (!res.ok) throw new Error(json?.error || "Neizdevas dzest kontu");
+      setStatus("Konts dzests");
       window.location.href = "/auth/sign-in";
     } catch (err: any) {
-      setStatus(err?.message || "Neizdevās dzēst kontu");
+      setStatus(err?.message || "Neizdevas dzest kontu");
     } finally {
       setDeleting(false);
     }
@@ -85,19 +85,19 @@ export default function EditProfileForm() {
   const onChangePassword = async (e: FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setPwdStatus("Jaunā parole un apstiprinājums nesakrīt.");
+      setPwdStatus("Jauna parole un apstiprinajums nesakrit.");
       return;
     }
     setPwdSaving(true);
     setPwdStatus(null);
     try {
       await changePassword(currentPassword, newPassword);
-      setPwdStatus("Parole atjaunināta.");
+      setPwdStatus("Parole atjauninata.");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err: any) {
-      setPwdStatus(err?.message || "Neizdevās atjaunināt paroli.");
+      setPwdStatus(err?.message || "Neizdevas atjauninat paroli.");
     } finally {
       setPwdSaving(false);
     }
@@ -109,7 +109,7 @@ export default function EditProfileForm() {
         <div className="flex flex-col items-center gap-1 text-center">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">Profils</h2>
-            <p className="text-sm text-gray-600">Atjaunojiet savu vārdu un tālruni.</p>
+            <p className="text-sm text-gray-600">Atjaunojiet savu vardu un talruni.</p>
           </div>
           {loading && (
             <span className="text-sm text-gray-600" aria-live="polite">
@@ -120,16 +120,16 @@ export default function EditProfileForm() {
 
         <form onSubmit={onSubmit} className="mt-4 space-y-3">
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-800">Vārds</label>
+            <label className="text-sm font-semibold text-gray-800">Vards</label>
             <input
               value={profile.name}
               onChange={(e) => setProfile((p) => ({ ...p, name: e.target.value }))}
               className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="Jūsu vārds"
+              placeholder="Jusu vards"
             />
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-800">Tālrunis</label>
+            <label className="text-sm font-semibold text-gray-800">Talrunis</label>
             <input
               value={profile.phone}
               onChange={(e) => setProfile((p) => ({ ...p, phone: e.target.value }))}
@@ -144,7 +144,7 @@ export default function EditProfileForm() {
               onChange={(e) => setProfile((p) => ({ ...p, email: e.target.value }))}
               className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-            <p className="text-xs text-gray-500">Šis e-pasts ir paredzēts saziņai; tas nemaina jūsu pieteikšanās e-pastu.</p>
+            <p className="text-xs text-gray-500">Sis e-pasts ir paredzets sazinai; tas nemaina jusu pieteiksanas e-pastu.</p>
           </div>
           {status && <p className="text-sm text-amber-700">{status}</p>}
           <div className="flex flex-wrap items-center justify-center gap-3">
@@ -153,7 +153,7 @@ export default function EditProfileForm() {
               disabled={saving}
               className="rounded bg-blue-600 px-4 py-2 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
             >
-              {saving ? "Saglabā..." : "Saglabāt izmaiņas"}
+              {saving ? "Saglaba..." : "Saglabat izmainas"}
             </button>
             <button
               type="button"
@@ -161,7 +161,7 @@ export default function EditProfileForm() {
               onClick={onDeleteAccount}
               className="rounded bg-red-600 px-4 py-2 text-white font-semibold hover:bg-red-700 transition disabled:opacity-60"
             >
-              {deleting ? "Dzēš..." : "Dzēst kontu"}
+              {deleting ? "Dzes..." : "Dzest kontu"}
             </button>
           </div>
         </form>
@@ -170,14 +170,14 @@ export default function EditProfileForm() {
       <section className="mt-6 rounded border border-gray-200 bg-white p-4 shadow-sm">
         <div className="flex flex-col items-center gap-1 text-center">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Paroles maiņa</h2>
-            <p className="text-sm text-gray-600">Atjaunojiet savu pieteikšanās paroli.</p>
+            <h2 className="text-lg font-semibold text-gray-900">Paroles maina</h2>
+            <p className="text-sm text-gray-600">Atjaunojiet savu pieteiksanas paroli.</p>
           </div>
         </div>
 
         <form onSubmit={onChangePassword} className="mt-4 space-y-3">
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-800">Pašreizējā parole</label>
+            <label className="text-sm font-semibold text-gray-800">Pasreizeja parole</label>
             <input
               type="password"
               value={currentPassword}
@@ -187,7 +187,7 @@ export default function EditProfileForm() {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-800">Jaunā parole</label>
+            <label className="text-sm font-semibold text-gray-800">Jauna parole</label>
             <input
               type="password"
               value={newPassword}
@@ -213,7 +213,7 @@ export default function EditProfileForm() {
               disabled={pwdSaving}
               className="rounded bg-blue-600 px-4 py-2 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
             >
-              {pwdSaving ? "Saglabā..." : "Atjaunot paroli"}
+              {pwdSaving ? "Saglaba..." : "Atjaunot paroli"}
             </button>
           </div>
         </form>

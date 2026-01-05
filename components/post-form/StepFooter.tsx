@@ -19,7 +19,7 @@ export function StepFooter({ step, saving, onPrev, onNext, onSubmit, onCancelHre
           disabled={step === 0}
           className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition disabled:opacity-50"
         >
-          Atpakaļ
+          Atpakal
         </button>
         {step < 2 && (
           <button
@@ -27,7 +27,7 @@ export function StepFooter({ step, saving, onPrev, onNext, onSubmit, onCancelHre
             onClick={onNext}
             className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 transition"
           >
-            Tālāk
+            Talak
           </button>
         )}
       </div>
@@ -45,7 +45,7 @@ export function StepFooter({ step, saving, onPrev, onNext, onSubmit, onCancelHre
             disabled={saving || disableSubmit}
             className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 transition disabled:opacity-60"
           >
-            {saving ? "Saglabā..." : mode === "create" ? "Izveidot ierakstu" : "Saglabāt izmaiņas"}
+            {saving ? "Saglaba..." : mode === "create" ? "Izveidot ierakstu" : "Saglabat izmainas"}
           </button>
         </div>
       )}

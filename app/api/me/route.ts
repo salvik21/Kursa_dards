@@ -23,7 +23,7 @@ export async function GET() {
   } catch (error: any) {
     console.error("GET /api/me error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to load profile" },
+      { ok: false, error: error?.message || "Neizdevas ieladet profilu" },
       { status: error?.message === "Unauthenticated" ? 401 : 500 }
     );
   }
@@ -38,20 +38,20 @@ export async function PATCH(req: Request) {
     };
     if (name !== undefined) {
       if (name !== null && typeof name !== "string") {
-        return NextResponse.json({ ok: false, error: "Invalid name" }, { status: 400 });
+        return NextResponse.json({ ok: false, error: "Nekorekts vards" }, { status: 400 });
       }
       update.name = name?.trim?.() ?? "";
       update.displayName = update.name;
     }
     if (phone !== undefined) {
       if (phone !== null && typeof phone !== "string") {
-        return NextResponse.json({ ok: false, error: "Invalid phone" }, { status: 400 });
+        return NextResponse.json({ ok: false, error: "Nekorekts talrunis" }, { status: 400 });
       }
       update.phone = phone?.trim?.() ?? "";
     }
     if (email !== undefined) {
       if (email !== null && typeof email !== "string") {
-        return NextResponse.json({ ok: false, error: "Invalid email" }, { status: 400 });
+        return NextResponse.json({ ok: false, error: "Nederigs e-pasts" }, { status: 400 });
       }
       update.email = email?.trim?.() ?? "";
     }
@@ -68,7 +68,7 @@ export async function PATCH(req: Request) {
   } catch (error: any) {
     console.error("PATCH /api/me error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to update profile" },
+      { ok: false, error: error?.message || "Neizdevas atjauninat profile" },
       { status: error?.message === "Unauthenticated" ? 401 : 500 }
     );
   }
@@ -88,7 +88,7 @@ export async function DELETE() {
           ? 400
           : 500;
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to delete account" },
+      { ok: false, error: error?.message || "Neizdevas dzest account" },
       { status }
     );
   }

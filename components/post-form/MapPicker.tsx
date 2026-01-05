@@ -68,18 +68,18 @@ export function MapPicker({ lat, lng, onChange }: MapPickerProps) {
   if (!mounted) {
     return (
       <div className="space-y-2">
-        <label className="text-sm font-semibold text-gray-800">Atrašanās vieta kartē</label>
+        <label className="text-sm font-semibold text-gray-800">Atrasanas vieta karte</label>
         <div className="h-64 w-full rounded border border-gray-300" role="presentation" />
-        <p className="text-xs text-gray-600">Noklikšķiniet kartē vai velciet marķieri, lai iestatītu koordinātas.</p>
+        <p className="text-xs text-gray-600">Noklikskiniet karte vai velciet markieri, lai iestatitu koordinatas.</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-semibold text-gray-800">Atrašanās vieta kartē</label>
+      <label className="text-sm font-semibold text-gray-800">Atrasanas vieta karte</label>
       <div ref={mapRef} className="h-64 w-full rounded border border-gray-300" role="presentation" />
-      <p className="text-xs text-gray-600">Noklikšķiniet kartē vai velciet marķieri, lai iestatītu koordinātas.</p>
+      <p className="text-xs text-gray-600">Noklikskiniet karte vai velciet markieri, lai iestatitu koordinatas.</p>
     </div>
   );
 }

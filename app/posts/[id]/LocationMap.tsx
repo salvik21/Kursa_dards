@@ -35,7 +35,7 @@ export default function LocationMap({ lat, lng, label }: Props) {
           title: label || "Location",
         });
       } catch (err: any) {
-        setError(err?.message || "Failed to load map");
+        setError(err?.message || "Neizdevas ieladet karti");
       }
     }
 

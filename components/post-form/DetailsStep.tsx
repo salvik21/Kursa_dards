@@ -38,7 +38,7 @@ export function DetailsStep({
           }`}
           placeholder="Pazudusi melna mugursoma pie parka"
         />
-        {fieldErrors.title && <p className="text-xs text-red-600">Nepieciešams virsraksts.</p>}
+        {fieldErrors.title && <p className="text-xs text-red-600">Nepieciesams virsraksts.</p>}
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -65,18 +65,18 @@ export function DetailsStep({
                 : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
             }`}
           >
-            <option value="">Izvēlieties kategoriju</option>
+            <option value="">Izvelieties kategoriju</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
               </option>
             ))}
           </select>
-          {fieldErrors.category && <p className="text-xs text-red-600">Kategorija ir obligāta.</p>}
+          {fieldErrors.category && <p className="text-xs text-red-600">Kategorija ir obligata.</p>}
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-800">Birkas (dubultklikšķis, lai pievienotu/noņemtu)</label>
+          <label className="text-sm font-semibold text-gray-800">Birkas (dubultklikskis, lai pievienotu/nonemtu)</label>
           <div className="flex flex-wrap gap-2 rounded border border-gray-300 p-3">
             {availableTags.map((t) => {
               const active = values.tags.includes(t);
@@ -90,7 +90,7 @@ export function DetailsStep({
                       ? "bg-blue-600 text-white border border-blue-600"
                       : "bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200"
                   }`}
-                  title="Dubultklikšķis, lai pārslēgtu"
+                  title="Dubultklikskis, lai parslegtu"
                 >
                   {t}
                 </button>
@@ -112,7 +112,7 @@ export function DetailsStep({
               ))}
             </div>
           )}
-          <p className="text-xs text-gray-600">Veiciet dubultklikšķi uz birkas, lai to pievienotu/noņemtu.</p>
+          <p className="text-xs text-gray-600">Veiciet dubultklikski uz birkas, lai to pievienotu/nonemtu.</p>
         </div>
       </div>
 
@@ -127,28 +127,28 @@ export function DetailsStep({
               ? "border-red-500 focus:border-red-500 focus:ring-red-500"
               : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           }`}
-          placeholder="Aprakstiet, kas tika pazaudēts/atrasts, kur, kad un pazīmes."
+          placeholder="Aprakstiet, kas tika pazaudets/atrasts, kur, kad un pazimes."
         />
-        {fieldErrors.description && <p className="text-xs text-red-600">Apraksts ir obligāts.</p>}
+        {fieldErrors.description && <p className="text-xs text-red-600">Apraksts ir obligats.</p>}
       </div>
 
       {values.type === "found" && (
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-800">Privāta piezīme (redzama tikai jums un administratoriem)</label>
+          <label className="text-sm font-semibold text-gray-800">Privata piezime (redzama tikai jums un administratoriem)</label>
           <textarea
             value={values.privateNote ?? ""}
             onChange={(e) => onUpdate("privateNote", e.target.value)}
             rows={3}
             className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="Papildu piezīme sev vai administratoriem. Publiski netiek rādīta."
+            placeholder="Papildu piezime sev vai administratoriem. Publiski netiek radita."
           />
-          <p className="text-xs text-gray-600">Šī piezīme nav redzama citiem lietotājiem.</p>
+          <p className="text-xs text-gray-600">Si piezime nav redzama citiem lietotajiem.</p>
         </div>
       )}
 
       <div className="space-y-2 rounded border border-gray-200 bg-gray-50 p-3">
-        <div className="text-sm font-semibold text-gray-800">Kontaktinformācijas redzamība</div>
-        <p className="text-xs text-gray-600">Izvēlieties, ko rādīt sludinājumā publiski.</p>
+        <div className="text-sm font-semibold text-gray-800">Kontaktinformacijas redzamiba</div>
+        <p className="text-xs text-gray-600">Izvelieties, ko radit sludinajuma publiski.</p>
         <div className="space-y-2 pt-1">
           <label className="inline-flex items-center gap-2 text-sm text-gray-800">
             <input
@@ -156,7 +156,7 @@ export function DetailsStep({
               checked={values.showEmail !== false}
               onChange={(e) => onUpdate("showEmail", e.target.checked)}
             />
-            Rādīt manu e-pastu{contactEmail ? ` (${contactEmail})` : ""}
+            Radit manu e-pastu{contactEmail ? ` (${contactEmail})` : ""}
           </label>
           {contactPhone && (
             <label className="inline-flex items-center gap-2 text-sm text-gray-800">
@@ -165,11 +165,11 @@ export function DetailsStep({
                 checked={!!values.showPhone}
                 onChange={(e) => onUpdate("showPhone", e.target.checked)}
               />
-              Rādīt manu telefonu ({contactPhone})
+              Radit manu telefonu ({contactPhone})
             </label>
           )}
           {!contactPhone && (
-            <p className="text-xs text-gray-500">Jūsu profilā nav tālruņa numura, tādēļ tas netiks rādīts.</p>
+            <p className="text-xs text-gray-500">Jusu profila nav talruna numura, tadel tas netiks radits.</p>
           )}
         </div>
       </div>

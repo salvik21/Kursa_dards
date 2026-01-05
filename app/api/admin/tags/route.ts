@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   try {
     const { name } = await req.json();
     if (!name || typeof name !== "string" || !name.trim()) {
-      return NextResponse.json({ ok: false, error: "Name is required" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Nosaukums ir obligats" }, { status: 400 });
     }
     const cleanName = name.trim();
     const nameLower = cleanName.toLowerCase();
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, id: ref.id });
   } catch (error: any) {
     console.error("Create tag error:", error);
-    return NextResponse.json({ ok: false, error: error?.message || "Failed to create tag" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: error?.message || "Neizdevas izveidot birku" }, { status: 500 });
   }
 }
 
@@ -65,7 +65,7 @@ export async function DELETE(req: Request) {
   } catch (error: any) {
     console.error("Delete tag error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to delete tag" },
+      { ok: false, error: error?.message || "Neizdevas dzest tag" },
       { status: 500 }
     );
   }

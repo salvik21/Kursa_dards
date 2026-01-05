@@ -32,12 +32,12 @@ export default function UsersPage() {
       const res = await fetch("/api/admin/users", { cache: "no-store" });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || "Neizdevās ielādēt lietotājus");
+        throw new Error(data?.error || "Neizdevas ieladet lietotajus");
       }
       const data = await res.json();
       setUsers(data.users ?? []);
     } catch (err: any) {
-      setError(err?.message || "Neizdevās ielādēt lietotājus");
+      setError(err?.message || "Neizdevas ieladet lietotajus");
     } finally {
       setLoading(false);
     }
@@ -71,11 +71,11 @@ export default function UsersPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || "Neizdevās atjaunināt lietotāju");
+        throw new Error(data?.error || "Neizdevas atjauninat lietotaju");
       }
       load();
     } catch (err: any) {
-      setError(err?.message || "Neizdevās atjaunināt lietotāju");
+      setError(err?.message || "Neizdevas atjauninat lietotaju");
     } finally {
       setUpdatingId(null);
     }
@@ -93,11 +93,11 @@ export default function UsersPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error || "Neizdevās atjaunināt lomu");
+        throw new Error(data?.error || "Neizdevas atjauninat lomu");
       }
       load();
     } catch (err: any) {
-      setError(err?.message || "Neizdevās atjaunināt lomu");
+      setError(err?.message || "Neizdevas atjauninat lomu");
       setRoleError(err?.message || null);
     } finally {
       setRoleUpdatingId(null);
@@ -105,7 +105,7 @@ export default function UsersPage() {
   };
 
   const deleteUser = async (id: string) => {
-    const confirmed = window.confirm("Dzēst šo lietotāju un visus viņa sludinājumus?");
+    const confirmed = window.confirm("Dzest so lietotaju un visus vina sludinajumus?");
     if (!confirmed) return;
     setDeletingId(id);
     setError(null);
@@ -117,11 +117,11 @@ export default function UsersPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data?.error || "Neizdevās dzēst lietotāju");
+        throw new Error(data?.error || "Neizdevas dzest lietotaju");
       }
       load();
     } catch (err: any) {
-      setError(err?.message || "Neizdevās dzēst lietotāju");
+      setError(err?.message || "Neizdevas dzest lietotaju");
     } finally {
       setDeletingId(null);
     }
@@ -131,8 +131,8 @@ export default function UsersPage() {
     <main className="mx-auto max-w-4xl p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Lietotāji</h1>
-          <p className="text-sm text-gray-700">Aplūkojiet lietotāju sarakstu un datus (tikai adminiem).</p>
+          <h1 className="text-3xl font-bold text-gray-900">Lietotaji</h1>
+          <p className="text-sm text-gray-700">Aplukojiet lietotaju sarakstu un datus (tikai adminiem).</p>
         </div>
         <div className="flex gap-2">
           <AdminBackButton />
@@ -140,15 +140,15 @@ export default function UsersPage() {
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
-      {loading && <p className="text-sm text-gray-600">Ielādē...</p>}
+      {loading && <p className="text-sm text-gray-600">Ielade...</p>}
 
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-sm font-semibold text-gray-800">Filtrēt:</span>
+        <span className="text-sm font-semibold text-gray-800">Filtret:</span>
         {[
           { value: "all", label: "Visi" },
           { value: "admin", label: "Administratori" },
-          { value: "user", label: "Lietotāji" },
-          { value: "blocked", label: "Bloķētie" },
+          { value: "user", label: "Lietotaji" },
+          { value: "blocked", label: "Bloketie" },
         ].map((opt) => (
           <button
             key={opt.value}
@@ -166,7 +166,7 @@ export default function UsersPage() {
       </div>
 
       {filteredUsers.length === 0 && !loading ? (
-        <p className="text-sm text-gray-600">Lietotāji nav atrasti.</p>
+        <p className="text-sm text-gray-600">Lietotaji nav atrasti.</p>
       ) : (
         <div className="space-y-3">
           {filteredUsers.map((u) => (
@@ -177,11 +177,11 @@ export default function UsersPage() {
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <div className="text-sm font-semibold text-gray-900">
-                    {u.name || "Bez vārda"}{" "}
-                    <span className="text-xs text-gray-500">({u.role === "admin" ? "administrators" : "lietotājs"})</span>
+                    {u.name || "Bez varda"}{" "}
+                    <span className="text-xs text-gray-500">({u.role === "admin" ? "administrators" : "lietotajs"})</span>
                   </div>
                   <div className="text-sm text-gray-700">{u.email}</div>
-                  {u.phone && <div className="text-sm text-gray-700">Tālrunis: {u.phone}</div>}
+                  {u.phone && <div className="text-sm text-gray-700">Talrunis: {u.phone}</div>}
                   {u.createdAt && (
                     <div className="text-xs text-gray-500">Izveidots: {new Date(u.createdAt).toLocaleString()}</div>
                   )}
@@ -200,8 +200,8 @@ export default function UsersPage() {
                     {updatingId === u.id
                       ? "Atjaunina..."
                       : u.blocked
-                        ? "Atbloķēt"
-                        : "Bloķēt"}
+                        ? "Atbloket"
+                        : "Bloket"}
                   </button>
                   <button
                     type="button"
@@ -212,8 +212,8 @@ export default function UsersPage() {
                     {roleUpdatingId === u.id
                       ? "Atjaunina..."
                       : u.role === "admin"
-                        ? "Noņemt administratoru"
-                        : "Piešķirt administratoru"}
+                        ? "Nonemt administratoru"
+                        : "Pieskirt administratoru"}
                   </button>
                   <button
                     type="button"
@@ -221,7 +221,7 @@ export default function UsersPage() {
                     disabled={deletingId === u.id}
                     className="rounded px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
                   >
-                    {deletingId === u.id ? "Dzēš..." : "Dzēst lietotāju"}
+                    {deletingId === u.id ? "Dzes..." : "Dzest lietotaju"}
                   </button>
                   {roleError && roleUpdatingId === u.id && (
                     <p className="text-[11px] text-red-600">{roleError}</p>

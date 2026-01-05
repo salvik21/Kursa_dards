@@ -30,14 +30,14 @@ export default async function AdminHome() {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-gray-900">Administratora panelis</h1>
           <p className="text-sm text-gray-700">
-            Pieslēgts kā {user.email ?? user.uid} (loma: {user.role ?? "nezināma"})
+            Pieslegts ka {user.email ?? user.uid} (loma: {user.role ?? "nezinama"})
           </p>
         </div>
         <Link
           href="/"
           className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
         >
-          Atpakaļ uz sākumu
+          Atpakal uz sakumu
         </Link>
       </header>
 
@@ -50,14 +50,14 @@ export default async function AdminHome() {
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-semibold text-gray-900">Sludinājumu moderācija</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Sludinajumu moderacija</h2>
                 {hasPending && (
                   <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 border border-amber-200">
-                    Ir jauni pārskatīšanai
+                    Ir jauni parskatisanai
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-600">Pārskatīt jaunus sludinājumus, mainīt statusu, slēpt spamu.</p>
+              <p className="text-sm text-gray-600">Parskatit jaunus sludinajumus, mainit statusu, slept spamu.</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -65,7 +65,7 @@ export default async function AdminHome() {
               href="/admin/posts"
               className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
             >
-              Uz sludinājumiem
+              Uz sludinajumiem
             </a>
           </div>
         </div>
@@ -75,7 +75,7 @@ export default async function AdminHome() {
             <div>
               <h2 className="text-lg font-semibold text-gray-900">Statistika un eksports</h2>
               <p className="text-sm text-gray-600">
-                Lejupielādē CSV un skaties lietošanas statistiku (pazudušie vienumi pa reģioniem).
+                Lejupielade CSV un skaties lietosanas statistiku (pazudusie vienumi pa regioniem).
               </p>
             </div>
           </div>
@@ -84,13 +84,13 @@ export default async function AdminHome() {
               href="/admin/stats"
               className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
             >
-              Skatīt statistiku
+              Skatit statistiku
             </a>
             <a
               href="/api/admin/stats?format=csv"
               className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
             >
-              Eksportēt CSV
+              Eksportet CSV
             </a>
           </div>
         </div>
@@ -98,8 +98,8 @@ export default async function AdminHome() {
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-2">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Lietotāji</h2>
-              <p className="text-sm text-gray-600">Bloķēt pārkāpējus vai piešķirt admin lomu.</p>
+              <h2 className="text-lg font-semibold text-gray-900">Lietotaji</h2>
+              <p className="text-sm text-gray-600">Bloket parkapejus vai pieskirt admin lomu.</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -107,7 +107,7 @@ export default async function AdminHome() {
               href="/admin/users"
               className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
             >
-              Uz lietotājiem
+              Uz lietotajiem
             </a>
           </div>
         </div>
@@ -116,7 +116,7 @@ export default async function AdminHome() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-gray-900">Birkas</h2>
-              <p className="text-sm text-gray-600">Izveidot un pārvaldīt birkas sludinājumiem.</p>
+              <p className="text-sm text-gray-600">Izveidot un parvaldit birkas sludinajumiem.</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -124,7 +124,7 @@ export default async function AdminHome() {
               href="/admin/tags"
               className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
             >
-              Pārvaldīt birkas
+              Parvaldit birkas
             </a>
           </div>
         </div>
@@ -133,7 +133,7 @@ export default async function AdminHome() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-gray-900">Kategorijas</h2>
-              <p className="text-sm text-gray-600">Izveidot vai dzēst kategorijas (tikai adminiem).</p>
+              <p className="text-sm text-gray-600">Izveidot vai dzest kategorijas (tikai adminiem).</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -141,7 +141,7 @@ export default async function AdminHome() {
               href="/admin/categories"
               className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
             >
-              Pārvaldīt kategorijas
+              Parvaldit kategorijas
             </a>
           </div>
         </div>
@@ -150,7 +150,7 @@ export default async function AdminHome() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-gray-900">Vietu nosaukumi</h2>
-              <p className="text-sm text-gray-600">Pievienot vai dzēst sagatavotus vietu nosaukumus (tikai adminiem).</p>
+              <p className="text-sm text-gray-600">Pievienot vai dzest sagatavotus vietu nosaukumus (tikai adminiem).</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -158,7 +158,7 @@ export default async function AdminHome() {
               href="/admin/places"
               className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
             >
-              Pārvaldīt vietas
+              Parvaldit vietas
             </a>
           </div>
         </div>
@@ -174,14 +174,14 @@ export default async function AdminHome() {
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-gray-900">Sūdzības</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Sudzibas</h2>
               {hasComplaints && (
                 <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 border border-amber-200">
-                  Ir jaunas sūdzības
+                  Ir jaunas sudzibas
                 </span>
               )}
             </div>
-            <p className="text-sm text-gray-600">Pārskatīt sūdzības un bloķēt sludinājumus pēc vajadzības.</p>
+            <p className="text-sm text-gray-600">Parskatit sudzibas un bloket sludinajumus pec vajadzibas.</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -189,12 +189,12 @@ export default async function AdminHome() {
             href="/admin/complaints"
             className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
           >
-            Uz sūdzībām
+            Uz sudzibam
           </a>
         </div>
       </section>
 
-      {/* Statistika bloks noņemts pēc lietotāja pieprasījuma */}
+      {/* Statistika bloks nonemts pec lietotaja pieprasijuma */}
     </main>
   );
 }

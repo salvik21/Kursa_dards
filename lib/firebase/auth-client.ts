@@ -1,8 +1,6 @@
 import {
-  applyActionCode,
   confirmPasswordReset,
   createUserWithEmailAndPassword,
-  sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -41,19 +39,26 @@ async function ensureUserDoc(user: { uid: string; email?: string | null; display
 }
 
 export async function signUp({ email, password, displayName }: SignUpParams) {
-  const cred = await createUserWithEmailAndPassword(auth, email, password);
-  if (displayName) {
-    await updateProfile(cred.user, { displayName });
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    if (displayName) {
+      await updateProfile(cred.user, { displayName });
+    }
+    await ensureUserDoc({ uid: cred.user.uid, email, displayName: displayName ?? "", emailVerified: false });
+    return cred.user;
+  } catch (error: any) {
+    if (error?.code === "auth/email-already-in-use") {
+      throw new Error("Lietotājs ar šo e-pastu jau ir reģistrēts sistēmā.");
+    }
+    throw error;
   }
-  await sendEmailVerification(cred.user);
-  await ensureUserDoc({ uid: cred.user.uid, email, displayName: displayName ?? "", emailVerified: false });
-  return cred.user;
 }
 
 export async function signIn(email: string, password: string) {
   const cred = await signInWithEmailAndPassword(auth, email, password);
   const idToken = await cred.user.getIdToken(true);
 
+  // Nosuta ID tokenu uz serveri, lai izveidotu sesijas cookie.
   const res = await fetch(SESSION_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -61,7 +66,7 @@ export async function signIn(email: string, password: string) {
   });
 
   if (!res.ok) {
-    throw new Error("Failed to create session");
+    throw new Error("Neizdevas izveidot sesiju");
   }
 
   // Notify UI about session change
@@ -88,7 +93,7 @@ export async function signInWithGoogle() {
     body: JSON.stringify({ idToken }),
   });
   if (!res.ok) {
-    throw new Error("Failed to create session");
+    throw new Error("Neizdevas izveidot sesiju");
   }
   // Notify UI about session change
   if (typeof window !== "undefined") {
@@ -105,32 +110,23 @@ export async function logout() {
   }
 }
 
-export async function resendVerificationEmail() {
-  if (!auth.currentUser) {
-    throw new Error("No current user");
-  }
-  await sendEmailVerification(auth.currentUser);
-}
-
 export async function sendResetEmail(email: string) {
+  // Sutam e-pastu ar paroles atjaunosanas saiti.
   await sendPasswordResetEmail(auth, email, {
     url: process.env.NEXT_PUBLIC_RESET_REDIRECT_URL || "http://localhost:3000/auth/reset-password",
     handleCodeInApp: true,
   });
 }
 
-export async function applyEmailVerification(oobCode: string) {
-  await applyActionCode(auth, oobCode);
-}
-
 export async function confirmPasswordResetAction(oobCode: string, newPassword: string) {
+  // Apstiprina paroles atjaunosanu ar kodu no e-pasta.
   await confirmPasswordReset(auth, oobCode, newPassword);
 }
 
 export async function changePassword(currentPassword: string, newPassword: string) {
   const user = auth.currentUser;
   if (!user || !user.email) {
-    throw new Error("Nav aktīva lietotāja");
+    throw new Error("Nav aktiva lietotaja");
   }
   const credential = EmailAuthProvider.credential(user.email, currentPassword);
   await reauthenticateWithCredential(user, credential);

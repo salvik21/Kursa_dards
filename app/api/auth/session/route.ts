@@ -26,7 +26,6 @@ export async function POST(request: Request) {
         email: decoded.email ?? "",
         displayName: decoded.name ?? "",
         role: "user",
-        emailVerified: decoded.email_verified ?? false,
         createdAt: new Date(),
         updatedAt: new Date(),
       });

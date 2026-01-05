@@ -2,13 +2,6 @@ import { Timestamp } from "firebase/firestore";
 
 export type UserRole = "user" | "admin";
 
-export interface UserAddress {
-  street?: string;
-  houseNr?: string;
-  city?: string;
-  label?: string;
-}
-
 export interface PrivateContact {
   emailHidden?: boolean;
   phoneHidden?: boolean;
@@ -32,8 +25,6 @@ export interface User {
   canLogin?: boolean;
   createdAt: Timestamp;
   updatedAt?: Timestamp;
-
-  address?: UserAddress;
   privateContact?: PrivateContact;
   authProviders?: AuthProvider[];
 }

@@ -34,7 +34,7 @@ export async function GET() {
   } catch (error: any) {
     console.error("GET /api/me/subscription error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to load subscriptions" },
+      { ok: false, error: error?.message || "Neizdevas ieladet abonementus" },
       { status: error?.message === "Unauthenticated" ? 401 : 500 }
     );
   }
@@ -47,10 +47,10 @@ export async function POST(req: Request) {
     const enabled = !!body.enabled;
     const name = typeof body.name === "string" ? body.name.trim() : "";
     if (!name) {
-      return NextResponse.json({ ok: false, error: "Name is required" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Nosaukums ir obligats" }, { status: 400 });
     }
     if (!ALLOWED_RADII.includes(Number(body.radiusKm))) {
-      return NextResponse.json({ ok: false, error: "Invalid radius" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Nekorekts radius" }, { status: 400 });
     }
     const location = normalizeLocation(body.location);
     if (enabled && !location) {
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("POST /api/me/subscription error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to create subscription" },
+      { ok: false, error: error?.message || "Neizdevas izveidot abonementu" },
       { status: error?.message === "Unauthenticated" ? 401 : 500 }
     );
   }
@@ -103,13 +103,13 @@ export async function PATCH(req: Request) {
     const update: Record<string, any> = { updatedAt: new Date() };
     if (body.name !== undefined) {
       if (typeof body.name !== "string" || !body.name.trim()) {
-        return NextResponse.json({ ok: false, error: "Invalid name" }, { status: 400 });
+        return NextResponse.json({ ok: false, error: "Nekorekts vards" }, { status: 400 });
       }
       update.name = body.name.trim();
     }
     if (body.radiusKm !== undefined) {
       if (!ALLOWED_RADII.includes(Number(body.radiusKm))) {
-        return NextResponse.json({ ok: false, error: "Invalid radius" }, { status: 400 });
+        return NextResponse.json({ ok: false, error: "Nekorekts radius" }, { status: 400 });
       }
       update.radiusKm = Number(body.radiusKm);
     }
@@ -133,7 +133,7 @@ export async function PATCH(req: Request) {
   } catch (error: any) {
     console.error("PATCH /api/me/subscription error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to update subscription" },
+      { ok: false, error: error?.message || "Neizdevas atjauninat subscription" },
       { status: error?.message === "Unauthenticated" ? 401 : 500 }
     );
   }
@@ -163,7 +163,7 @@ export async function DELETE(req: Request) {
   } catch (error: any) {
     console.error("DELETE /api/me/subscription error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to delete subscription" },
+      { ok: false, error: error?.message || "Neizdevas dzest subscription" },
       { status: error?.message === "Unauthenticated" ? 401 : 500 }
     );
   }

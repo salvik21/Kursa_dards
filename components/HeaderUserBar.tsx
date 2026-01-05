@@ -53,7 +53,7 @@ export function HeaderUserBar({ initialUser }: Props) {
   }, [load, router]);
 
   if (loading && !user) {
-    return <span className="text-sm text-gray-600">Ielādē...</span>;
+    return <span className="text-sm text-gray-600">Ielade...</span>;
   }
 
   if (!user) {
@@ -69,7 +69,7 @@ export function HeaderUserBar({ initialUser }: Props) {
           href="/auth/sign-up"
           className="rounded bg-blue-600 px-3 py-1 font-semibold text-white hover:bg-blue-700 transition"
         >
-          Reģistrēties
+          Registreties
         </Link>
       </div>
     );

@@ -25,16 +25,16 @@ export function AddressFields({
           <input
             value={street}
             onChange={(e) => onStreetChange(e.target.value)}
-            placeholder="Brīvības iela"
+            placeholder="Brivibas iela"
             className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
         <div className="space-y-1">
-          <label className="text-sm font-semibold text-gray-800">Pilsēta *</label>
+          <label className="text-sm font-semibold text-gray-800">Pilseta *</label>
           <input
             value={city}
             onChange={(e) => onCityChange(e.target.value)}
-            placeholder="Rīga"
+            placeholder="Riga"
             className="w-full rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
@@ -54,7 +54,7 @@ export function AddressFields({
         </div>
       </div>
       <p className="text-xs text-gray-600">
-        Mēģināsim pārvērst šo adresi koordinātēs. Ja to neizdodas atrast, lūdzu, izvēlieties {"\""}Izvēlēties kartē{"\""}.
+        Meginasim parverst so adresi koordinates. Ja to neizdodas atrast, ludzu, izvelieties {"\""}Izveleties karte{"\""}.
       </p>
     </div>
   );

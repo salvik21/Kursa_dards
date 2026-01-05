@@ -10,6 +10,6 @@ export async function GET() {
     return NextResponse.json({ ok: true, places });
   } catch (error: any) {
     console.error("Public places error:", error);
-    return NextResponse.json({ ok: false, error: "Failed to load places" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "Neizdevas ieladet vietas" }, { status: 500 });
   }
 }

@@ -59,7 +59,7 @@ Registered user	Manage profile, create and update announcements, upload photos, 
 Administrator	Full access: moderate announcements, manage users and system data, edit location list, export statistics, ensure GDPR compliance.
 - What authentication method is required (email/password, OAuth, SSO, passwordless)? - Authentication method
 
-Primary method: Email and password with email verification link.
+Primary method: Email and password.
 
 Optional (future phase): Google OAuth login for easier access.
 
@@ -87,8 +87,6 @@ Contact page (/contact) – general email contact form.
 Authentication
 
 Sign In / Register (/auth/sign-in, /auth/register) – account access and creation.
-
-Email verification (/auth/verify).
 
 Forgot / Reset password (/auth/forgot, /auth/reset).
 
@@ -299,7 +297,7 @@ Background Jobs
 
 Several asynchronous background processes ensure smooth and automated system operation:
 
-Sending email verifications, password reset links, and notifications.
+Sending password reset links and notifications.
 
 Processing uploaded images (resizing, thumbnail generation, removing EXIF metadata).
 
@@ -310,7 +308,7 @@ Auto-archiving posts with status “Returned to owner” after a certain period.
 Sending daily or weekly notification digests to subscribed users.
 
 ## 5) Auth & Authorization
-- Sign-up/sign-in flows needed? Password reset, email verification, 2FA? - es — the system includes sign-up and sign-in flows with email and password authentication.
+- Sign-up/sign-in flows needed? Password reset, 2FA? - es — the system includes sign-up and sign-in flows with email and password authentication.
 Users can also reset their password via a secure email link and must verify their email address after registration.
 Two-factor authentication (2FA) is not required for the MVP version but can be added in future for enhanced security.
 - Protected routes? Role-based access control requirements? - es — the system includes protected routes and role-based access control.
@@ -333,7 +331,7 @@ Administrator – can moderate content, block users, manage system data, and vie
 - Session management, token lifetimes, and security considerations? - The system uses JWT-based authentication for secure session management.
 Each user receives an access token with a limited lifetime, after which re-authentication is required.
 All passwords are stored in encrypted form, and all communication is protected via HTTPS.
-Basic security measures such as email verification and input validation are implemented to prevent unauthorized access.
+Basic security measures such as input validation are implemented to prevent unauthorized access.
 
 ## 6) Non-Functional Requirements
 - Performance targets (Core Web Vitals), page load budgets? - The website should load within 3 seconds on standard broadband connections.

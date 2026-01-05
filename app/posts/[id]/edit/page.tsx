@@ -20,11 +20,11 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
         const res = await fetch(`/api/posts/${params.id}`, { cache: "no-store" });
         const json = await res.json();
         if (!res.ok) {
-          throw new Error(json?.error || "Neizdevās ielādēt ierakstu");
+          throw new Error(json?.error || "Neizdevas ieladet ierakstu");
         }
         if (json.post?.status === "hidden") {
           const reason = json.post?.blockedReason ? ` Iemesls: ${json.post.blockedReason}.` : "";
-          setError(`Šis sludinājums ir bloķēts un to var tikai dzēst.${reason}`);
+          setError(`Sis sludinajums ir blokets un to var tikai dzest.${reason}`);
           setLoading(false);
           return;
         }
@@ -53,7 +53,7 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
           privateNote: json.post.privateNote ?? "",
         });
       } catch (err: any) {
-        setError(err?.message || "Neizdevās ielādēt ierakstu");
+        setError(err?.message || "Neizdevas ieladet ierakstu");
       } finally {
         setLoading(false);
       }
@@ -73,14 +73,14 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
     });
     const json = await res.json();
     if (!res.ok) {
-      throw new Error(json?.error || "Neizdevās atjaunināt ierakstu");
+      throw new Error(json?.error || "Neizdevas atjauninat ierakstu");
     }
   };
 
   if (loading) {
     return (
       <main className="mx-auto max-w-3xl p-6">
-        <p className="text-sm text-gray-700">Ielādē...</p>
+        <p className="text-sm text-gray-700">Ielade...</p>
       </main>
     );
   }
@@ -88,9 +88,9 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
   if (error || !initialValues) {
     return (
       <main className="mx-auto max-w-3xl p-6 space-y-4">
-        <p className="text-sm text-red-600">{error || "Neizdevās ielādēt ierakstu"}</p>
+        <p className="text-sm text-red-600">{error || "Neizdevas ieladet ierakstu"}</p>
         <Link href="/me/posts" className="text-blue-600 hover:underline text-sm">
-          Atpakaļ uz “Mani sludinājumi”
+          Atpakal uz &quot;Mani sludinajumi&quot;
         </Link>
       </main>
     );
@@ -100,21 +100,21 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
     <main className="mx-auto max-w-3xl p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Rediģēt ierakstu</h1>
-            <p className="text-sm text-gray-600">Atjaunojiet ieraksta informāciju un saglabājiet.</p>
+            <h1 className="text-3xl font-bold text-gray-900">Rediget ierakstu</h1>
+            <p className="text-sm text-gray-600">Atjaunojiet ieraksta informaciju un saglabajiet.</p>
           </div>
           <div className="flex gap-2">
             <Link
               href={`/posts/${params.id}`}
               className="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
             >
-              Skatīt ierakstu
+              Skatit ierakstu
             </Link>
             <Link
               href="/"
               className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
             >
-              Atpakaļ uz sākumlapu
+              Atpakal uz sakumlapu
             </Link>
           </div>
         </div>

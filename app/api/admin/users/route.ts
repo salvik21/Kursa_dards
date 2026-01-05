@@ -37,13 +37,13 @@ export async function PATCH(req: Request) {
   try {
     const { id, blocked, role } = await req.json();
     if (!id || typeof id !== "string") {
-      return NextResponse.json({ ok: false, error: "Invalid payload" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Nekorekts pieprasijums" }, { status: 400 });
     }
     if (blocked !== undefined && typeof blocked !== "boolean") {
-      return NextResponse.json({ ok: false, error: "Invalid payload" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Nekorekts pieprasijums" }, { status: 400 });
     }
     if (role !== undefined && role !== "admin" && role !== "user") {
-      return NextResponse.json({ ok: false, error: "Invalid role" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Nekorekts lomas tips" }, { status: 400 });
     }
 
     // If demoting from admin to user, ensure at least one admin remains
@@ -68,7 +68,7 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (error: any) {
     console.error("Update user error:", error);
-    return NextResponse.json({ ok: false, error: error?.message || "Failed to update user" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: error?.message || "Neizdevas atjauninat user" }, { status: 500 });
   }
 }
 
@@ -80,7 +80,7 @@ export async function DELETE(req: Request) {
   try {
     const { id } = await req.json();
     if (!id || typeof id !== "string") {
-      return NextResponse.json({ ok: false, error: "Invalid payload" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Nekorekts pieprasijums" }, { status: 400 });
     }
 
     const targetSnap = await adminDb.collection("users").doc(id).get();
@@ -101,7 +101,7 @@ export async function DELETE(req: Request) {
   } catch (error: any) {
     console.error("Delete user error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to delete user" },
+      { ok: false, error: error?.message || "Neizdevas dzest user" },
       { status: 500 }
     );
   }

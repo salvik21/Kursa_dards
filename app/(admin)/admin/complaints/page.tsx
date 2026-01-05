@@ -33,9 +33,9 @@ const postStatusLabels: Record<string, { label: string; className: string }> = {
 };
 
 const complaintStatusLabels: Record<ComplaintItem["status"], { label: string; className: string }> = {
-  accepted: { label: "Pieņemta", className: "bg-emerald-100 text-emerald-700" },
-  in_review: { label: "Pārskatīšanā", className: "bg-amber-100 text-amber-700" },
-  closed: { label: "Slēgta", className: "bg-gray-100 text-gray-700" },
+  accepted: { label: "Pienemta", className: "bg-emerald-100 text-emerald-700" },
+  in_review: { label: "Parskatisana", className: "bg-amber-100 text-amber-700" },
+  closed: { label: "Slegta", className: "bg-gray-100 text-gray-700" },
 };
 
 function ComplaintsHeader({ onRefresh }: { onRefresh: () => void }) {
@@ -44,7 +44,7 @@ function ComplaintsHeader({ onRefresh }: { onRefresh: () => void }) {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Lietotaju sudzibas</h1>
         <p className="text-sm text-gray-700">
-          Pārskatiet sūdzības, mainiet statusu un pārvaldiet sludinājumu stāvokli, ja nepieciešams.
+          Parskatiet sudzibas, mainiet statusu un parvaldiet sludinajumu stavokli, ja nepieciesams.
         </p>
       </div>
       <div className="flex gap-2">
@@ -100,7 +100,7 @@ export default function AdminComplaintsPage() {
         body: JSON.stringify({ id, status }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Neizdevās atjaunināt statusu");
+      if (!res.ok) throw new Error(json?.error || "Neizdevas atjauninat statusu");
       if (reload) {
         await load();
       } else {
@@ -109,7 +109,7 @@ export default function AdminComplaintsPage() {
         );
       }
     } catch (err: any) {
-      setError(err?.message || "Neizdevās atjaunināt statusu");
+      setError(err?.message || "Neizdevas atjauninat statusu");
     } finally {
       setUpdatingId(null);
     }
@@ -137,7 +137,7 @@ export default function AdminComplaintsPage() {
 
   const safeSnippet = (snippet?: string | null) => {
     if (!snippet) return "";
-    return snippet.replace(/‚÷\?‚?/g, "...");
+    return snippet.replace(/\u2026/g, "...");
   };
 
   return (
@@ -203,7 +203,7 @@ export default function AdminComplaintsPage() {
 
                 <div className="text-xs text-gray-600 flex flex-wrap items-center gap-2">
                   {c.createdAt && <span>{new Date(c.createdAt).toLocaleString()}</span>}
-                  {c.reporterEmail && <span>Ziņotājs: {c.reporterEmail}</span>}
+                  {c.reporterEmail && <span>Zinotajs: {c.reporterEmail}</span>}
                 </div>
 
                 {c.postSnippet && (
@@ -212,7 +212,7 @@ export default function AdminComplaintsPage() {
 
                 {c.reason && (
                   <span className="inline-flex items-center gap-2 rounded border border-amber-200 bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-800">
-                    Sūdzības iemesls:
+                    Sudzibas iemesls:
                     <span className="font-normal text-amber-900">{c.reason}</span>
                   </span>
                 )}
@@ -237,12 +237,12 @@ export default function AdminComplaintsPage() {
                 </div>
                 {c.blockReason && (
                   <p className="text-red-700">
-                    Blokēts: {c.blockReason}
-                    {c.blockedByEmail ? ` (bloķēja ${c.blockedByEmail})` : ""}
+                    Blokets: {c.blockReason}
+                    {c.blockedByEmail ? ` (blokeja ${c.blockedByEmail})` : ""}
                   </p>
                 )}
                 <p className="text-xs text-gray-600">
-                  Pārbaudīja: {c.closedByEmail || c.blockedByEmail || "nav norādīts"}
+                  Parbaudija: {c.closedByEmail || c.blockedByEmail || "nav noradits"}
                 </p>
               </div>
             </div>

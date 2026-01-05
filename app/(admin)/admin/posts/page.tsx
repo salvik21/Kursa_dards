@@ -25,9 +25,9 @@ type PostItem = {
 
 const STATUS_FILTERS = [
   { value: "all", label: "Visi" },
-  { value: "pending", label: "Gaida pārskatīšanu" },
-  { value: "open", label: "Publicētie" },
-  { value: "hidden", label: "Bloķētie" },
+  { value: "pending", label: "Gaida parskatisanu" },
+  { value: "open", label: "Publicetie" },
+  { value: "hidden", label: "Bloketie" },
 ];
 
 function PostsHeader({ onRefresh }: { onRefresh: () => void }) {
@@ -35,9 +35,9 @@ function PostsHeader({ onRefresh }: { onRefresh: () => void }) {
     <div className="flex flex-col gap-2 border-b border-gray-200 pb-4">
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">Admin · Sludinājumi</div>
-          <h1 className="text-3xl font-bold text-gray-900">Sludinājumu moderācija</h1>
-          <p className="text-sm text-gray-700">Apstipriniet vai bloķējiet sludinājumus pirms publicēšanas.</p>
+          <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">Admin - Sludinajumi</div>
+          <h1 className="text-3xl font-bold text-gray-900">Sludinajumu moderacija</h1>
+          <p className="text-sm text-gray-700">Apstipriniet vai blokejiet sludinajumus pirms publicesanas.</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -45,9 +45,9 @@ function PostsHeader({ onRefresh }: { onRefresh: () => void }) {
             onClick={onRefresh}
             className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
           >
-            Atsvaidzināt
+            Atsvaidzinat
           </button>
-          <AdminBackButton label="Atpakaļ uz adminu" />
+          <AdminBackButton label="Atpakal uz adminu" />
         </div>
       </div>
     </div>
@@ -70,10 +70,10 @@ export default function AdminPostsPage() {
     try {
       const res = await fetch("/api/admin/posts", { cache: "no-store" });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Failed to load posts");
+      if (!res.ok) throw new Error(json?.error || "Neizdevas ieladet sludinajumus");
       setPosts(json.posts ?? []);
     } catch (err: any) {
-      setError(err?.message || "Failed to load posts");
+      setError(err?.message || "Neizdevas ieladet sludinajumus");
     } finally {
       setLoading(false);
     }
@@ -98,27 +98,27 @@ export default function AdminPostsPage() {
         body: JSON.stringify({ id, status, blockReason }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Failed to update");
+      if (!res.ok) throw new Error(json?.error || "Neizdevas atjauninat");
       await load();
     } catch (err: any) {
-      setError(err?.message || "Failed to update");
+      setError(err?.message || "Neizdevas atjauninat");
     } finally {
       setUpdatingId(null);
     }
   };
 
   const deletePost = async (id: string) => {
-    const confirmed = window.confirm("Delete this post permanently?");
+    const confirmed = window.confirm("Dzest so sludinajumu neatgriezeniski?");
     if (!confirmed) return;
     setDeletingId(id);
     setError(null);
     try {
       const res = await fetch(`/api/posts/${id}`, { method: "DELETE" });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Failed to delete");
+      if (!res.ok) throw new Error(json?.error || "Neizdevas dzest");
       await load();
     } catch (err: any) {
-      setError(err?.message || "Failed to delete");
+      setError(err?.message || "Neizdevas dzest");
     } finally {
       setDeletingId(null);
     }
@@ -181,7 +181,7 @@ export default function AdminPostsPage() {
                     </div>
                   <div className="text-xs text-gray-600">
                     {p.category}
-                    {p.createdAt && ` • ${new Date(p.createdAt).toLocaleString()}`}
+                    {p.createdAt && ` - ${new Date(p.createdAt).toLocaleString()}`}
                   </div>
                   {p.placeName && <div className="text-sm text-gray-700">Place: {p.placeName}</div>}
                   {p.description && (
@@ -223,17 +223,17 @@ export default function AdminPostsPage() {
                       }`}
                     >
                       {p.status === "pending"
-                        ? "Nepārskatīts"
+                        ? "Neparskatits"
                         : p.status === "hidden"
-                          ? "Bloķēts"
+                          ? "Blokets"
                           : p.status === "resolved"
-                            ? "Atrisināts"
-                            : "Atvērts"}
+                            ? "Atrisinats"
+                            : "Atverts"}
                     </span>
                   </div>
                   {p.blockedReason && (
                     <span className="text-xs text-red-700">
-                      Bloķēts: {p.blockedReason} {p.blockedByEmail ? `(bloķēja ${p.blockedByEmail})` : ""}
+                      Blokets: {p.blockedReason} {p.blockedByEmail ? `(blokeja ${p.blockedByEmail})` : ""}
                     </span>
                   )}
                 </div>

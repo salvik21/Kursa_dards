@@ -1,2 +1,2 @@
-export const defaultTagOptions = ["Melns", "Zils", "Maks", "Telefons", "Klēpjdators", "Atslēgas", "ID karte", "Pase", "Rotaslietas"];
-export const defaultPlaceOptions = ["Nav vietas", "Centrālais parks", "Galvenā stacija", "Tirdzniecības centrs", "Universitāte", "Birojs", "Cits"];
+export const defaultTagOptions = ["Melns", "Zils", "Maks", "Telefons", "Klepjdators", "Atslegas", "ID karte", "Pase", "Rotaslietas"];
+export const defaultPlaceOptions = ["Nav vietas", "Centralais parks", "Galvena stacija", "Tirdzniecibas centrs", "Universitate", "Birojs", "Cits"];

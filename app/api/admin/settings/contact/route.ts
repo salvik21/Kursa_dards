@@ -16,7 +16,7 @@ export async function GET() {
     return NextResponse.json({ ok: true, email });
   } catch (error: any) {
     console.error("Admin contact get error:", error);
-    return NextResponse.json({ ok: false, error: "Failed to load contact" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "Neizdevas ieladet kontaktu" }, { status: 500 });
   }
 }
 
@@ -30,12 +30,12 @@ export async function PUT(req: Request) {
     const body = await req.json();
     const email = typeof body.email === "string" ? body.email.trim() : "";
     if (!email) {
-      return NextResponse.json({ ok: false, error: "Email is required" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "E-pasts ir obligats" }, { status: 400 });
     }
     await adminDb.collection("settings").doc("contact").set({ email }, { merge: true });
     return NextResponse.json({ ok: true, email });
   } catch (error: any) {
     console.error("Admin contact update error:", error);
-    return NextResponse.json({ ok: false, error: error?.message || "Failed to update contact" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: error?.message || "Neizdevas atjauninat contact" }, { status: 500 });
   }
 }

@@ -14,14 +14,14 @@ export async function POST(
 
     if (!reason || typeof reason !== "string" || !reason.trim()) {
       return NextResponse.json(
-        { ok: false, error: "Текст жалобы обязателен" },
+        { ok: false, error: "Sudzibas teksts ir obligats" },
         { status: 400 }
       );
     }
 
     const postSnap = await adminDb.collection("posts").doc(params.id).get();
     if (!postSnap.exists) {
-      return NextResponse.json({ ok: false, error: "Объявление не найдено" }, { status: 404 });
+      return NextResponse.json({ ok: false, error: "Sludinajums nav atrasts" }, { status: 404 });
     }
     const postData = postSnap.data() as any;
 
@@ -41,7 +41,7 @@ export async function POST(
   } catch (error: any) {
     console.error("Create complaint error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Не удалось отправить жалобу" },
+      { ok: false, error: error?.message || "Neizdevas nosutit sudzibu" },
       { status: 500 }
     );
   }

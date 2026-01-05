@@ -160,7 +160,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   } catch (error: any) {
     console.error("Get post error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to load post" },
+      { ok: false, error: error?.message || "Neizdevas ieladet sludinajumu" },
       { status: 500 }
     );
   }
@@ -186,7 +186,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     }
     if (data?.status === "hidden") {
       return NextResponse.json(
-        { ok: false, error: "Bloķēts sludinājums nav rediģējams; to var tikai dzēst." },
+        { ok: false, error: "Blokets sludinajums nav redigejams; to var tikai dzest." },
         { status: 403 }
       );
     }
@@ -214,7 +214,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       );
     }
     if (!ALLOWED_TYPES.includes(type)) {
-      return NextResponse.json({ ok: false, error: "Invalid type" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Nekorekts tips" }, { status: 400 });
     }
 
     await adminDb.collection("posts").doc(params.id).update({
@@ -257,7 +257,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   } catch (error: any) {
     console.error("Update post error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to update post" },
+      { ok: false, error: error?.message || "Neizdevas atjauninat post" },
       { status: 500 }
     );
   }
@@ -286,7 +286,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
   } catch (error: any) {
     console.error("Delete post error:", error);
     return NextResponse.json(
-      { ok: false, error: error?.message || "Failed to delete post" },
+      { ok: false, error: error?.message || "Neizdevas dzest post" },
       { status: 500 }
     );
   }
