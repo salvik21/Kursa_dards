@@ -193,8 +193,6 @@ export default async function AdminHome() {
           </a>
         </div>
       </section>
-
-      {/* Statistika bloks nonemts pec lietotaja pieprasijuma */}
     </main>
   );
 }

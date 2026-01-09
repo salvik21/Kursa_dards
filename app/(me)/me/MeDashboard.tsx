@@ -69,7 +69,7 @@ const statusLabels: Record<string, string> = {
 
 export default function MeDashboard({ user }: { user: User }) {
   const items = useMemo(
-    () => ACTIONS.filter((a) => !a.onlyAdmin || user.role === "admin"),
+    () => ACTIONS.filter((a) =>!a.onlyAdmin || user.role === "admin"),
     [user.role]
   );
 

@@ -44,7 +44,7 @@ export default function EditProfileForm() {
     load();
   }, []);
 
-  const onSubmit = async (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSaving(true);
     setStatus(null);

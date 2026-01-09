@@ -45,9 +45,9 @@ export default function ResetPasswordPage() {
       <div className="mx-auto max-w-md p-6">
         <h1 className="text-2xl font-semibold mb-4">Atjaunot paroli</h1>
         {/* Parada kludu, ja saite nav deriga vai kods trukst. */}
-        <p className="text-sm text-red-600">Reset link is invalid or missing.</p>
+        <p className="text-sm text-red-600">Paroles atjaunošanas saite ir nederīga vai trūkst.</p>
         <a href="/auth/forgot-password" className="mt-4 inline-block text-blue-600 underline">
-          Request a new link
+          Pieprasīt jaunu saiti
         </a>
       </div>
     );
@@ -55,11 +55,11 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="mx-auto max-w-md p-6">
-      <h1 className="text-2xl font-semibold mb-4">Set new password</h1>
+      <h1 className="text-2xl font-semibold mb-4">Iestatīt jaunu paroli</h1>
       {/* Jaunas paroles ievade un nosutisana uz Firebase. */}
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="space-y-2">
-          <label className="block text-sm font-medium">New password</label>
+          <label className="block text-sm font-medium">Jaunā parole</label>
           <input
             type="password"
             value={newPassword}
@@ -75,7 +75,7 @@ export default function ResetPasswordPage() {
           disabled={loading}
           className="w-full rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
         >
-          {loading ? "Updating..." : "Update password"}
+          {loading ? "Atjauno..." : "Atjaunot paroli"}
         </button>
       </form>
     </div>

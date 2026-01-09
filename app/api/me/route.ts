@@ -40,8 +40,7 @@ export async function PATCH(req: Request) {
       if (name !== null && typeof name !== "string") {
         return NextResponse.json({ ok: false, error: "Nekorekts vards" }, { status: 400 });
       }
-      update.name = name?.trim?.() ?? "";
-      update.displayName = update.name;
+      update.displayName = name.trim() ?? "";
     }
     if (phone !== undefined) {
       if (phone !== null && typeof phone !== "string") {
@@ -84,7 +83,7 @@ export async function DELETE() {
     const status =
       error?.message === "Unauthenticated"
         ? 401
-        : error?.message === "Cannot delete the last admin"
+        : error?.message === "Nevar dzēst pēdējo administratoru"
           ? 400
           : 500;
     return NextResponse.json(

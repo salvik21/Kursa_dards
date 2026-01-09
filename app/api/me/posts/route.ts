@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { requireSessionUser } from "@/lib/auth/server";
-import { loadAllPhotosForPosts, loadVisiblePhotosForPosts } from "@/lib/postPhotos";
+import { loadAllPhotosForPosts } from "@/lib/postPhotos";
 
 export const runtime = "nodejs";
 
@@ -13,11 +13,13 @@ export async function GET() {
       .where("userId", "==", user.uid)
       .limit(100)
       .get();
-
+    // load category names
     const categoriesSnap = await adminDb.collection("categories").get();
     const categoriesMap = new Map<string, string>();
-    categoriesSnap.docs.forEach((d) => categoriesMap.set(d.id, (d.data() as any)?.name ?? ""));
-
+    for (const d of categoriesSnap.docs) {
+      const name = (d.data() as any)?.name;
+      categoriesMap.set(d.id, typeof name === "string" ? name : "");
+    }
     // load photo visibility and place data
     const postIds = snap.docs
       .map((d) => (d.data() as any)?.id as string | undefined)
@@ -40,7 +42,7 @@ export async function GET() {
         const data = d.data() as any;
         const id = data.id as string | undefined;
         if (!id) return null;
-        const categoryName = categoriesMap.get(data.categoryId) ?? data.categoryName ?? data.category ?? "";
+        const categoryName = categoriesMap.get(data.categoryId)  ?? "";
         const placeData = placeMap.get(id);
         const photoList = photosMap.get(id) ?? [];
         const hiddenPhotos = photoList.filter((p) => !p.visible).map((p) => p.url);

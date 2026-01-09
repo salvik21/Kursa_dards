@@ -36,10 +36,10 @@ function MapPointPicker({
   lng: string;
   onChange: (lat: string, lng: string) => void;
 }) {
-  const mapRef = useRef<HTMLDivElement | null>(null);
-  const markerRef = useRef<google.maps.Marker | null>(null);
-  const mapInstance = useRef<google.maps.Map | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const mapRef = useRef<HTMLDivElement | null>(null);   
+  const markerRef = useRef<google.maps.Marker | null>(null);  
+  const mapInstance = useRef<google.maps.Map | null>(null); 
+  const [mounted, setMounted] = useState(false);  
 
   useEffect(() => {
     setMounted(true);
@@ -54,6 +54,7 @@ function MapPointPicker({
       try {
         const gm = await loadGoogleMaps();
         if (cancelled || !mapRef.current) return;
+        // Initialize map and draggable marker once after mount.
         const center =
           lat && lng
             ? { lat: Number(lat), lng: Number(lng) }
@@ -73,6 +74,7 @@ function MapPointPicker({
           onChange(pos.lat().toString(), pos.lng().toString());
         };
 
+        // Keep form state in sync with marker drag and map clicks.
         marker.addListener("dragend", () => {
           const pos = marker.getPosition();
           if (pos) update(pos);
@@ -99,6 +101,7 @@ function MapPointPicker({
   useEffect(() => {
     if (!mapInstance.current || !markerRef.current) return;
     if (lat && lng) {
+      // Reflect external lat/lng changes on the map.
       const position = { lat: Number(lat), lng: Number(lng) };
       markerRef.current.setPosition(position);
       mapInstance.current.setCenter(position);
@@ -145,6 +148,7 @@ export default function NotificationSettings() {
       const items = json.subscriptions ?? [];
       setList(items);
       if (items.length > 0) {
+        // Default to the first subscription for editing.
         selectForEdit(items[0]);
       } else {
         resetForm();
@@ -167,6 +171,7 @@ export default function NotificationSettings() {
       try {
         await loadGoogleMaps();
         if (!addressInputRef.current || !window.google?.maps?.places) return;
+        // Autocomplete fills address and updates coordinates.
         autocomplete = new window.google.maps.places.Autocomplete(addressInputRef.current, {
           fields: ["geometry", "formatted_address", "name"],
         });
@@ -220,6 +225,7 @@ export default function NotificationSettings() {
     setSaving(true);
     setStatus(null);
 
+    // Enabled notifications require a selected map point.
     if (enabled && (!lat || !lng)) {
       setStatus("Ludzu, novieto punktu uz kartes.");
       setSaving(false);
@@ -227,6 +233,7 @@ export default function NotificationSettings() {
     }
 
     try {
+      // Build payload; new or existing subscription based on currentId.
       const payload = {
         id: currentId || undefined,
         name: name.trim() || "Bez nosaukuma",
@@ -268,6 +275,7 @@ export default function NotificationSettings() {
     const confirmed = window.confirm("Dzest so bridinajumu? So darbibu nevar atsaukt.");
     if (!confirmed) return;
 
+    // Delete current subscription and keep UI on a remaining item.
     setDeleting(true);
     setStatus(null);
     try {

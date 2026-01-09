@@ -31,11 +31,10 @@ export function DetailsStep({
         <input
           value={values.title}
           onChange={(e) => onUpdate("title", e.target.value)}
-          className={`w-full rounded border px-3 py-2 focus:outline-none focus:ring-1 ${
-            fieldErrors.title
+          className={`w-full rounded border px-3 py-2 focus:outline-none focus:ring-1 ${fieldErrors.title
               ? "border-red-500 focus:border-red-500 focus:ring-red-500"
               : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-          }`}
+            }`}
           placeholder="Pazudusi melna mugursoma pie parka"
         />
         {fieldErrors.title && <p className="text-xs text-red-600">Nepieciesams virsraksts.</p>}
@@ -59,11 +58,10 @@ export function DetailsStep({
           <select
             value={values.category}
             onChange={(e) => onUpdate("category", e.target.value)}
-            className={`w-full rounded border px-3 py-2 focus:outline-none focus:ring-1 ${
-              fieldErrors.category
+            className={`w-full rounded border px-3 py-2 focus:outline-none focus:ring-1 ${fieldErrors.category
                 ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                 : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-            }`}
+              }`}
           >
             <option value="">Izvelieties kategoriju</option>
             {categories.map((c) => (
@@ -85,11 +83,10 @@ export function DetailsStep({
                   key={t}
                   type="button"
                   onDoubleClick={() => onToggleTag(t)}
-                  className={`rounded-full px-3 py-1 text-sm font-semibold ${
-                    active
+                  className={`rounded-full px-3 py-1 text-sm font-semibold ${active
                       ? "bg-blue-600 text-white border border-blue-600"
                       : "bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200"
-                  }`}
+                    }`}
                   title="Dubultklikskis, lai parslegtu"
                 >
                   {t}
@@ -122,11 +119,10 @@ export function DetailsStep({
           value={values.description}
           onChange={(e) => onUpdate("description", e.target.value)}
           rows={4}
-          className={`w-full rounded border px-3 py-2 focus:outline-none focus:ring-1 ${
-            fieldErrors.description
+          className={`w-full rounded border px-3 py-2 focus:outline-none focus:ring-1 ${fieldErrors.description
               ? "border-red-500 focus:border-red-500 focus:ring-red-500"
               : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-          }`}
+            }`}
           placeholder="Aprakstiet, kas tika pazaudets/atrasts, kur, kad un pazimes."
         />
         {fieldErrors.description && <p className="text-xs text-red-600">Apraksts ir obligats.</p>}
