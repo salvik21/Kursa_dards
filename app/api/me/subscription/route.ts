@@ -52,7 +52,9 @@ export async function POST(req: Request) {
     if (!ALLOWED_RADII.includes(Number(body.radiusKm))) {
       return NextResponse.json({ ok: false, error: "Nekorekts radius" }, { status: 400 });
     }
-    const location = normalizeLocation(body.location);
+    const location = normalizeLocation(
+      body.location !== undefined ? body.location : { lat: body.lat, lng: body.lng }
+    );
     if (enabled && !location) {
       return NextResponse.json({ ok: false, error: "Location is required" }, { status: 400 });
     }
@@ -60,6 +62,7 @@ export async function POST(req: Request) {
     const now = new Date();
     const payload = {
       userId: user.uid,
+      userEmail: user.email ?? null,
       name,
       enabled,
       radiusKm: Number(body.radiusKm),

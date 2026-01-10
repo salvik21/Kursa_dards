@@ -241,6 +241,7 @@ export default function NotificationSettings() {
         radiusKm: radius,
         lat: lat ? Number(lat) : undefined,
         lng: lng ? Number(lng) : undefined,
+        location: lat && lng ? { lat: Number(lat), lng: Number(lng) } : undefined,
       };
 
       const res = await fetch("/api/me/subscription", {

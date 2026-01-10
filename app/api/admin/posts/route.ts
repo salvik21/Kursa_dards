@@ -112,6 +112,24 @@ async function notifySubscriptions(postId: string, post: any) {
     "";
 
   const postUrl = buildPostUrl(postId);
+  const userEmailCache = new Map<string, string | null>();
+
+  async function resolveEmail(data: any) {
+    const direct = data.userEmail || data.email;
+    if (direct) return direct as string;
+    const userId = data.userId;
+    if (!userId) return null;
+    if (userEmailCache.has(userId)) return userEmailCache.get(userId) ?? null;
+    try {
+      const snap = await adminDb.collection("users").doc(userId).get();
+      const email = (snap.data() as any)?.email ?? null;
+      userEmailCache.set(userId, email);
+      return email;
+    } catch {
+      userEmailCache.set(userId, null);
+      return null;
+    }
+  }
   let subsSnap;
   try {
     subsSnap = await adminDb.collection("subscriptions").where("enabled", "==", true).get();
@@ -123,7 +141,7 @@ async function notifySubscriptions(postId: string, post: any) {
     const data = docSnap.data() as any;
     const target = normalizeGeo({ lat: data.lat ?? data.location?.geo?.lat, lng: data.lng ?? data.location?.geo?.lng });
     const radiusKm = Number(data.radiusKm);
-    const to = data.userEmail || data.email;
+    const to = await resolveEmail(data);
     if (!to || !target || !ALLOWED_RADII.includes(radiusKm)) return;
 
     const dist = distanceKm(geo, target);
